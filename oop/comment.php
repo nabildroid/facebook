@@ -95,7 +95,7 @@ class Comment extends common{
 	}
 	public function users_likes(){
 		if(!$this->info["likes"]["users"]&&$this->info["likes"]["all"]){
-			$this->info["likes"]["users"]=$this->parent->likes($this->info["likes"]["all"]);
+			$this->info["likes"]["users"]=$this->parent->users_likes($this->info["likes"]["all"]);
 		}
 		return $this->info["likes"]["users"];
 	}

@@ -6,29 +6,29 @@ there is two type of comments section
 -replay in top section
 -replay in bottom section
 
-### post
-	-fetch info
-	 	[x] likes number
-	 	[x] user
-	 	[x] content
-	 	[] from  !!!
-	-GetInfoFromData
-		[x] likes number
-		[x] user
-		[x] content
-		[] from  !!!
-	[]general way to grab information about the post
-	## notes
-		-like action it's jsut GET request you can get it from the html of the post
-	-likes
-		[x] get all id of who likes
-			!!! some times it's return profile.php?id=100007245405886 
-		[] add like action
-	-comments
-		[] get all who comments 
-### comment
-	-data
-		post-user-content-likes-replayLink(contain)
+## post
+-fetch info
+ 	[x] likes number
+ 	[x] user
+ 	[x] content
+ 	[] from  !!!
+-GetInfoFromData
+	[x] likes number
+	[x] user
+	[x] content
+	[] from  !!!
+[]general way to grab information about the post
+## notes
+	-like action it's jsut GET request you can get it from the html of the post
+-likes
+	[x] get all id of who likes
+		!!! some times it's return profile.php?id=100007245405886 
+	[] add like action
+-comments
+	[] get all who comments 
+## comment
+-data
+	post-user-content-likes-replayLink(contain)
 
 
 

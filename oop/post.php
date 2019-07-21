@@ -13,7 +13,7 @@ class  Post extends common{
 		"like_link"=>"",//like action
 		"content"=>"" //the content of post
 	];
-	public $comments=[
+	public $comments_info=[
 		"items"=>[],
 		"next"=>"",
 		"form"=>""
@@ -28,6 +28,27 @@ class  Post extends common{
 		if(empty($info->user))
 			$this->fetch_info();
 		return $this->info[$prop];
+	}
+	//get comments
+	public function comments($page=""){
+		if(is_numeric($page)){
+			if(isset($this->comments_info["items"][$page]))
+				return $this->comments_info["items"][$page];
+			else{
+				for ($i=0; $i <$page; $i++) { 
+					$this->http($this->comments_info["next"]);
+					if($this->detectType($this->html))
+						$data=$this->spliceImageHtml($this->html);
+					else
+						$data=$this->splicePostHtml($this->html);
+					$this->parseComments($data["comment_html"]);
+				}
+				return $this->comments_info["items"][count($this->comments_info["items"])-1];
+			}
+		}else {
+			return $this->comments_info["items"];
+		}
+
 	}
 	//like action
 	public function like(){
@@ -74,8 +95,19 @@ class  Post extends common{
 	public function fetch_info(){
 		$this->http("/".$this->info["id"]);
 		if($this->detectType($this->html))
-			$this->spliceImageHtml($this->html);
-		else $this->splicePostHtml($this->html);
+			$data=$this->spliceImageHtml($this->html);
+		else
+			$data=$this->splicePostHtml($this->html);
+
+		$this->info["from"]=Post::parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
+		$this->info["content"]=$data["content"];
+		$this->info["likes"]["length"]=$data["likes_number"];
+		$this->info["like_link"]=$data["like_link"];
+		if(isset($data["image"]))
+			$this->info["image"]=$data["image"];
+
+		$this->parseComments($data["comment_html"]);
+
 	}
 
 	//satic global functions get information about such post from it html
@@ -140,6 +172,7 @@ class  Post extends common{
 
 		//reaction
 		$reaction=filter(doms($reaction,["<div","<div","<div"]))[0];
+
 		
 
 		//get reply like
@@ -155,12 +188,15 @@ class  Post extends common{
 		*/
 		$likes=array_pop($likes);
 		$likes=!intval($likes)&&$likes?1:intval($likes);
-		$this->info["from"]=Post::parseFrom($from);
-		$this->info["image"]=$image;
-		$this->info["content"]=$content;
-		$this->info["likes"]["length"]=$likes;
-		$this->info["like_link"]=$like_link;
-		$this->parseComments($reaction);
+
+		return [
+			"from"=>$from,
+			"image"=>$image,
+			"content"=>$content,
+			"likes_number"=>$likes,
+			"like_link"=>$like_link,
+			"comment_html"=>$reaction
+		];
 
 		
 
@@ -195,12 +231,15 @@ class  Post extends common{
 		*/
 		$likes=array_pop($likes);
 		$likes=!intval($likes)&&$likes?1:intval($likes);
-		$this->info["from"]=Post::parseFrom($from,$data);
-		$this->info["content"]=$content;
-		$this->info["likes"]["length"]=$likes;
-		$this->info["like_link"]=$like_link;
-		$this->parseComments($reaction);
 
+		return [
+			"from"=>$from,
+			"data"=>$data,
+			"content"=>$content,
+			"likes_number"=>$likes,
+			"like_link"=>$like_link,
+			"comment_html"=>$reaction
+		];
 	}
 	//grab all comments from the first page
 	public function parseComments($reaction){
@@ -217,9 +256,11 @@ class  Post extends common{
 
 		$comments=$comments[0];
 		$comments=array_map(function ($cmt_html){return new Comment($cmt_html,$this);},$comments);
-		$this->comments["items"]=array_merge($this->comments["items"],$comments);
-		$this->comments["next"]=isset($next)?$next:"";		
-		$this->comments["form"]=$form;
+		$this->comments_info["items"]=array_merge($this->comments_info["items"],[$comments]);
+		$this->comments_info["next"]=isset($next)?$next:"";
+		
+		if(!$this->comments_info["form"])		
+			$this->comments_info["form"]=$form;
 	}
 	//grab the user who publish this post and in which section (group|share from)
 	public function parseFrom($from,$data=""){
@@ -267,15 +308,13 @@ class  Post extends common{
 			if(isset($temp[1][0][1]["href"])&&!$page)
 				$user=$temp[1][0][1]["href"];
 		}
-		return[
+		return [
 			"user"=>$user,
 			"origin_post"=>$origin_post,
 			"page_id"=>$page,
 			"group_id"=>$group,
 		];
 	}
-
-
 }
 
 
