@@ -31,21 +31,34 @@ there is two type of comments section
 	post-user-content-likes-replayLink(contain)
 
 
-
-function detecteType
+2# fdf
+function **detecteType**
 	//0 post|1 group_post|2  page_post|3 image|
 	video id="m_story_permalink_view" parent  id="root"
 	image id="MPhotoContent"  
 		contain the view-full-size likes comments
 	
 
-
+1.
+2.
+3.
++
++
++
+	+
+		+
+	+
++
 function dealWithContent
 function dealWithReaction
 
+[ ] test
 
-
-
+*effefef*
+fefef
+__text__
+_text_
+***text***
 
 
 

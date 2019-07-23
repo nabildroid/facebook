@@ -1,6 +1,5 @@
 <?php 
 function ping($url,$data="",$headers=[]){
-	var_dump("1");
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

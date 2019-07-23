@@ -9,9 +9,9 @@ $user->login("c_user=100009747405464; xs=20:lGaNLcxxejf-1g:2:1557504986");
 
 
 // $user->wall->all();
-$post=new Post(2183798388414679,$user);
+$post=new Post(338556417070774,$user);
 $post->fetch_info();
-var_dump($post->comments(3)[0]->users_likes());
+var_dump($post->comments(0)[8]->subcomments(0)[1]->info["likes"]);
 
 
 

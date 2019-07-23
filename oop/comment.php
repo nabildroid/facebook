@@ -11,10 +11,12 @@ class Comment extends common{
 			"all"=>""
 		],
 		"like"=>"",
-		"reply"=>[
-			"length"=>0,
-			"url"=>""
-		]
+		"reply_length"=>0
+	];
+	public $subcomments_info=[
+		"items"=>[],
+		"next"=>"",
+		"form"=>""
 	];
 	function __construct($html,$parent){
 		$this->parent=$parent;
@@ -24,7 +26,7 @@ class Comment extends common{
 	public function parse(){
 		$this->html=dom($this->html,"<div")[0];
 		$user=dom(dom($this->html,"<h3")[0],"<a",1)[0][1]["href"];
-
+		
 		/////
 		$html=dom($this->html,"<div",1);
 		//delete any div with empty content
@@ -61,7 +63,9 @@ class Comment extends common{
 		//get reply like
 		$reply_link=filter($reaction,function($tool){
 			return $tool[0]=="Reply";
-		})[0][0][1]["href"];
+		})[0];
+		if(isset($reply_link[0][1]["href"]))$reply_link=$reply_link[0][1]["href"];
+		else $reply_link="";
 
 		//get reply_number
 		$reply_number=0;
@@ -75,8 +79,8 @@ class Comment extends common{
 		$this->info["likes"]["length"]=$likes;
 		$this->info["likes"]["all"]=$likes_users_link;
 		$this->info["like"]=$like_link;
-		$this->info["reply"]["length"]=$reply_number;
-		$this->info["reply"]["url"]=$reply_link;
+		$this->info["reply_length"]=$reply_number;
+		$this->subcomments_info["next"]=$reply_link;
 	}
 
 	public function makeContentFromHtmlContent($html){
@@ -99,6 +103,63 @@ class Comment extends common{
 		}
 		return $this->info["likes"]["users"];
 	}
+	public function subcomments($page){
+		if(is_numeric($page)){
+			if(isset($this->subcomments_info["items"][$page]))
+				return $this->subcomments_info["items"][$page];
+			else{
+				for ($i=0; $i <=$page; $i++) { 
+					if(!$this->subcomments_info["next"])continue;
+					$this->http($this->subcomments_info["next"]);
+					$data=doms($this->html,['id="objects_container"','<div','<div','<div']);
+					//get only replys and form for submit new reply
+					$data=[$data[count($data)-2],$data[count($data)-1] ];
+					$data=$this->parseComments($data,$this);
+
+					$this->subcomments_info["next"]=$data["next"];
+
+					$this->subcomments_info["items"]=array_merge($this->subcomments_info["items"],[$data["items"]]);
+
+					if(!$this->subcomments_info["form"])
+					$this->subcomments_info["form"]=$data["form"];
+
+				}
+				if(isset($this->subcomments_info["items"][count($this->subcomments_info["items"])-1]))
+					return $this->subcomments_info["items"][count($this->subcomments_info["items"])-1];
+				else return [];
+			}
+		}else {
+			return $this->subcomments_info["items"];
+		}
+	}
+	//staic global funcitons
+	//grab all comments from the first page
+	static public function parseComments($reaction,$parent){
+		if(strpos($reaction[0],"<form")===0)
+			$form=array_shift($reaction);
+		else $form=array_pop($reaction);
+		$comments=dom(array_shift($reaction),"<div");
+		$comments=filter($comments,function($str){
+			return strpos($str,"View more comments…")===false&&
+						 strpos($str,"View previous comments…")===false&&
+						 strpos($str,"<span>View previous replies</span>")===false&&
+						 strpos($str,"<span>View more replies</span>")===false;
+		});
+		if($comments[1])
+			$next=dom($comments[1][0],"<a",1)[0][1]["href"];
+
+		$comments=$comments[0];
+		$comments=array_map(function ($cmt_html) use (&$parent){
+			return new Comment($cmt_html,$parent);
+		},$comments);
+
+		return [
+			"items"=>$comments,
+			"form"=>$form,
+			"next"=>isset($next)?$next:""
+		];
+	}
+
 }
 
 

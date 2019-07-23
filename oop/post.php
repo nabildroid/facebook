@@ -35,7 +35,7 @@ class  Post extends common{
 			if(isset($this->comments_info["items"][$page]))
 				return $this->comments_info["items"][$page];
 			else{
-				for ($i=0; $i <$page; $i++) { 
+				for ($i=0; $i <=$page; $i++) { 
 					$this->http($this->comments_info["next"]);
 					if($this->detectType($this->html))
 						$data=$this->spliceImageHtml($this->html);
@@ -243,24 +243,12 @@ class  Post extends common{
 	}
 	//grab all comments from the first page
 	public function parseComments($reaction){
-		if(strpos($reaction[0],"<form")===0)
-			$form=array_shift($reaction);
-		else $form=array_pop($reaction);
-		$comments=dom(array_shift($reaction),"<div");
-		$comments=filter($comments,function($str){
-			return strpos($str,"View more comments…")===false&&
-						 strpos($str,"View previous comments…")===false;
-		});
-		if($comments[1])
-			$next=dom($comments[1][0],"<a",1)[0][1]["href"];
-
-		$comments=$comments[0];
-		$comments=array_map(function ($cmt_html){return new Comment($cmt_html,$this);},$comments);
-		$this->comments_info["items"]=array_merge($this->comments_info["items"],[$comments]);
-		$this->comments_info["next"]=isset($next)?$next:"";
+		$comments=Comment::parseComments($reaction,$this);
+		$this->comments_info["items"]=array_merge($this->comments_info["items"],[$comments["items"]]);
+		$this->comments_info["next"]=!empty($comments["next"])?$comments["next"]:"";
 		
 		if(!$this->comments_info["form"])		
-			$this->comments_info["form"]=$form;
+			$this->comments_info["form"]=$comments["form"];
 	}
 	//grab the user who publish this post and in which section (group|share from)
 	public function parseFrom($from,$data=""){
