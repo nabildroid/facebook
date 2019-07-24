@@ -26,7 +26,6 @@ class Common{
 				$data[$input["name"]]=$input["value"];
 		}
 		$this->http($url,$data);
-		var_dump($this->html);
 	}
 
 }

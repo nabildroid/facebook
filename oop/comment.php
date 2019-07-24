@@ -124,9 +124,13 @@ class Comment extends common{
 					$this->http($this->subcomments_info["next"]);
 					$data=doms($this->html,['id="objects_container"','<div','<div','<div']);
 					//get only replys and form for submit new reply
-					$data=[$data[count($data)-2],$data[count($data)-1] ];
-					$data=$this->parseComments($data,$this);
 
+					//delete before last div if it's not replys because the formal div number is 4 divs 
+					if(count($data)<4)
+						$data[count($data)-2]="";
+					$data=[$data[count($data)-2],$data[count($data)-1] ];
+
+					$data=$this->parseComments($data,$this);
 					$this->subcomments_info["next"]=$data["next"];
 
 					$this->subcomments_info["items"]=array_merge($this->subcomments_info["items"],[$data["items"]]);
