@@ -10,7 +10,7 @@ class Comment extends common{
 			"users"=>[],
 			"all"=>""
 		],
-		"like"=>"",
+		"like_link"=>"",
 		"reply_length"=>0
 	];
 	public $subcomments_info=[
@@ -58,7 +58,10 @@ class Comment extends common{
 		if(!isset($like_link)){
 			$like_link=filter($reaction,function($tool){
 				return $tool[0]=="Like";
-			})[0][0][1]["href"];
+			});
+			if(isset($like_link[0][0][1]["href"]))
+				$like_link=$like_link[0][0][1]["href"];
+			else $like_link="";
 		}
 		//get reply like
 		$reply_link=filter($reaction,function($tool){
@@ -78,7 +81,7 @@ class Comment extends common{
 		$this->info["user"]=$user;
 		$this->info["likes"]["length"]=$likes;
 		$this->info["likes"]["all"]=$likes_users_link;
-		$this->info["like"]=$like_link;
+		$this->info["like_link"]=$like_link;
 		$this->info["reply_length"]=$reply_number;
 		$this->subcomments_info["next"]=$reply_link;
 	}
@@ -94,12 +97,15 @@ class Comment extends common{
 
 	//action
 	public function like(){
-		if($this->info["like"])
-			$this->http($this->info["like"]);
+		if($this->info["like_link"]){
+			$this->http($this->info["like_link"]);
+			return true;
+		}else return false;
+
 	}
 	public function users_likes(){
 		if(!$this->info["likes"]["users"]&&$this->info["likes"]["all"]){
-			$this->info["likes"]["users"]=$this->parent->users_likes($this->info["likes"]["all"]);
+			$this->info["likes"]["users"]=Post::fetch_users_likes($this->info["likes"]["all"],$this);
 		}
 		return $this->info["likes"]["users"];
 	}

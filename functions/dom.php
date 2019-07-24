@@ -1,7 +1,8 @@
 <?php 
 
+
 function dom($cn,$search,$header=0,$nclose=0){
-	//version:1.1.1
+	//version:1.2.2
 	
 	// $cn 	   => content
 	// $search => what we are loking for 
@@ -14,17 +15,17 @@ function dom($cn,$search,$header=0,$nclose=0){
 
 	// delete any comment from cn
 	$cn=comment($cn);
-	for ($i=0; $i <strlen($cn)+1 ; $i++) {
+	for ($i=0; $i <strlen($cn) ; $i++) {
 		// find tage
 		$find_tag=multiSearch($search,$cn,$i);
 		if($find_tag && $cnt==0){
 			$tag=1;$cnt=!$nclose?1:0;$i+=strlen($find_tag);
 			$attr="";
-			for ($i=$i; $i >0 ; $i--) //start back when  the tag begin 
-				if($cn[$i]=="<"){$i++;break;}
+			for ($i=$i; $i >=0 ; $i--) //start back when  the tag begin 
+				if($cn[$i]=="<")break;
 
-			for($i=$i;$i<strlen($cn)+1;$i++){ // grap all attribute from tag
-					if($cn[$i]==">"){$i+=1;break;}
+			for($i=$i;$i<strlen($cn);$i++){ // grap all attribute from tag
+					if($cn[$i]==">"){$i++;break;}
 				$attr.=$cn[$i];
 			}
 			if($header){
@@ -32,24 +33,26 @@ function dom($cn,$search,$header=0,$nclose=0){
 					if($attr[$h]=="="){
 						//get the attr name
 						$l_attr_value="";$l_attr_name="";
-						for ($hr=$h-1; $hr < strlen($attr)+1; $hr--) { // header right 
+						for ($hr=$h-1; $hr >=0; $hr--) { // header right 
 							if($attr[$hr]==" ")break; 
 							$l_attr_name.=$attr[$hr]; // local attribute name
 						}
-						for ($hl=$h+2; $hl < strlen($attr)+1 ; $hl++) { // header left 
-							if(($attr[$hl]=="'"||$attr[$hl]=='"')&&($hl+1 >= strlen($attr)||$attr[$hl+1]==' '))
-								{$h=$hl+1;break;} 
+						for ($hl=$h+2; $hl < strlen($attr)-1 ; $hl++) { // header left 
+							if(($attr[$hl]=="'"||$attr[$hl]=='"')&&($hl+2>= strlen($attr)||$attr[$hl+1]==' '))
+								{$h=$hl;break;} 
 							$l_attr_value.=$attr[$hl]; // local attribute value
 						}
 						$headers[strrev($l_attr_name)]=$l_attr_value;
 					}
 				}
+				$headers[$find_tag]="";//add the tag name to tag attributes
 			}
 			if($nclose){
 				$cnt=0;
 				$stok[]=$headers;
 				$headers=array();
 				$item="";
+				$i--;
 				continue;
 			}
 		}

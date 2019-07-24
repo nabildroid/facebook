@@ -52,25 +52,32 @@ class  Post extends common{
 	}
 	//like action
 	public function like(){
-		info("post ".$this->id." has been liked");
+		if($this->info["like_link"]){
+			$this->http($this->info["like_link"]);
+			return true;
+		}
+		else return false;
 	}
 	//comment action
 	public function comment($txt){
-		info("post ".$this->id." has been commented with '".$txt."'");
+		$form=dom($this->comments_info["form"],"<form",1)[0];
+		$this->submit_form($form[0],$form[1]["action"],[$txt]);
+	}
+	public function users_likes(){
+		var_dump(self::fetch_users_likes("",$this));
 	}
 	//get all users who likes this post
-	public function users_likes($url=""){
+	static public function fetch_users_likes($url="",$parent){
 		//ufi/reaction/profile/browser/?ft_ent_identifier=ID_HERE
 			$all_users=[];
-
-		if($url||empty($this->info["likes"]["users"])){
-			$next=($url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$this->info["id"]);
+		if($url||empty($parent->info["likes"]["users"])){
+			$next=($url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$parent->info["id"]);
 	
 			do{
 				$next=is_array($next)?$next[0][1]["href"]:$next;//first next is string then it array
-				$this->http($next);
-				$this->html=$this->dom("<ul")[0];
-				$users=dom($this->html,"<a",1);
+				$parent->http($next);
+				$parent->html=$parent->dom("<ul")[0];
+				$users=dom($parent->html,"<a",1);
 				//get only the url of users and next page if it available
 				$users=filter($users,function($user){
 					return strpos($user[0],"<span")===false||strpos($user[0],"See More")!=false;
@@ -86,7 +93,7 @@ class  Post extends common{
 			}while(isset($next[0][1]["href"]));
 			
 			if(!$url)
-				$this->info["likes"]["users"]=$all_users;
+				$parent->info["likes"]["users"]=$all_users;
 			
 			return $all_users;
 		}
