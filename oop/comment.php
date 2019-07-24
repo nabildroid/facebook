@@ -101,7 +101,12 @@ class Comment extends common{
 			$this->http($this->info["like_link"]);
 			return true;
 		}else return false;
-
+	}
+	public function reply($txt){
+		if(!$this->subcomments_info["form"])
+			$this->subcomments(0);
+		$form=dom($this->subcomments_info["form"],"<form",1)[0];
+		$this->submit_form($form[0],$form[1]["action"],[$txt]);
 	}
 	public function users_likes(){
 		if(!$this->info["likes"]["users"]&&$this->info["likes"]["all"]){
