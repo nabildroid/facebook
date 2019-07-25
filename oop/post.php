@@ -164,12 +164,7 @@ class  Post extends common{
 
 		//content
 		$content=dom($content,"<div");   //fisrt contain 'from' 'content' the second conatint full-size
-		//NOTE:: i gonna suppose that the last div in content[0] is only the content but it's not proved	
-		// $content[0]=
-		/*
-			TODO
-			try to figuerout a way to splice the last div that hold content, from the above elements that hold any links to the owner of such post
-		*/
+		//NOTE:: i gonna suppose that the last div in content[0] is only the content but it's not proved			
 		$content[0]=dom($content[0],["<a","<div"],1);//not filtred
 
 		$text=array_pop($content[0])[0];
@@ -199,7 +194,7 @@ class  Post extends common{
 		return [
 			"from"=>$from,
 			"image"=>$image,
-			"content"=>$content,
+			"content"=>$text,
 			"likes_number"=>$likes,
 			"like_link"=>$like_link,
 			"comment_html"=>$reaction
@@ -242,7 +237,7 @@ class  Post extends common{
 		return [
 			"from"=>$from,
 			"data"=>$data,
-			"content"=>$content,
+			"content"=>$text,
 			"likes_number"=>$likes,
 			"like_link"=>$like_link,
 			"comment_html"=>$reaction
