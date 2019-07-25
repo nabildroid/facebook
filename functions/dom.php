@@ -1,66 +1,73 @@
 <?php 
 
 
-function dom($cn,$search,$header=0,$nclose=0){
-	//version:1.2.2
+function dom($cn,$search,$header=0,$nclose=0,$grabText=0){
+	//version:1.3.2
 	
 	// $cn 	   => content
 	// $search => what we are loking for 
-	// $header => iclude attributes of tage
-	// $nclose => if the tage does't has closed tag 
-	$cnt=0;// controle between find get tage and save it  
-	$stok=array();// for save all tage into it
-	$item=""; // for save one tage into it
+	// $header => iclude attributes of tag
+	// $nclose => if the tag does't has closed tag 
+	$cnt=0;// controle between find get tag and save it  
+	$stok=array();// for save all tag into it
+	$item=""; // for save one tag into it
 	$headers=array(); // for stoke attribute name and value accusiative array fo
-
+	$text="";//for save all not wrapped text by desire tag
 	// delete any comment from cn
 	$cn=comment($cn);
 	for ($i=0; $i <strlen($cn) ; $i++) {
-		// find tage
-		$find_tag=multiSearch($search,$cn,$i);
-		if($find_tag && $cnt==0){
-			$tag=1;$cnt=!$nclose?1:0;$i+=strlen($find_tag);
-			$attr="";
-			for ($i=$i; $i >=0 ; $i--) //start back when  the tag begin 
-				if($cn[$i]=="<")break;
+		// find tag
+		if($cnt==0){
+			$find_tag=multiSearch($search,$cn,$i);
+			if($find_tag){
+				$tag=1;$cnt=!$nclose?1:0;$i+=strlen($find_tag);
+				$attr="";
+				for ($i=$i; $i >=0 ; $i--) //start back when  the tag begin 
+					if($cn[$i]=="<")break;
 
-			for($i=$i;$i<strlen($cn);$i++){ // grap all attribute from tag
-					if($cn[$i]==">"){$i++;break;}
-				$attr.=$cn[$i];
-			}
-			if($header){
-				for ($h=0; $h < strlen($attr); $h++) { 
-					if($attr[$h]=="="){
-						//get the attr name
-						$l_attr_value="";$l_attr_name="";
-						for ($hr=$h-1; $hr >=0; $hr--) { // header right 
-							if($attr[$hr]==" ")break; 
-							$l_attr_name.=$attr[$hr]; // local attribute name
+				for($i=$i;$i<strlen($cn);$i++){ // grap all attribute from tag
+						if($cn[$i]==">"){$i++;break;}
+					$attr.=$cn[$i];
+				}
+				if($header){
+					for ($h=0; $h < strlen($attr); $h++) { 
+						if($attr[$h]=="="){
+							//get the attr name
+							$l_attr_value="";$l_attr_name="";
+							for ($hr=$h-1; $hr >=0; $hr--) { // header right 
+								if($attr[$hr]==" ")break; 
+								$l_attr_name.=$attr[$hr]; // local attribute name
+							}
+							for ($hl=$h+2; $hl < strlen($attr)-1 ; $hl++) { // header left 
+								if(($attr[$hl]=="'"||$attr[$hl]=='"')&&($hl+2>= strlen($attr)||$attr[$hl+1]==' '))
+									{$h=$hl;break;} 
+								$l_attr_value.=$attr[$hl]; // local attribute value
+							}
+							$headers[strrev($l_attr_name)]=$l_attr_value;
 						}
-						for ($hl=$h+2; $hl < strlen($attr)-1 ; $hl++) { // header left 
-							if(($attr[$hl]=="'"||$attr[$hl]=='"')&&($hl+2>= strlen($attr)||$attr[$hl+1]==' '))
-								{$h=$hl;break;} 
-							$l_attr_value.=$attr[$hl]; // local attribute value
-						}
-						$headers[strrev($l_attr_name)]=$l_attr_value;
 					}
 				}
-				$headers[$find_tag]="";//add the tag name to tag attributes
-			}
-			if($nclose){
-				$cnt=0;
-				$stok[]=$headers;
-				$headers=array();
-				$item="";
-				$i--;
-				continue;
+				if($nclose){
+					$cnt=0;
+					$stok[]=$headers;
+					$headers=array();
+					$item="";
+					$i--;
+					continue;
+				}
+				if($grabText&&trim($text)){ //store grabed text
+					$stok[]=["",["text"=>$text]];
+					$text="";
+				}
+			}elseif($grabText){
+				$text.=$cn[$i];
 			}
 		}
-		// save tage
+		// save tag
 		if($cnt==1){ 
 			// echo $tag==$tag1?'':$tag;
 			// $tag1=$tag;
-
+			//ignore comments
 			if($cn[$i]=="<"&&$cn[$i+1]=="!"&&$cn[$i+2]=="-"&&$cn[$i+3]=="-"){
 				$i+=3;
 				for ($c=$i; $c <strlen($cn) ; $c++) { 
@@ -85,17 +92,24 @@ function dom($cn,$search,$header=0,$nclose=0){
 				!($cn[$i+2]==" "&&$cn[$i+3]=="h"&&$cn[$i+4]=="r")
 			){$tag--;}
 			if($tag==0){
-				$cnt=0;
+				//go to next letter after the close of this  tag
+				for($i=$i;$i<strlen($cn);$i++)
+						if($cn[$i]==">")break;
 				if($header)
 					$stok[]=array($item,$headers);
 				else $stok[]=$item;
+				//reset every things
 				$headers=array();
 				$item="";
+				$cnt=0;
 				continue;
-			}
-			$item.=$cn[$i];
+			}else 
+				$item.=$cn[$i];
 		}
 	}
+	//save the last grabbed text if exist
+	if(trim($text))
+		$stok[]=["",["text"=>$text]];
 	return $stok;
 }
 function comment($cn){
