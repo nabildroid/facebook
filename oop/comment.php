@@ -77,7 +77,7 @@ class Comment extends common{
 			preg_match_all("/\d+/",$reply[0],$reply_number);
 			$reply_number=intval($reply_number[0][0]);
 		}
-		$this->info["content"]=$this->makeContentFromHtmlContent($html);
+		$this->info["content"]=parseContent($this->makeContentFromHtmlContent($html));
 		$this->info["user"]=$user;
 		$this->info["likes"]["length"]=$likes;
 		$this->info["likes"]["all"]=$likes_users_link;

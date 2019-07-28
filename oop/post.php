@@ -107,7 +107,7 @@ class  Post extends common{
 			$data=$this->splicePostHtml($this->html);
 
 		$this->info["from"]=Post::parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
-		$this->info["content"]=$data["content"];
+		$this->info["content"]=parseContent($data["content"]);
 		$this->info["likes"]["length"]=$data["likes_number"];
 		$this->info["like_link"]=$data["like_link"];
 		if(isset($data["image"]))
@@ -143,7 +143,7 @@ class  Post extends common{
 		$info["info"]["user"]=$user;
 		$info["info"]["from"]=$from;
 		$info["info"]["likes"]["length"]=$likes;
-		$info["info"]["content"]=$content;
+		$info["info"]["content"]=parseContent($content);
 		Post::parseFrom($from);
 		return $info;
 	}
