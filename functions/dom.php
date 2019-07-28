@@ -1,8 +1,6 @@
 <?php 
-
-
-function dom($cn,$search,$header=0,$nclose=0,$grabText=0){
-	//version:1.3.2
+function dom($cn,$search,$header=0,$grabText=0){
+	//version:2.0.0
 	
 	// $cn 	   => content
 	// $search => what we are loking for 
@@ -14,12 +12,14 @@ function dom($cn,$search,$header=0,$nclose=0,$grabText=0){
 	$headers=array(); // for stoke attribute name and value accusiative array fo
 	$text="";//for save all not wrapped text by desire tag
 	// delete any comment from cn
+	$find_tag="";//desire tag
 	$cn=comment($cn);
 	for ($i=0; $i <strlen($cn) ; $i++) {
 		// find tag
 		if($cnt==0){
 			$find_tag=multiSearch($search,$cn,$i);
 			if($find_tag){
+				$nclose=autoCloseTagsDetect($find_tag,1)==true;//if the tag does't has closed tag 
 				$tag=1;$cnt=!$nclose?1:0;$i+=strlen($find_tag);
 				$attr="";
 				for ($i=$i; $i >=0 ; $i--) //start back when  the tag begin 
@@ -29,7 +29,7 @@ function dom($cn,$search,$header=0,$nclose=0,$grabText=0){
 						if($cn[$i]==">"){$i++;break;}
 					$attr.=$cn[$i];
 				}
-				if($header){
+				if($header||$nclose){
 					for ($h=0; $h < strlen($attr); $h++) { 
 						if($attr[$h]=="="){
 							//get the attr name
@@ -47,21 +47,20 @@ function dom($cn,$search,$header=0,$nclose=0,$grabText=0){
 						}
 					}
 				}
+				if($grabText&&trim($text)){ //store grabed text
+					$stok[]=$text;
+					$text="";					
+				}
 				if($nclose){
 					$cnt=0;
+					$headers["find_tag"]=$find_tag;
 					$stok[]=$headers;
 					$headers=array();
 					$item="";
 					$i--;
-					continue;
 				}
-				if($grabText&&trim($text)){ //store grabed text
-					$stok[]=["",["text"=>$text]];
-					$text="";
-				}
-			}elseif($grabText){
+			}elseif($grabText)
 				$text.=$cn[$i];
-			}
 		}
 		// save tag
 		if($cnt==1){ 
@@ -75,41 +74,32 @@ function dom($cn,$search,$header=0,$nclose=0,$grabText=0){
 						{$i=$c+3;break;}
 				}	
 			}
-			if($cn[$i]=="<" && $cn[$i+1]!=="/" 
-				&& !($cn[$i+1]==="!") 
-				&& !($cn[$i+1]==="b" && $cn[$i+2]==="r") 
-				&& !($cn[$i+1]==="h" && $cn[$i+2]==="r") 
-				&& !($cn[$i+1]==="i" && $cn[$i+2]==="m" && $cn[$i+3]==="g") 
-				&& !($cn[$i+1]==="w" && $cn[$i+2]==="b" && $cn[$i+3]==="r") 
-				&& !($cn[$i+1]==="m" && $cn[$i+2]==="e" && $cn[$i+3]==="t"&& $cn[$i+4]==="a")
-				&& !($cn[$i+1]==="l" && $cn[$i+2]==="i" && $cn[$i+3]==="n"&& $cn[$i+4]==="k")
-				&& !($cn[$i+1]==="i"&&$cn[$i+2]==="n"&&$cn[$i+3]==="p"&& $cn[$i+4]==="u"&& $cn[$i+5]==="t")
-				&& !($cn[$i+1]==="s"&&$cn[$i+2]==="o"&&$cn[$i+3]==="u"&& $cn[$i+4]==="r"&& $cn[$i+5]==="c"&& $cn[$i+6]==="e")
-				){$tag++;}
-			if(($cn[$i]=="<" && $cn[$i+1] =="/")&&
-				!($cn[$i+2]==" " &&$cn[$i+3]=="b"&&$cn[$i+4]=="r")&&
-				!($cn[$i+2]=="b"&&$cn[$i+3]=="r")&&
-				!($cn[$i+2]==" "&&$cn[$i+3]=="h"&&$cn[$i+4]=="r")
-			){$tag--;}
+			if($cn[$i]=="<" && $cn[$i+1]!="/" && !autoCloseTagsDetect($cn,$i+1))
+				{$tag++;}
+			elseif($cn[$i]=="<" && $cn[$i+1] =="/" && !autoCloseTagsDetect($cn,$i+1))
+				{$tag--;}
 			if($tag==0){
-				//go to next letter after the close of this  tag
+				//go to next letter after the close of this tag
 				for($i=$i;$i<strlen($cn);$i++)
 						if($cn[$i]==">")break;
-				if($header)
+
+				if($header){
+					$headers["find_tag"]=$find_tag;
 					$stok[]=array($item,$headers);
+				}
 				else $stok[]=$item;
 				//reset every things
 				$headers=array();
 				$item="";
 				$cnt=0;
 				continue;
-			}else 
+			}else
 				$item.=$cn[$i];
 		}
 	}
 	//save the last grabbed text if exist
 	if(trim($text))
-		$stok[]=["",["text"=>$text]];
+		$stok[]=$text;
 	return $stok;
 }
 function comment($cn){
@@ -123,6 +113,10 @@ function comment($cn){
 		if($cnt)$temp.=$cn[$i];
 	}
 	return $temp;
+}
+function autoCloseTagsDetect($cn,$i){
+	$tags=["img","link","meta","source","wbr","br"," br","hr"," hr","input"];
+	return multiSearch($tags,$cn,$i);
 }
 function multiSearch($search,$cn,$i){
 	if(is_array($search))

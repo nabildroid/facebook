@@ -17,7 +17,7 @@ class Common{
 		return dom($this->html,$search,$getAttribute,$closedTag);
 	}
 	public function submit_form($html,$url,$values){
-		$inputs=dom($html,"<input",1,1);
+		$inputs=dom($html,"<input",1);
 		$data=[];
 		foreach ($inputs as $input) {
 			if($input["type"]=="text")
