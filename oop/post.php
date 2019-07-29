@@ -20,7 +20,12 @@ class  Post extends common{
 	];
 	function __construct($id,$parent,$info=[]){
 		$this->parent=$parent;
-		if(!empty($info))$this->info=$info;
+		if(!empty($info)){
+			$this->info["from"]=$info["from"];		
+			$this->info["likes"]["length"]=$info["likes_number"];		
+			$this->info["like_link"]=$info["like_link"];		
+			$this->info["content"]=$info["content"];		
+		}
 		$this->info["id"]=$id;
 	}
 	//post information
@@ -31,6 +36,7 @@ class  Post extends common{
 	}
 	//get comments
 	public function comments($page=""){
+		if(!$this->comments_info["next"])$this->fetch_info();
 		if(is_numeric($page)){
 			if(isset($this->comments_info["items"][$page]))
 				return $this->comments_info["items"][$page];
@@ -60,11 +66,13 @@ class  Post extends common{
 	}
 	//comment action
 	public function comment($txt){
+		if(!$this->comments_info["form"])
+			$this->fetch_info();
 		$form=dom($this->comments_info["form"],"<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$txt]);
 	}
 	public function users_likes(){
-		var_dump(self::fetch_users_likes("",$this));
+		return self::fetch_users_likes("",$this);
 	}
 	//get all users who likes this post
 	static public function fetch_users_likes($url="",$parent){
@@ -123,29 +131,41 @@ class  Post extends common{
 		$info=[];
 		$data=jsondecode($post[1]["data-ft"]);
 		$html=dom($post[0],"<div");
+
 		//data [id,user,type_of_post(group or page or friend)]
-		$id=$data["top_level_post_id"];
-		$user=$data["content_owner_id_new"];
-		if(isset($data["group_id"]))
-			$from=$data["group_id"];
-		else $from=null;
+
 		//html [content,likes_number]
 		$content=dom($html[0],"<div");
-		array_shift($content);
-		$content=join($content,"");
 
-		$likes=dom($html[1],"<div");
-		$likes=array_pop($likes);
-		$likes=dom(dom($likes,"<span")[0],"<a")[0];
-		$likes=intval(substr($likes,strpos($likes,"</span>")+7));
+		$from=dom(array_shift($content),"<a",1);
+		// $from=parseFrom($content,$data);  / ! \
 
-		$info["id"]=$id;
-		$info["info"]["user"]=$user;
-		$info["info"]["from"]=$from;
-		$info["info"]["likes"]["length"]=$likes;
-		$info["info"]["content"]=parseContent($content);
-		Post::parseFrom($from);
-		return $info;
+		$text=join($content,"");
+
+
+		$actions=dom(dom($html[1],"<div")[1],"<a",1);
+
+		//get link of like action
+		$like_link=filter($actions,function($action){
+			return strpos($action[0],"Like")!==false;
+		});
+		if(isset($like_link[0][0][1]["href"]))
+			$like_link=$like_link[0][0][1]["href"];
+		else $like_link="";
+
+		$likes=array_shift($actions);
+		if(strlen($likes[0])>4)
+			$likes=intval(substr($likes[0],strpos($likes[0],"</span>")+7));
+		else $likes=0;
+
+		return [
+			"from"=>Post::parseFrom($from,$data),
+			"data"=>$data,
+			"content"=>parseContent($text),
+			"likes_number"=>$likes,
+			"like_link"=>$like_link,
+		];
+
 	}
 	//get the type of such post if it's normal post or image post
 	public function detectType($html){
@@ -177,7 +197,7 @@ class  Post extends common{
 
 		
 
-		//get reply like
+		//get link of like action
 		$like_link=filter($actions,function($action){
 			return strpos($action[0],"Like")!=false;
 		})[0][0][1]["href"];
@@ -219,7 +239,7 @@ class  Post extends common{
 
 		$reaction=filter(doms($reaction,["<div","<div"]))[0];
 		$actions=dom(array_shift($reaction),"<a",1);//##### like action
-		//get reply like
+		//get link of like action
 		$like_link=filter($actions,function($action){
 			return strpos($action[0],"Like")!=false;
 		})[0][0][1]["href"];
@@ -254,12 +274,13 @@ class  Post extends common{
 	}
 	//grab the user who publish this post and in which section (group|share from)
 	public function parseFrom($from,$data=""){
-		$user="";		$page="";		$group="";		$origin_post="";
+		$user="";		$page="";		$group="";		$origin_post=""; $id="";
 		//delete any <a that does't has href
 		$from=filter($from,function($a){return isset($a[1]["href"]);})[0];
-
 		///////Get Data from JsonData
 		if($data){
+			if(isset($data["top_level_post_id"]))
+				$id=$data["top_level_post_id"];
 			if(isset($data["content_owner_id_new"]))
 				$user=$data["content_owner_id_new"];
 			if(isset($data["page_id"]))
@@ -300,6 +321,7 @@ class  Post extends common{
 		}
 		return [
 			"user"=>$user,
+			"id"=>$id,
 			"origin_post"=>$origin_post,
 			"page_id"=>$page,
 			"group_id"=>$group,

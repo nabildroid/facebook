@@ -1,6 +1,6 @@
 <?php 
 function dom($cn,$search,$header=0,$grabText=0){
-	//version:2.0.0
+	//version:2.0.1
 	
 	// $cn 	   => content
 	// $search => what we are loking for 
@@ -31,7 +31,7 @@ function dom($cn,$search,$header=0,$grabText=0){
 				}
 				if($header||$nclose){
 					for ($h=0; $h < strlen($attr); $h++) { 
-						if($attr[$h]=="="){
+						if($attr[$h]=="="&&($attr[$h+1]=="'"||$attr[$h+1]=='"')){
 							//get the attr name
 							$l_attr_value="";$l_attr_name="";
 							for ($hr=$h-1; $hr >=0; $hr--) { // header right 
