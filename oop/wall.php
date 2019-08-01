@@ -14,11 +14,26 @@ class Wall extends common{
 		$posts= array_filter(dom($html,"<div"));
 		$posts=dom(array_pop($posts),"<div",1);
 		//create posts objects
-		$posts=array_map(function ($post){
+		$tempPosts=[];
+		foreach ($posts as $post){
 			$info=Post::GetInfoFromListedPost($post);
-			return new Post($info["from"]["id"],$this,$info);
-		},$posts);
-		return $posts;
+			if($info)
+				$tempPosts[]=new Post($info["from"]["id"],$this,$info);
+		}
+		return $tempPosts;
+	}
+
+	public function publish($txt="",$images=[]){
+		$this->http();
+		$form=$this->dom("<form",1)[1];
+		$this->submit_form($form[0],$form[1]["action"],[$txt],$images?"view_photo":"");
+		if($images){
+			$form=dom($this->html,"<form",1)[0];
+			$this->submit_form($form[0],$form[1]["action"],$images,"add_photo_done");
+			$form=dom($this->html,"<form",1)[0];
+			var_dump($form);
+			$this->submit_form($form[0],$form[1]["action"],[$txt],"view_post");
+		}
 	}
 }
 
