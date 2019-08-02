@@ -2,28 +2,33 @@
 class Common{
 	public $root=null;
 	public $html="";
+	public $lastHttpRequest=null;
 	public function http($url="",$data="",$headers=[],$responseHeader=0){
-		if($this->root!=null)
-			$root=$this->root;
-		else{
-			$root=$this->parent;
-			while(!is_a($root,"Profile"))
-				$root=$root->parent;
-			$this->root=$root;
+		//prepare the root variable
+		if(!$this->root){
+			$this->root=$this->parent;
+			while(!is_a($this->root,"Profile"))
+				$this->root=$this->root->parent;
 		}
-		$this->html=$root->http($url,$data,$headers,$responseHeader);
+		//check if previous request is equivalent to current one 
+		if($this->lastHttpRequest===[$url,$data,$headers,$responseHeader])
+			return $this->html;
+		else $this->lastHttpRequest=[$url,$data,$headers,$responseHeader];
+
+		$this->html=$this->root->http($url,$data,$headers,$responseHeader);
 	}
 	public function dom($search,$getAttribute=0,$grabText=0){
 		return dom($this->html,$search,$getAttribute,$grabText);
 	}
-	/*
+	/**
 		submit any form 
-		@param $html is the content(HTML) of form that hold any inputs
-		@param $url where the form action happen 
-		@param $values array of all values that will submitted by order, can be a text or url* for files
-		@param $target_submit if one submit must trigger in this form
+		* @param $html is the content(HTML) of form that hold any inputs
+		* @param $url where the form action happen 
+		* @param $values array of all values that will submitted by order, can be a text or **url** for files
+		* @param $target_submit if one submit must trigger in this form
+		* @param forceInput is key/value pair for forcing any input to take static value
 	*/
-	public function submit_form($html,$url,$values=[],$target_submit=""){
+	public function submit_form($html,$url,$values=[],$target_submit="",$forceInput=""){
 		$inputs=dom($html,["<input","<textarea"],1);
 		$files=[];
 		$data=[];
@@ -67,6 +72,11 @@ class Common{
 					}
 				}
 		}
+		if($forceInput){
+			foreach ($forceInput as $key => $value)
+				$data[$key]=$value;
+		}
+		
 		if(!$files)$data=http_build_query($data);
 
 		$this->http($url,$data);
