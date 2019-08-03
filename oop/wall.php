@@ -36,7 +36,7 @@ class Wall extends common{
 					$csid=substr($csid[0][0],5);
 				}else $csid=$csid[0][1]["value"];
 
-				$this->http("/composer/mbasic/?csid=".$csid."&errcode=0&cwevent=composer_entry&filter_type=0&av=100009747405464&priv_expand=see_all&view_privacy");
+				$this->http("/composer/mbasic/?csid=".$csid."&errcode=0&cwevent=composer_entry&filter_type=0&priv_expand=see_all&view_privacy");
 				$html=$this->dom("<table")[1];
 				$html=doms($html,["<td","<tr"]);
 
