@@ -111,4 +111,45 @@ function parseContent($html){
 }
 
 
+/**
+	* recursive function for  search on  depth of any array it's good for select one element in doms array
+	* @param $tree, array that contain all elements including our $target
+	* @param $target, what we looking for, i doesn't metter if it array or part of full string 
+	* @return boolean
+**/
+function FindInTree($tree,$target){
+	if(is_array($tree)){
+		foreach($tree as $key => $value){
+			if(is_array($target)){
+				if (is_array($value)&&$target===$value)
+					return true;
+				else{
+					foreach ($target as $Tkey => $Tvalue) {
+						if($Tkey===$key&&$Tvalue===$value)
+							return true;
+						elseif(is_array($value)&&FindInTree($value,[$Tkey=>$Tvalue]))
+							return true;
+					}
+				}
+			}
+			elseif(is_array($value)&&FindInTree($value,$target))
+				return true;
+			elseif(strpos($key,$target)!==false||$value===$target)
+				return true;
+			elseif (!is_array($value)&&strpos($value,$target)!==false)
+				return true;
+		}
+	}elseif(!is_array($target)&&strpos($tree,$target)!==false)
+		return true;
+}
+
+function findDom($doms,$target){
+	$doms=filter($doms,function ($d) use (&$target){
+		return FindInTree($d,$target);
+	});
+	if(isset($doms[0][0]))
+		return $doms[0][0];
+	else return [];
+}
+
  ?>

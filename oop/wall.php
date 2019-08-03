@@ -58,8 +58,7 @@ class Wall extends common{
 
 	public function publish($txt="",$images=[],$privacy=""){
 		$this->http();
-		$form=$this->dom("<form",1)[1];	
-
+		$form=findDom($this->dom("<form",1),"<textarea");	
 		if(!$images){//publish image
 			$privacy=$this->changePrivacy($form,$privacy);
 
