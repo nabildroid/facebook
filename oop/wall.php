@@ -60,30 +60,39 @@ class Wall extends common{
 		}
 		return false;
 	}
+	/**
+	 * @param $param, is array(key/pair) it takes text(string),images(array),privacy(string),tags(array) and all are options
+	*/
+	public function publish($param){
+		//prepare paramater
+		$text=isset($param["text"])?$param["text"]:"";
+		$images=isset($param["images"])?$param["images"]:[];
+		$privacy=isset($param["privacy"])?$param["privacy"]:"";
+		$tags=isset($param["tags"])?$param["tags"]:[];
 
-	public function publish($txt="",$images=[],$privacy="",$friendsTag){
+		//main function
 		$this->http();
 		$form=findDom($this->dom("<form",1),"<textarea");	
 
 		//handle logic error taging friends in private post
-		if($friendsTag&&($this->currentPrivacy($form[0])==="only me"||$privacy==="only me"))
+		if($tags&&($this->currentPrivacy($form[0])==="only me"||$privacy==="only me"))
 			throw new Exception("trying to tag friend in private post ", 1);
 
 		$forceInput=[];
 		//tag friends
-		if($friendsTag)
-			$forceInput["users_with"]=join($friendsTag,",");
+		if($tags)
+			$forceInput["users_with"]=join($tags,",");
 
 		if(!$images){//publish image
 			//add privacy if exist to $forceInpute
 			$privacy=$this->changePrivacy($form,$privacy);
 			if($privacy)$forceInput["privacyx"]=$privacy;
 			//publish post
-			$this->submit_form($form[0],$form[1]["action"],[$txt],"",$forceInput);
+			$this->submit_form($form[0],$form[1]["action"],[$text],"",$forceInput);
 
 		}else{//publish text
 			//fecth upload page
-			$this->submit_form($form[0],$form[1]["action"],[$txt],"view_photo");
+			$this->submit_form($form[0],$form[1]["action"],[$text],"view_photo");
 			//upload images
 			$form=dom($this->html,"<form",1)[0];
 			$this->submit_form($form[0],$form[1]["action"],$images,"add_photo_done");
@@ -92,7 +101,7 @@ class Wall extends common{
 			$privacy=$this->changePrivacy($form,$privacy);
 			if($privacy)$forceInput["privacyx"]=$privacy;
 			//publish post
-			$this->submit_form($form[0],$form[1]["action"],[$txt],"view_post",$forceInput);
+			$this->submit_form($form[0],$form[1]["action"],[$text],"view_post",$forceInput);
 		}
 	}
 }
