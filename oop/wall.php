@@ -22,10 +22,15 @@ class Wall extends common{
 		}
 		return $tempPosts;
 	}
+	private function currentPrivacy($formHtml){
+		$current_privacy=dom($formHtml,'name="view_privacy"',1)[0];
+		if(isset($current_privacy[1]["value"]))
+			return strtolower(trim($current_privacy[1]["value"]));
+		else return false;
+	}
 	private function changePrivacy($form,$privacy){
 		if($privacy){
-			$current_privacy=dom($form[0],'name="view_privacy"',1)[0];
-			if(strtolower($current_privacy[1]["value"])!=$privacy){
+			if($this->currentPrivacy($form[0])!=$privacy){
 
 				/*if form contain csid(as hidden input), so that easy to get the code of any privacy by only one request then force such value to publish (submit last form).
 				but if the form doesn't contain it we must submit the privacy input then we can get the csid and do the half part of the first condition*/
@@ -56,15 +61,25 @@ class Wall extends common{
 		return false;
 	}
 
-	public function publish($txt="",$images=[],$privacy=""){
+	public function publish($txt="",$images=[],$privacy="",$friendsTag){
 		$this->http();
 		$form=findDom($this->dom("<form",1),"<textarea");	
-		if(!$images){//publish image
-			$privacy=$this->changePrivacy($form,$privacy);
 
-			$this->submit_form($form[0],$form[1]["action"],[$txt],"",$privacy?[
-				"privacyx"=>$privacy
-			]:"");
+		//handle logic error taging friends in private post
+		if($friendsTag&&($this->currentPrivacy($form[0])==="only me"||$privacy==="only me"))
+			throw new Exception("trying to tag friend in private post ", 1);
+
+		$forceInput=[];
+		//tag friends
+		if($friendsTag)
+			$forceInput["users_with"]=join($friendsTag,",");
+
+		if(!$images){//publish image
+			//add privacy if exist to $forceInpute
+			$privacy=$this->changePrivacy($form,$privacy);
+			if($privacy)$forceInput["privacyx"]=$privacy;
+			//publish post
+			$this->submit_form($form[0],$form[1]["action"],[$txt],"",$forceInput);
 
 		}else{//publish text
 			//fecth upload page
@@ -73,11 +88,11 @@ class Wall extends common{
 			$form=dom($this->html,"<form",1)[0];
 			$this->submit_form($form[0],$form[1]["action"],$images,"add_photo_done");
 			$form=dom($this->html,"<form",1)[0];
-			//publish post
+			//add privacy if exist to $forceInpute
 			$privacy=$this->changePrivacy($form,$privacy);
-			$this->submit_form($form[0],$form[1]["action"],[$txt],"view_post",$privacy?[
-				"privacyx"=>$privacy
-			]:"");
+			if($privacy)$forceInput["privacyx"]=$privacy;
+			//publish post
+			$this->submit_form($form[0],$form[1]["action"],[$txt],"view_post",$forceInput);
 		}
 	}
 }
