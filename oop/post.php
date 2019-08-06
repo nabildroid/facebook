@@ -142,9 +142,9 @@ class  Post extends common{
 
 		$text=join($content,"");
 
-		$actions=dom($html[1],"<div");
-		if(!isset($actions[1]))return;
-		$actions=dom($actions[1],"<a",1);
+		$actions=findDom(dom($html[1],"<div"),"More");
+		if(!$actions)return;
+		$actions=dom($actions,"<a",1);
 
 		//get link of like action
 		$like_link=filter($actions,function($action){

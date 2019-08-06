@@ -151,5 +151,19 @@ function findDom($doms,$target){
 		return $doms[0][0];
 	else return [];
 }
+/**
+*@param $origin the template of the array
+*@param $new where the template take thier values
+*@return template with new value
+*/
+function mergeAssociativeArray($origin,$new){
+	foreach ($origin as $key => $value) {
+		if(isset($new[$key])){
+			$origin[$key]=$new[$key];
+		}
+	}
+	return $origin;
+}
+
 
  ?>
