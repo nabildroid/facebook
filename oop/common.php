@@ -21,7 +21,7 @@ class Common{
 		return dom($this->html,$search,$getAttribute,$grabText);
 	}
 	/**
-		submit any form 
+		*submit any form 
 		* @param $html is the content(HTML) of form that hold any inputs
 		* @param $url where the form action happen 
 		* @param $values array of all values that will submitted by order, can be a text or **url** for files
@@ -66,7 +66,7 @@ class Common{
 					$img=array_shift($values);
 					if($img){
 						file_put_contents($file_path,file_get_contents($img));
-						$files[]=$img;
+						$files[]=$file_path;
 						$file = new CURLFile($file_path,mime_content_type($file_path),$input["name"]);	
 						$data[$input["name"]]=$file;
 					}

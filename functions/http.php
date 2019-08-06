@@ -18,7 +18,7 @@ function ping($url,$data="",$headers=[],$responseHeader=0){
 
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 5);
 
-	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.3) Gecko/20070309 Firefox/2.0.0.3");
+	curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) snap Chromium/75.0.3770.142 Chrome/75.0.3770.142 Safari/537.36");
 
 	$response = curl_exec($ch);
 	if (curl_errno($ch)) {

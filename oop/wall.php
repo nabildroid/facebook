@@ -65,10 +65,12 @@ class Wall extends common{
 	*/
 	public function publish($param){
 		//prepare paramater
-		$text=isset($param["text"])?$param["text"]:"";
-		$images=isset($param["images"])?$param["images"]:[];
-		$privacy=isset($param["privacy"])?$param["privacy"]:"";
-		$tags=isset($param["tags"])?$param["tags"]:[];
+		$param=mergeAssociativeArray([
+			"text"=>"",
+			"images"=>[],
+			"privacy"=>"",
+			"tags"=>[]
+		],$param);
 
 		//main function
 		$this->http();
