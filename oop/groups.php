@@ -4,62 +4,34 @@ class Groups extends Common{
 	function __construct($parent){
 		$this->parent=$parent;
 	}
-	public function all(){
-		$html=$this->http("groups/?seemore");
-		$html=dom(dom($html,"<table")[1],"<a",1);
-		array_shift($html);
-		//get 
-		return array_map(function ($id){
-			// get  the id from url
-			$id=$id[1]["href"];
-			$id=$this->grabGroupIdFromURL($id);
-			
-			return new Group($id,$this);
-		}, $html);
+	public function myGroups(){
+		$this->http("/groups/?seemore");
+		$my=$this->dom("<ul")[0];
+		$groups=dom($my,"<a",1);
+		$groups=array_map(function($group){
+			return [
+				"name"=>$group[0],
+				"id"=>$group[1]["href"],
+			];
+		},$groups);
+		var_dump($groups);
 	}
-	public function Group($id){
-		return new Group($id,$this);
-	}
-	public static function grabGroupIdFromURL($url){
-		return strcut($id,strpos($id,"s/")+3,strpos($id,"?")-1)[0];
+	public function suggestionGroups(){
+		$this->http("/groups");
+		$suggetion=findDom($this->dom("<ul"),"Join");
+		$groups=dom($suggetion,"<li");
+		$groups=array_map(function($group){
+			$group=dom($group,"<td");
+			$info=dom($group[0],"<a",1)[0];
+			$join=dom($group[1],"<a",1)[0];
+			return [
+				"name"=>$info[0],
+				"id"=>$info[1]["href"],
+				"join"=>$join[1]["href"]
+			];
+		},$groups);
+		var_dump($groups);
 	}
 }
-
-
-
-
-class Group{
-	public $parent=null;
-	public $id=null;
-	function  __construct($id,$parent){
-		$this->parent=$parent;
-		$this->id=$id;
-	}
-	//Group action
-	public function join(){
-		info("Group(".$this->id.") has been liked");
-	}
-	public function disjoin(){
-		info("Group(".$this->id.") has been unliked");
-	}
-	public function data(){
-		info("Group information[id:".$this->id."]");
-	}
-	//postes actions
-	public function postes(){
-		$ids=["efkef","pojzpgjpzr","sjpogjpr","pzjfrf68"];
-		return array_map(function ($id){
-			return $this->post($id);
-		}, $ids);
-	}
-	public function post($id){
-		return new Post($id,$this);
-	}
-
-
-}
-
-
-
 
  ?>
