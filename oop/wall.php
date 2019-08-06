@@ -77,33 +77,33 @@ class Wall extends common{
 		$form=findDom($this->dom("<form",1),"<textarea");	
 
 		//handle logic error taging friends in private post
-		if($tags&&($this->currentPrivacy($form[0])==="only me"||$privacy==="only me"))
+		if($param["tags"]&&($this->currentPrivacy($form[0])==="only me"||$param["privacy"]==="only me"))
 			throw new Exception("trying to tag friend in private post ", 1);
 
 		$forceInput=[];
 		//tag friends
-		if($tags)
-			$forceInput["users_with"]=join($tags,",");
+		if($param["tags"])
+			$forceInput["users_with"]=join($param["tags"],",");
 
-		if(!$images){//publish image
+		if(!$param["images"]){//publish text
 			//add privacy if exist to $forceInpute
-			$privacy=$this->changePrivacy($form,$privacy);
+			$privacy=$this->changePrivacy($form,$param["privacy"]);
 			if($privacy)$forceInput["privacyx"]=$privacy;
 			//publish post
-			$this->submit_form($form[0],$form[1]["action"],[$text],"",$forceInput);
+			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"",$forceInput);
 
-		}else{//publish text
+		}else{//publish image
 			//fecth upload page
-			$this->submit_form($form[0],$form[1]["action"],[$text],"view_photo");
+			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_photo");
 			//upload images
 			$form=dom($this->html,"<form",1)[0];
-			$this->submit_form($form[0],$form[1]["action"],$images,"add_photo_done");
+			$this->submit_form($form[0],$form[1]["action"],$param["images"],"add_photo_done");
 			$form=dom($this->html,"<form",1)[0];
 			//add privacy if exist to $forceInpute
 			$privacy=$this->changePrivacy($form,$privacy);
 			if($privacy)$forceInput["privacyx"]=$privacy;
 			//publish post
-			$this->submit_form($form[0],$form[1]["action"],[$text],"view_post",$forceInput);
+			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_post",$forceInput);
 		}
 	}
 }
