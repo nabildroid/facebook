@@ -60,6 +60,16 @@ class Group extends common{
 			$this->member=0;
 		}else throw new Exception("user didn't have the permission to leave such group");
 	}
+
+	private function splitPosts(){
+		$content=$this->dom('id="m_group_stories_container"');
+		if(isset($content[0])){
+			$posts=dom($content[0],["data-ft",'role="article"'],1);
+			$next=findDom(dom($content[0],"<a",1),"See More Posts");
+			return ["posts"=>$posts,"next"=>$next];
+		}else return ["posts"=>[],"next"=>""];
+
+	}
 	public function posts($page=0){
 		if($this->member!==1)
 			throw new Exception("user didn't have the permission to read group posts");
@@ -69,23 +79,20 @@ class Group extends common{
 			else{
 				for ($i=count($this->info["posts"]);$i <=$page; $i++) {
 					if(!$this->info["posts_next_page"])break;
-					
 					$this->http($this->info["posts_next_page"]);
-					$content=$this->dom('id="m_group_stories_container"')[0];
-
-					$posts=dom($content,["data-ft",'role="article"'],1);
+					
+					$content=$this->splitPosts();
 
 					$tempPosts=[];
-					foreach ($posts as $post){
+					foreach ($content["posts"] as $post){
 						$info=Post::GetInfoFromListedPost($post);
 						if($info)
 							$tempPosts[]=new Post($info["from"]["id"],$this,$info);
 					}
 					$this->info["posts"]=array_merge($this->info["posts"],[$tempPosts]);
 
-					$next=findDom(dom($content,"<a",1),"See More Posts");
-					if(isset($next[1]["href"]))
-						$this->info["posts_next_page"]=$next[1]["href"];
+					if(isset($content["next"][1]["href"]))
+						$this->info["posts_next_page"]=$content["next"][1]["href"];
 
 				}
 				if(isset($this->info["posts"][count($this->info["posts"])-1]))
@@ -132,6 +139,14 @@ class Group extends common{
 			//publish post
 			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_post",$forceInput);
 		}
+		return $this->postAppeared()?"published":"pending";
+	}
+	private function postAppeared(){
+		$posts=$this->splitPosts()["posts"];
+		$appeared=filter($posts,function($post){
+			return !count(findDom(dom($post[0],"<a"),"More"));
+		});
+		return count($appeared[0]);
 	}
 
 }

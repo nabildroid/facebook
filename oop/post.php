@@ -142,7 +142,7 @@ class  Post extends common{
 
 		$text=join($content,"");
 
-		$actions=findDom(dom($html[1],"<div"),"More");
+		$actions=findDom(dom($html[1],"<div"),"Full Story");
 		if(!$actions)return;
 		$actions=dom($actions,"<a",1);
 
