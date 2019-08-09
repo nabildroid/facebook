@@ -9,12 +9,12 @@ class Groups extends Common{
 		$my=$this->dom("<ul")[0];
 		$groups=dom($my,"<a",1);
 		$groups=array_map(function($group){
-			return [
+			return new Group([
 				"name"=>$group[0],
 				"id"=>$group[1]["href"],
-			];
+			],$this,1);
 		},$groups);
-		var_dump($groups);
+		return $groups;
 	}
 	public function suggestionGroups(){
 		$this->http("/groups");
@@ -24,13 +24,13 @@ class Groups extends Common{
 			$group=dom($group,"<td");
 			$info=dom($group[0],"<a",1)[0];
 			$join=dom($group[1],"<a",1)[0];
-			return [
+			return new Group([
 				"name"=>$info[0],
 				"id"=>$info[1]["href"],
 				"join"=>$join[1]["href"]
-			];
+			],$this);
 		},$groups);
-		var_dump($groups);
+		return $groups;
 	}
 }
 
