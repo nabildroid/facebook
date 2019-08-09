@@ -77,8 +77,8 @@ function detectTagType($tag){
 		return 3;
 	elseif($tag=="<div")
 		return 4;
-	elseif($tag=="<span")
-		return 5;
+	// elseif($tag=="<span") // it makes the content more complex
+	// 	return 5;
 	else return 0;//text
 }
 function branchApplay($arr,$tags){
