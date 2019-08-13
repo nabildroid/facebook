@@ -1,10 +1,14 @@
 <?php 
 class Wall extends common{
 	public $parent=null;
+	public $info=[
+		"myPosts"=>[],
+		"myPosts_next_page"=>"profile.php",
+	];
 	function  __construct($parent){
 		$this->parent=$parent;
 	}
-	public function all(){
+	public function suggestion(){
 		$this->http();
 		$html=$this->dom('<div id="m_newsfeed_stream"')[0];
 		//get next page
@@ -22,6 +26,46 @@ class Wall extends common{
 		}
 		return $tempPosts;
 	}
+	private function splitPosts(){
+		$content=$this->dom('id="structured_composer_async_container"');
+		if(isset($content[0])){
+			$posts=dom($content[0],["data-ft",'role="article"'],1);
+			$next=findDom(dom($content[0],"<a",1),"See More Stories");
+			return ["posts"=>$posts,"next"=>$next];
+		}else return ["posts"=>[],"next"=>""];
+	}
+	public function myPosts($page=0){
+		if(is_numeric($page)){
+			if(isset($this->info["myPosts"][$page]))
+				return $this->info["myPosts"][$page];
+			else{
+				for ($i=count($this->info["myPosts"]);$i <=$page; $i++) {
+					if(!$this->info["myPosts_next_page"])break;
+					$this->http($this->info["myPosts_next_page"]);
+					
+					$content=$this->splitPosts();
+
+					$tempPosts=[];
+					foreach ($content["posts"] as $post){
+						$info=Post::GetInfoFromListedPost($post);
+						if($info)
+							$tempPosts[]=new Post($info["from"]["id"],$this,$info);
+					}
+					$this->info["myPosts"]=array_merge($this->info["myPosts"],[$tempPosts]);
+
+					if(isset($content["next"][1]["href"]))
+						$this->info["myPosts_next_page"]=$content["next"][1]["href"];
+
+				}
+				if(isset($this->info["myPosts"][count($this->info["myPosts"])-1]))
+					return $this->info["myPosts"][count($this->info["myPosts"])-1];
+				else return [];
+			}
+		}else {
+			return $this->info["myPosts"];
+		}
+	}
+
 	private function currentPrivacy($formHtml){
 		$current_privacy=dom($formHtml,'name="view_privacy"',1)[0];
 		if(isset($current_privacy[1]["value"]))
