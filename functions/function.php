@@ -110,6 +110,30 @@ function parseContent($html){
 
 }
 
+/**
+	*concatenate all single child of type 0
+	*@param $arr is what the parseContent() return;
+	*@return string
+**/
+function flatContent($arr){
+	$content="";
+	for ($i=0; $i < count($arr) ; $i++) { 
+		if(!isset($arr[$i]))continue;
+		$index=$arr[$i];
+		while(is_array($index["child"])&&count($index["child"])==1)
+			$index=$index["child"][0];
+
+		if(is_array($index["child"])&&$index["child"]){
+			$temp=flatContent($index["child"]);
+			if($temp)
+				$content.="<child>".$temp;
+		}elseif(!is_array($index["child"])&&$index["child"])
+			$content.=$index["child"];
+		elseif($index) $content.=$index;
+	}
+	return $content;	
+}
+
 
 /**
 	* recursive function for  search on  depth of any array it's good for select one element in doms array
