@@ -16,9 +16,24 @@ class Common{
 		else $this->lastHttpRequest=[$url,$data,$headers,$responseHeader];
 
 		$this->html=$this->root->http($url,$data,$headers,$responseHeader);
+		$this->getMyId();
 	}
 	public function dom($search,$getAttribute=0,$grabText=0){
 		return dom($this->html,$search,$getAttribute,$grabText);
+	}
+	/**
+		* parse all the html content and get from any form that has an action this account id it's usually named a "av" in form action paramater
+		* @return int this account id or null if the html content hasn't id
+	**/
+	public function getMyId(){
+		$id=$this->root->info["id"];
+		if($this->html&&!$id){
+			preg_match_all("/<form.*action=.*av=.(\d)*?(?=&)/",$this->html,$id);
+			if(!isset($id[0][0]))return null;
+			$id=explode("=",$id[0][0]);
+			$id=intval(array_pop($id));
+		}
+		return $this->root->info["id"]=$id;
 	}
 	/**
 		*submit any form 

@@ -4,7 +4,10 @@ class Profile extends system{
 	public $pages;
 	public $groups;
 	public $messages;
-	public $cookie;
+	protected $cookie;
+	public $info=[
+		"id"=>null
+	];
 	function  __construct(){
 		$this->wall=new Wall($this);
 		$this->pages=new Pages($this);
@@ -17,6 +20,10 @@ class Profile extends system{
 	protected function parseMenu($html){
 
 	}
+	
+
+
+	
 }
 
 
