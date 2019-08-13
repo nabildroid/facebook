@@ -151,27 +151,28 @@ class Comment extends common{
 	//staic global funcitons
 	//grab all comments from the first page
 	static public function parseComments($reaction,$parent){
-		if(strpos($reaction[0],"<form")===0)
-			$form=array_shift($reaction);
-		else $form=array_pop($reaction);
-		$comments=dom(array_shift($reaction),"<div");
-		$comments=filter($comments,function($str){
-			return strpos($str,"View more comments…")===false&&
-						 strpos($str,"View previous comments…")===false&&
-						 strpos($str,"<span>View previous replies</span>")===false&&
-						 strpos($str,"<span>View more replies</span>")===false;
-		});
-		if($comments[1])
-			$next=dom($comments[1][0],"<a",1)[0][1]["href"];
+		if(isset($reaction[0])){
+			if(strpos($reaction[0],"<form")===0)
+				$form=array_shift($reaction);
+			else $form=array_pop($reaction);
+			$comments=dom(array_shift($reaction),"<div");
+			$comments=filter($comments,function($str){
+				return strpos($str,"View more comments…")===false&&
+							 strpos($str,"View previous comments…")===false&&
+							 strpos($str,"<span>View previous replies</span>")===false&&
+							 strpos($str,"<span>View more replies</span>")===false;
+			});
+			if($comments[1])
+				$next=dom($comments[1][0],"<a",1)[0][1]["href"];
 
-		$comments=$comments[0];
-		$comments=array_map(function ($cmt_html) use (&$parent){
-			return new Comment($cmt_html,$parent);
-		},$comments);
-
+			$comments=$comments[0];
+			$comments=array_map(function ($cmt_html) use (&$parent){
+				return new Comment($cmt_html,$parent);
+			},$comments);
+		}
 		return [
-			"items"=>$comments,
-			"form"=>$form,
+			"items"=>isset($comments)?$comments:[],
+			"form"=>isset($form)?$form:[],
 			"next"=>isset($next)?$next:""
 		];
 	}

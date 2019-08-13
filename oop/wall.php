@@ -42,7 +42,7 @@ class Wall extends common{
 				}else $csid=$csid[0][1]["value"];
 
 				$this->http("/composer/mbasic/?csid=".$csid."&errcode=0&cwevent=composer_entry&filter_type=0&priv_expand=see_all&view_privacy");
-				$html=$this->dom("<table")[1];
+				$html=$this->dom("<table")[0];
 				$html=doms($html,["<td","<tr"]);
 
 				foreach ($html as $tr) {
