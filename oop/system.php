@@ -1,5 +1,4 @@
 <?php
-require "./functions/http.php";
 class  System{
 	public function http($url,$data="",$headers=[],$responseHeader=0){
 		if(strpos($url,"http")!==0)
