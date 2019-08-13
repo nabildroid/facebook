@@ -28,7 +28,12 @@ function ping($url,$data="",$headers=[],$responseHeader=0){
 
 	if($responseHeader){
 		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-		$header = substr($response, 0, $header_size);
+		array_map(function($h)use(&$header){
+			$temp=explode(":",$h);
+			if(isset($temp[0])&&!empty(trim($temp[0])))
+			$header[$temp[0]]=isset($temp[1])?trim($temp[1]):"";
+		},explode("\n",substr($response, 0, $header_size)));
+
 		$response = substr($response, $header_size);
 		return ["body"=>html_entity_decode($response),"header"=>$header];
 	}else return html_entity_decode($response);
