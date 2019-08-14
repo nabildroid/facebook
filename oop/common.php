@@ -7,7 +7,7 @@ class Common{
 		//prepare the root variable
 		if(!$this->root){
 			$this->root=$this->parent;
-			while(!is_a($this->root,"Profile"))
+			while(!is_a($this->root,"Account"))
 				$this->root=$this->root->parent;
 		}
 		//check if previous request is equivalent to current one 
@@ -26,14 +26,14 @@ class Common{
 		* @return int this account id or null if the html content hasn't id
 	**/
 	public function getMyId(){
-		$id=$this->root->info["id"];
-		if($this->html&&!$id){
+		$id=$this->root->profile->info["id"];
+		if($this->html&&!intval($id)){
 			preg_match_all("/<form.*action=.*av=.(\d)*?(?=&)/",$this->html,$id);
 			if(!isset($id[0][0]))return null;
 			$id=explode("=",$id[0][0]);
 			$id=intval(array_pop($id));
 		}
-		return $this->root->info["id"]=$id;
+		return $this->root->profile->info["id"]=$id;
 	}
 	/**
 		*submit any form 
