@@ -28,11 +28,16 @@ class  Post extends common{
 		}
 		$this->info["id"]=$id;
 	}
-	//post information
-	public function data($prop){
-		if(empty($info->user))
-			$this->fetch_info();
-		return $this->info[$prop];
+	//get Full content
+	public function fullContent(){
+		if($this->info["content"]){
+			$content=$this->info["content"];
+			$flat=flatContent($content);
+			if(strpos($flat,"...More")==strlen($flat)-7){
+				$this->fetch_info();
+			} 
+			return $this->info["content"];
+		}
 	}
 	//get comments
 	public function comments($page=""){
