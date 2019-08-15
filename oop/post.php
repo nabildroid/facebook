@@ -7,6 +7,7 @@ class  Post extends common{
 		"id"=>null,//id of the post
 		"from"=>null,  //who publish it and where
 		"likes"=>[    //infomation about likes
+			"me"=>0, //does i likes this post or not
 			"length"=>0,
 			"users"=>[]
 		],
@@ -25,6 +26,7 @@ class  Post extends common{
 		if(!empty($info)){
 			$this->info["from"]=$info["from"];		
 			$this->info["likes"]["length"]=$info["likes_number"];		
+			$this->info["likes"]["me"]=$info["aready_liked"];		
 			$this->info["like_link"]=$info["like_link"];		
 			$this->info["content"]=$info["content"];		
 		}
@@ -35,7 +37,7 @@ class  Post extends common{
 		if($this->info["content"]){
 			$content=$this->info["content"];
 			$flat=flatContent($content);
-			if(strpos($flat,"...More")==strlen($flat)-7){
+			if(strpos($flat,"...More")!==false){
 				$this->fetch_info();
 			} 
 			return $this->info["content"];
@@ -65,11 +67,21 @@ class  Post extends common{
 	}
 	//like action
 	public function like(){
-		if($this->info["like_link"]){
+		if($this->info["like_link"]&&!$this->info["likes"]["me"]){
 			$this->http($this->info["like_link"]);
+			$this->info["likes"]["me"]=true;
 			return true;
 		}
 		else return false;
+	}
+	//deslike action
+	public function unlike(){
+		if($this->info["like_link"]&&$this->info["likes"]["me"]){
+			$this->http($this->info["like_link"]);
+			$this->http($this->dom("<a",1)[0][1]["href"]);
+			$this->info["likes"]["me"]=false;
+			return true;
+		}
 	}
 	//comment action
 	public function comment($txt){
@@ -124,6 +136,7 @@ class  Post extends common{
 		$this->info["from"]=Post::parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
 		$this->info["content"]=parseContent($data["content"]);
 		$this->info["likes"]["length"]=$data["likes_number"];
+		$this->info["likes"]["me"]=$data["aready_liked"];
 		$this->info["like_link"]=$data["like_link"];
 		if(isset($data["image"]))
 			$this->info["image"]=$data["image"];
@@ -160,6 +173,10 @@ class  Post extends common{
 		if(isset($like_link[0][0][1]["href"]))
 			$like_link=$like_link[0][0][1]["href"];
 		else $like_link="";
+		
+		$areadyliked=isset(filter($actions,function($action){
+			return strpos($action[0],"<b>Like</b>")!==false;
+		})[0][0]);
 
 		$likes=array_shift($actions);
 		if(strlen($likes[0])>4)
@@ -172,6 +189,7 @@ class  Post extends common{
 			"content"=>parseContent($text),
 			"likes_number"=>$likes,
 			"like_link"=>$like_link,
+			"aready_liked"=>$areadyliked
 		];
 
 	}
@@ -210,6 +228,10 @@ class  Post extends common{
 			return strpos($action[0],"Like")!=false;
 		})[0][0][1]["href"];
 
+		$areadyliked=isset(filter($actions,function($action){
+			return strpos($action[0],"presentation")!==false;
+		})[0][0]);
+
 		$likes=doms(array_shift($reaction),["<div","<div"]);
 		/*
 			some times the html of likes show the name of who like not one
@@ -225,6 +247,7 @@ class  Post extends common{
 			"content"=>$text,
 			"likes_number"=>$likes,
 			"like_link"=>$like_link,
+			"aready_liked"=>$areadyliked,
 			"comment_html"=>$reaction
 		];
 
@@ -251,6 +274,12 @@ class  Post extends common{
 		$like_link=filter($actions,function($action){
 			return strpos($action[0],"Like")!=false;
 		})[0][0][1]["href"];
+		/**
+			*@todo presentation criteria is not efficient way because it attribute and exist in picture (not tested in all situation)
+		**/
+		$areadyliked=isset(filter($actions,function($action){
+			return strpos($action[0],"presentation")!==false;
+		})[0][0]);
 
 		//get number of likes
 		$likes=doms(array_shift($reaction),["<div","<div"]);
@@ -268,6 +297,7 @@ class  Post extends common{
 			"content"=>$text,
 			"likes_number"=>$likes,
 			"like_link"=>$like_link,
+			"aready_liked"=>$areadyliked,
 			"comment_html"=>$reaction
 		];
 	}
