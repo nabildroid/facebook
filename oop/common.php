@@ -70,7 +70,7 @@ class Common{
 				}
 				// submit inputs
 				elseif (isset($input["type"])&&$input["type"]=="submit"&&isset($input["name"])){
-					if(!$target_submit||$target_submit&&$target_submit==$input["name"])
+					if(!$target_submit||$target_submit&&strtolower($target_submit)==strtolower($input["name"]))
 						$data[$input["name"]]=isset($input["value"])?$input["value"]:"";
 				}
 				/*

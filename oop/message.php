@@ -2,11 +2,11 @@
 class Message extends common{
 	public $parent=null;
 	public $info=[
-		"id"=>null,
 		"friend"=>null,  //for now it contain only the name of such friend
 		"msg_next_page"=>null,
 		"msgs"=>[],
-		"form"=>""
+		"form"=>"",
+		"firstConversation"=>0
 	];
 
 	function  __construct($info,$parent){
@@ -14,22 +14,31 @@ class Message extends common{
 		parent::__construct();
 
 		$this->info=mergeAssociativeArray($this->info,$info);
-		$this->info["msg_next_page"]=$this->info["id"];
+		$this->info["msg_next_page"]=$this->messageUrl();
 	}
-	public function fetch_info() {
-		if($this->info["form"])return;//for prevent multi fetch 
-
-		$this->http($this->info["id"]);
-		
-		$friend=$this->dom("<span")[0];
-		$form=findDom($this->dom("<form",1),"<textarea");
-		
-		$this->info["friend"]=$friend;
-		$this->info["form"]=$form;
-
+	public function messageUrl(){
+		return "/messages/read/?fbid=".$this->info["friend"];
+	}
+	public function fetch_info($force=0) {
+		if(!$force&&$this->info["form"])return;//for prevent multi fetch 
+		$this->http($this->messageUrl());
+		if($this->checkIfFirstConversation()){
+			$this->info["firstConversation"]=1;
+			$this->info["form"]=$this->dom("<form",1);
+		}else{
+			$this->info["firstConversation"]=0;
+			$form=findDom($this->dom("<form",1),"<textarea");	
+			$this->info["form"]=$form;
+		}
+	}
+	public function checkIfFirstConversation(){
+		$criteria=findDom($this->dom("<a"),"Add Recipients");
+		return $criteria==true;
 	}
 	public function chat($page=0){
 		$this->fetch_info();
+		if($this->info["firstConversation"])return [];
+
 		if(is_numeric($page)){
 			if(isset($this->info["msgs"][$page]))
 				return $this->info["msgs"][$page];
@@ -80,7 +89,17 @@ class Message extends common{
 			"images"=>[]
 		],$param);
 
-		$form=$this->info["form"];
+
+		if($this->info["firstConversation"]){
+			if($param["images"]&&$param["text"]){
+				$this->send(mergeAssociativeArray($param,["images"=>[]]));
+				$this->fetch_info(1);
+				$this->send(mergeAssociativeArray($param,["text"=>""]));
+			}elseif($param["images"])$form=$this->info["form"][1];
+			else $form=$this->info["form"][0];
+
+		}else		$form=$this->info["form"];
+
 		if(!$param["images"]){//send text
 			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"send");
 		}else{
@@ -90,7 +109,5 @@ class Message extends common{
 			$inputs=array_merge($param["images"],[$param["text"]]);
 			$this->submit_form($form[0],$form[1]["action"],$inputs);
 		}
-
-
 	}
 }
