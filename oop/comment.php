@@ -20,6 +20,8 @@ class Comment extends common{
 	];
 	function __construct($html,$parent){
 		$this->parent=$parent;
+		parent::__construct();
+		
 		$this->html=$html;
 		$this->parse();
 	}

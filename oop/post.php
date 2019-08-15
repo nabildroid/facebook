@@ -20,6 +20,8 @@ class  Post extends common{
 	];
 	function __construct($id,$parent,$info=[]){
 		$this->parent=$parent;
+		parent::__construct();
+		
 		if(!empty($info)){
 			$this->info["from"]=$info["from"];		
 			$this->info["likes"]["length"]=$info["likes_number"];		

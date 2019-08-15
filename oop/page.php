@@ -14,6 +14,8 @@ class Page extends common{
 	];
 	function  __construct($info=[],$parent,$admin=0){
 		$this->parent=$parent;
+		parent::__construct();
+		
 		$this->admin=$admin;
 		$this->info=mergeAssociativeArray($this->info,$info);
 		$this->info["posts_next_page"]=$this->info["id"];

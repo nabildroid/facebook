@@ -13,6 +13,8 @@ class Group extends common{
 
 	function  __construct($info,$parent,$member=0){
 		$this->parent=$parent;
+		parent::__construct();
+		
 		$this->member=$member;
 		$this->info=mergeAssociativeArray($this->info,$info);
 		$this->info["posts_next_page"]=$this->info["id"];

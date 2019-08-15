@@ -11,6 +11,8 @@ class Message extends common{
 
 	function  __construct($info,$parent){
 		$this->parent=$parent;
+		parent::__construct();
+
 		$this->info=mergeAssociativeArray($this->info,$info);
 		$this->info["msg_next_page"]=$this->info["id"];
 	}

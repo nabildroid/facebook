@@ -3,13 +3,15 @@ class Common{
 	public $root=null;
 	public $html="";
 	public $lastHttpRequest=null;
-	public function http($url="",$data="",$headers=[],$responseHeader=0){
+	public function __construct(){
 		//prepare the root variable
 		if(!$this->root){
 			$this->root=$this->parent;
 			while(!is_a($this->root,"Account"))
 				$this->root=$this->root->parent;
 		}
+	}
+	public function http($url="",$data="",$headers=[],$responseHeader=0){		
 		//check if previous request is equivalent to current one 
 		if($this->lastHttpRequest===[$url,$data,$headers,$responseHeader])
 			return $this->html;

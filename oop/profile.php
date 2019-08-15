@@ -7,8 +7,10 @@ class Profile extends common{
 		"posts_next_page"=>"profile.php",
 	];
 	function  __construct($parent,$id="profile.php"){
-		$this->info["id"]=$id;
 		$this->parent=$parent;
+		parent::__construct();
+		
+		$this->info["id"]=$id;
 	}
 	public function fetch(){
 		$this->http($this->info["id"]);

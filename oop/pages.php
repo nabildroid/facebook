@@ -3,6 +3,7 @@ class Pages extends common{
 	public $parent=null;
 	function __construct($parent){
 		$this->parent=$parent;
+		parent::__construct();
 	}
 	private  function fetch(){
 		$this->http("/pages");

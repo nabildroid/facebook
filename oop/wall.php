@@ -3,6 +3,7 @@ class Wall extends common{
 	public $parent=null;
 	function  __construct($parent){
 		$this->parent=$parent;
+		parent::__construct();
 	}
 	public function all(){
 		$this->http();
