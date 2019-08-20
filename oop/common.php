@@ -62,7 +62,7 @@ class Common{
 					$input["name"]=str_replace("[]", "",$input["name"]);
 
 					$value=isset($input["value"])?$input["value"]:"";
-					if(isset($data[$input["name"]])){
+					if(isset($data[$input["name"]])&&$value){
 						if(!is_array($data[$input["name"]]))
 							$data[$input["name"]]=[$data[$input["name"]],$value];
 						else array_push($data[$input["name"]],$value);
