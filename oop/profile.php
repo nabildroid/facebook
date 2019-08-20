@@ -4,6 +4,11 @@ class Profile extends common{
 	public $info=[
 		"id"=>null,
 		"posts"=>[],
+		"picture"=>[
+			"profile"=>"",
+			"cover"=>""
+		],
+		"bio"=>"",
 		"posts_next_page"=>"profile.php",
 	];
 	function  __construct($parent,$id="profile.php"){
@@ -14,6 +19,41 @@ class Profile extends common{
 	}
 	public function fetch(){
 		$this->http($this->info["id"]);
+		$html=doms($this->html,['id="root"',"<div","<div"])[0];
+		//get cover picture
+		$section=dom($html,"<div");
+		$cover=dom($section[0],"<a",1)[0];
+		preg_match_all("/fbid=.(\d)*/",$cover[1]["href"],$cover);
+		$cover=intval(substr($cover[0][0],5));
+		$this->info["picture"]["cover"]=new Post($cover,$this);
+		//get profile picture
+		$section1=dom($section[1],"<div");
+		$profile=dom($section1[0],"<a",1)[0];
+		preg_match_all("/fbid=.(\d)*/",$profile[1]["href"],$profile);
+		$profile=intval(substr($profile[0][0],5));
+		$this->info["picture"]["profile"]=new Post($profile,$this);
+		//get bio
+		$bio=dom($section1[1],"<div");
+		if(isset($bio[0]))
+			$this->info["bio"]=$bio[0];
+		else{
+			$this->info["bio"]=flatContent(parseContent($section1[1]));
+		}
+	}
+	public function setProfilePhoto($url){
+		$this->http("photos/upload/?profile_pic");
+		$form=$this->dom("<form",1)[0];
+		$this->submit_form($form[0],$form[1]["action"],[$url]);
+	}
+	public function setCoverPhoto($url){
+		$this->http("photos/upload/?cover_photo");
+		$form=$this->dom("<form",1)[0];
+		$this->submit_form($form[0],$form[1]["action"],[$url]);
+	}
+	public function  setBio($txt){
+		$this->http("profile/basic/intro/bio");
+		$form=$this->dom("<form",1)[0];
+		$this->submit_form($form[0],$form[1]["action"],[$txt]);
 	}
 
 	private function splitPosts(){
