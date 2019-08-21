@@ -11,7 +11,8 @@ class  System{
 			if(!isset($html[0]))return $http;
 			$menu=array_shift($html);
 			$content=array_shift($html);
-			$this->parseMenu($menu);
+			if(!instr($url,"notifications.php"))
+				$this->notification->parseMenu($menu);
 			return $content;
 		}else return $http;
 	}

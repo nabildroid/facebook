@@ -189,5 +189,8 @@ function mergeAssociativeArray($origin,$new){
 	return $origin;
 }
 
+function instr($str,$s){
+	return strpos($str,$s)!==false;
+}
 
  ?>

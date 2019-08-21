@@ -4,6 +4,7 @@ class Account extends system{
 	public $pages;
 	public $groups;
 	public $messages;
+	public $notification;
 	protected $cookie;
 	function  __construct(){
 		$this->profile=new Profile($this,[],1);
@@ -11,6 +12,7 @@ class Account extends system{
 		$this->pages=new Pages($this);
 		$this->groups=new Groups($this);
 		$this->messages=new Messages($this);
+		$this->notification=new Notification($this);
 	}
 	public function login($cookie){
 		$this->cookie=$cookie;
@@ -18,14 +20,6 @@ class Account extends system{
 		if(isset($id[0][0]))$id=substr($id[0][0],7);
 		$this->profile->info["id"]=$id;
 	}
-	
-	protected function parseMenu($html){
-
-	}
-	
-
-
-	
 }
 
 
