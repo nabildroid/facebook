@@ -4,8 +4,7 @@ class Profile extends common{
 	private $admin=0;
 	private $message=null;
 	public $info=[
-		"id"=>null,
-		"mine"=>0,
+		"id"=>"profile",
 		"picture"=>[
 			"profile"=>"",
 			"cover"=>""
@@ -15,12 +14,12 @@ class Profile extends common{
 		"posts"=>[],
 		"posts_next_page"=>"profile.php",
 	];
-	function  __construct($parent,$id="profile.php",$admin=0){
+	function  __construct($parent,$info,$admin=0){
 		$this->parent=$parent;
 		parent::__construct();
-		
-		$this->info["id"]=$id;
-		$this->mine=$admin;
+
+		if($info)$this->info=mergeAssociativeArray($this->info,$info);
+		$this->admin=$admin;
 	}
 	public function fetch(){
 		$this->http($this->info["id"]);
@@ -49,9 +48,25 @@ class Profile extends common{
 		//action buttons
 		$section2=dom($section[2],"<a",1);
 		$this->info["actions"]=$section2;
-		var_dump($section2);
 	}
-
+	public function pendingRequests(){
+		$this->http("friends/center/requests?seemore");
+		$users=filter($this->dom("<td"),function($td){return strpos($td,"<img")!==0;})[0];
+		$users=array_map(function($user){
+			$a=dom($user,"<a",1);
+			preg_match_all("/uid=.(\d)*/",$a[0][1]["href"],$id);
+			$id=intval(substr($id[0][0],4));
+			$confirm=findDom($a,"Confirm");
+			$confirm[0]="Confirm Friend";
+			$reject=findDom($a,"Delete Request");
+			$reject[0]="Delete Request";
+			return new Profile($this,[
+				"id"=>$id,
+				"actions"=>[$confirm,$reject]
+			]);
+		},$users);	
+		return $users;
+	}
 	public function sendFriendRequest(){
 		$this->permission(0);
 		$url=findDom($this->info["actions"],"Add Friend");
