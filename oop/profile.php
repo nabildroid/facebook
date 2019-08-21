@@ -26,10 +26,12 @@ class Profile extends common{
 		$html=doms($this->html,['id="root"',"<div","<div"])[0];
 		//get cover picture
 		$section=dom($html,"<div");
-		$cover=dom($section[0],"<a",1)[0];
-		preg_match_all("/fbid=.(\d)*/",$cover[1]["href"],$cover);
-		$cover=intval(substr($cover[0][0],5));
-		$this->info["picture"]["cover"]=new Post($cover,$this);
+		$cover=dom($section[0],"<a",1);
+		if(isset($cover[0])){
+			preg_match_all("/fbid=.(\d)*/",$cover[0][1]["href"],$cover);
+			$cover=intval(substr($cover[0][0],5));
+			$this->info["picture"]["cover"]=new Post($cover,$this);
+		}
 		//get profile picture
 		$section1=dom($section[1],"<div");
 		$profile=dom($section1[0],"<a",1)[0];
@@ -49,7 +51,40 @@ class Profile extends common{
 		$section2=dom($section[2],"<a",1);
 		$this->info["actions"]=$section2;
 	}
+	public function friends(){
+		$all=[];
+		$next=$this->info["id"]."?v=friends";
+		while ($next) {
+			$this->http($next);
+			$html=doms($this->html,["<div","<div","<div"])[1];
+			$users=dom($html,"<div");
+			if($this->admin){
+				$users=array_pop($users);
+				$users=dom($users,"<div");
+			}
+
+			$friends=array_map(function($friend){
+
+				$a=dom($friend,"<a",1)[0];
+				preg_match_all("/[a-z0-9.=]+/", $a[1]["href"],$id);
+				if($id[0][0]=="profile.php")
+					$id=intval(substr($id[0][1],3));
+				else $id=$id[0][0];
+				//@note: the id could be a string !!!!!
+				return new Profile($this,["id"=>$id]);
+			},$users);
+			$all=array_merge($all,$friends);
+
+			//get next page 
+			$next=findDom($this->dom("<a",1),"See More");
+			if(isset($next[1]["href"]))
+				$next=$next[1]["href"];
+			else $next="";
+		}
+		return $all;
+	}
 	public function pendingRequests(){
+		$this->permission(1);
 		$this->http("friends/center/requests?seemore");
 		$users=filter($this->dom("<td"),function($td){return strpos($td,"<img")!==0;})[0];
 		$users=array_map(function($user){
