@@ -7,14 +7,13 @@ class Pages extends common{
 	}
 	private  function fetch(){
 		$this->http("/pages");
-		$this->html=findDom($this->dom("<table"),"like");
-		$this->html=$this->dom("<div");
-		$sections=filter($this->html,function($div){
-			return strpos($div,"<h3")!==0;
-		});
-		$this->html=isset($sections[0])?$sections[0]:[];
-		if(!$this->html)
-			throw new Exception("there's no page could process", 1);
+		$this->html=findDom($this->dom("<table"),"Like");
+		$html=$this->dom("<div");
+		$html=filter($html,function($h){
+			if(strpos($h,"<table")!==false||strpos($h,"<a")===false)return true;
+			else return false;
+		})[0];
+		$this->html=$html;		
 	}
 	private function processInlinePagesHtml($pages){
 		$pages=filter($pages,function($page){
@@ -47,28 +46,48 @@ class Pages extends common{
 	*/
 	public function myPages(){
 		$this->fetch();
-		$pages=doms($this->html[0],["<div","<div"]);
-		$pages=$this->processInlinePagesHtml($pages);
-		return array_map(function ($page){
-			return new Page($page,$this,1);
-		},$pages);
+		if($this->html){
+			for ($i=0;$i<count($this->html)-1;$i++)
+				if(strpos($this->html[$i],"Pages You Work On")!==false){
+					$this->html=$this->html[$i+1];break;
+				}
+			if(is_array($this->html))return [];
+			$pages=doms($this->html,["<div","<div"]);
+			$pages=$this->processInlinePagesHtml($pages);
+			return array_map(function ($page){
+				return new Page($page,$this,1);
+			},$pages);
+		}else return [];
 	}
 	public function  invitedPages(){
 		$this->fetch();
-		$pages=doms($this->html[1],["<div","<div"]);
-		$pages=$this->processInlinePagesHtml($pages);
-		return array_map(function ($page){
-			return new Page($page,$this);
-		},$pages);
-		
+		if($this->html){
+			for ($i=0;$i<count($this->html)-1;$i++)
+				if(strpos($this->html[$i],"Page Invites")!==false){
+					$this->html=$this->html[$i+1];break;
+				}
+			if(is_array($this->html))return [];
+			$pages=doms($this->html,["<div","<div"]);
+			$pages=$this->processInlinePagesHtml($pages);
+			return array_map(function ($page){
+				return new Page($page,$this);
+			},$pages);
+		}else return [];
 	}
 	public function suggestionPages(){
 		$this->fetch();
-		$pages=doms($this->html[2],["<div","<div"]);
-		$pages=$this->processInlinePagesHtml($pages);
-		return array_map(function ($page){
-			return new Page($page,$this);
-		},$pages);
+		if($this->html){
+			for ($i=0;$i<count($this->html)-1;$i++)
+				if(strpos($this->html[$i],"Suggested Pages")!==false){
+					$this->html=$this->html[$i+1];break;
+				}
+			if(is_array($this->html))return [];
+			$pages=doms($this->html,["<div","<div"]);
+			$pages=$this->processInlinePagesHtml($pages);
+			return array_map(function ($page){
+				return new Page($page,$this);
+			},$pages);
+		}else return [];
 	}
 
 
