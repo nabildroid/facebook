@@ -1,21 +1,26 @@
 <?php 
 class Profile extends common{
 	public $parent=null;
+	private $admin=0;
+	private $message=null;
 	public $info=[
 		"id"=>null,
-		"posts"=>[],
+		"mine"=>0,
 		"picture"=>[
 			"profile"=>"",
 			"cover"=>""
 		],
 		"bio"=>"",
+		"actions"=>null,
+		"posts"=>[],
 		"posts_next_page"=>"profile.php",
 	];
-	function  __construct($parent,$id="profile.php"){
+	function  __construct($parent,$id="profile.php",$admin=0){
 		$this->parent=$parent;
 		parent::__construct();
 		
 		$this->info["id"]=$id;
+		$this->mine=$admin;
 	}
 	public function fetch(){
 		$this->http($this->info["id"]);
@@ -33,24 +38,63 @@ class Profile extends common{
 		$profile=intval(substr($profile[0][0],5));
 		$this->info["picture"]["profile"]=new Post($profile,$this);
 		//get bio
-		$bio=dom($section1[1],"<div");
-		if(isset($bio[0]))
-			$this->info["bio"]=$bio[0];
-		else{
-			$this->info["bio"]=flatContent(parseContent($section1[1]));
+		if(isset($section1[1])){
+			$bio=dom($section1[1],"<div");
+			if(isset($bio[0]))
+				$this->info["bio"]=$bio[0];
+			else{
+				$this->info["bio"]=flatContent(parseContent($section1[1]));
+			}
 		}
+		//action buttons
+		$section2=dom($section[2],"<a",1);
+		$this->info["actions"]=$section2;
+		var_dump($section2);
 	}
+
+	public function sendFriendRequest(){
+		$this->permission(0);
+		$url=findDom($this->info["actions"],"Add Friend");
+		if(isset($url[1]["href"])){
+			$this->http($url[1]["href"]);
+			return true;
+		}else return false;
+	}
+	public function friendAsk(){
+		$this->permission(0);
+		return isset(findDom($this->info["actions"],"Confirm Friend")[1]["href"]);
+	}
+	public function confirmFriendRequest(){
+		$this->permission(0);
+		if($this->friendAsk()){
+			$url=findDom($this->info["actions"],"Confirm Friend");	
+			$this->http($url[1]["href"]);
+			return true;
+		}else return false;
+	}
+	public function rejectFriendRequest(){
+		$this->permission(0);
+		if($this->friendAsk()){
+			$url=findDom($this->info["actions"],"Delete Request");	
+			$this->http($url[1]["href"]);
+			return true;
+		}else return false;
+	}
+
 	public function setProfilePhoto($url){
+		$this->permission(1);
 		$this->http("photos/upload/?profile_pic");
 		$form=$this->dom("<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$url]);
 	}
 	public function setCoverPhoto($url){
+		$this->permission(1);
 		$this->http("photos/upload/?cover_photo");
 		$form=$this->dom("<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$url]);
 	}
 	public function  setBio($txt){
+		$this->permission(1);
 		$this->http("profile/basic/intro/bio");
 		$form=$this->dom("<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$txt]);
@@ -94,6 +138,20 @@ class Profile extends common{
 			return $this->info["posts"];
 		}
 	}
+	public function Message(){
+		$this->permission(0);
+		if($this->message)
+			return $this->message;
+		else {
+			$this->message=new Message(["friend"=>$this->info["id"]],$this);
+			return $this->message;
+		}
+	}
+	private function permission($access){
+		if($this->admin!==$access)
+			throw new Exception("you haven't permission", 1);
+	}
+
 }
 
 

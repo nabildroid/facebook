@@ -7,7 +7,7 @@ class Common{
 		//prepare the root variable
 		if(!$this->root){
 			$this->root=$this->parent;
-			while(!is_a($this->root,"Account"))
+			while(!is_a($this->root,"Account")&&isset($this->root->parent))
 				$this->root=$this->root->parent;
 		}
 	}

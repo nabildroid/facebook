@@ -6,7 +6,7 @@ class Account extends system{
 	public $messages;
 	protected $cookie;
 	function  __construct(){
-		$this->profile=new Profile($this);
+		$this->profile=new Profile($this,"",1);
 		$this->wall=new Wall($this);
 		$this->pages=new Pages($this);
 		$this->groups=new Groups($this);
