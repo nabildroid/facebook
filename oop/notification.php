@@ -14,13 +14,12 @@ class Notification extends common{
 		$a=dom($html,"<a",1);
 		$message=findDom($a,"Message");
 		$notification=findDom($a,"Notification");
-
 		//message
-		if(strpos($message[0],"(")!==false){
+		if(isset($message[0])&&strpos($message[0],"(")!==false){
 			if(is_callable($this->triggers["message"]))
 				$this->triggers["message"]($message);
 		}
-		if(strpos($notification[0],"<")!==false){
+		if(isset($notification[0])&&strpos($notification[0],"<")!==false){
 			if(is_callable($this->triggers["notification"]))
 				$this->triggers["notification"]($this->parseNotification());
 		}

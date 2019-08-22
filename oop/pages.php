@@ -8,6 +8,7 @@ class Pages extends common{
 	private  function fetch(){
 		$this->http("/pages");
 		$this->html=findDom($this->dom("<table"),"Like");
+		if(!$this->html)return [];
 		$html=$this->dom("<div");
 		$html=filter($html,function($h){
 			if(strpos($h,"<table")!==false||strpos($h,"<a")===false)return true;

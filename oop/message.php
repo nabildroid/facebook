@@ -2,7 +2,7 @@
 class Message extends common{
 	public $parent=null;
 	public $info=[
-		"friend"=>null,  //for now it contain only the name of such friend
+		"friend"=>null, 
 		"msg_next_page"=>null,
 		"msgs"=>[],
 		"form"=>"",

@@ -3,6 +3,7 @@
 class  Post extends common{
 	public $parent=null;
 	public $commonHtml="";
+	public $admin=0;//if this post is mine or not
 	public $info=[
 		"id"=>null,//id of the post
 		"from"=>null,  //who publish it and where
