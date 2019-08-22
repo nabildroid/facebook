@@ -20,7 +20,7 @@ class Notification extends common{
 			if(is_callable($this->triggers["message"]))
 				$this->triggers["message"]($message);
 		}
-		if(1||strpos($notification[0],"<")!==false){
+		if(strpos($notification[0],"<")!==false){
 			if(is_callable($this->triggers["notification"]))
 				$this->triggers["notification"]($this->parseNotification());
 		}
@@ -41,45 +41,56 @@ class Notification extends common{
 
 		$this->http("notifications.php");
 		$noti=array();
-		$html=$this->dom("<tr");
-		foreach ($html as $a) {
+		$html=doms($this->html,['id="notifications_list"',"<div","<div"]);
+		$list=[];
+		foreach ($html as $div)
+			$list=array_merge($list,dom($div,"<div",1));
+		$list=filter($list,function($l){
+			return instr($l[1]["class"],"bw")&&instr($l[1]["class"],"bx");
+		})[0];
+		foreach ($list as $a) {
+			$a=dom($a[0],"<tr")[0];
 			$a=dom($a,"<a",1)[0];
 			$url=urldecode($a[1]["href"]);
 			$url=substr($url,strpos($url,"redir=")+6);
-			$type=null;
-			//check add post or photo
-			if(instr($a[0],"added a photo")||
-				 instr($a[0],"posted"))
-			$type=1;
-			//post reaction
-			if(instr($a[0],"reacted to your post")||
-				 instr($a[0],"like your post")||
-				 instr($a[0],"reacted to your photo")||
-				 instr($a[0],"like your photo")||
-				 instr($a[0],"reacted to a post you shared")||
-				 instr($a[0],"like to a post you shared")||
-			   instr($a[0],"reacted a photo you shared")||
-				 instr($a[0],"like a photo you shared"))
-			$type=2;
-			//add comment
-			if(instr($a[0],"commented on your")||
-				 instr($a[0],"replied to your comment"))
-			$type=3;
-			//comment reaction
-			if(instr($a[0],"reacted to your comment")||
-				 instr($a[0],"like your comment"))
-			$type=4;
-			//approved post
-			if(instr($a[0],"approved your post")||
-				 instr($a[0],"approved your photo"))
-			$type=4;
-			//aproved join request
-			if(instr($a[0],"has been approved"))
-			$type=6;
+
+			$type=$this->detectNotificationType($a[0]);
 			if($type)
 				array_push($noti,["type"=>$type,"url"=>$url,"snippet"=>$a[0]]);
 		}
 		return $noti;
+	}
+
+	public function detectNotificationType($title){
+		//check add post or photo
+		if(instr($title,"added a photo")||
+			 instr($title,"posted"))
+		return 1;
+		//post reaction
+		if(instr($title,"reacted to your post")||
+			 instr($title,"like")&&instr($title,"your post")||
+			 instr($title,"reacted to your photo")||
+			 instr($title,"like")&&instr($title,"your photo")||
+			 instr($title,"reacted to a post you shared")||
+			 instr($title,"like to a post you shared")||
+		   instr($title,"reacted a photo you shared")||
+			 instr($title,"like a photo you shared"))
+		return 2;
+		//add comment
+		if(instr($title,"commented on your")||
+			 instr($title,"replied to your comment"))
+		return 3;
+		//comment reaction
+		if(instr($title,"reacted to your comment")||
+			 instr($title,"like")&&instr($title,"your comment"))
+		return 4;
+		//approved post
+		if(instr($title,"approved your post")||
+			 instr($title,"approved your photo"))
+		return 4;
+		//aproved join request
+		if(instr($title,"has been approved"))
+		return 6;
 	}
 }
 
