@@ -32,6 +32,16 @@ class  Post extends common{
 		}
 		$this->info["id"]=$id;
 	}
+	public function checkIsMine(){
+		if(isset($this->info["from"]["user"])&&$this->info["from"]["user"]){
+			if($this->info["from"]["user"]==$this->root->profile->info["id"])
+				return $this->admin=true;
+		}else{
+			$this->fetch_info();
+			return $this->checkIsMine();
+		}
+		return $this->admin=false;
+	}
 	//get Full content
 	public function fullContent(){
 		if($this->info["content"]){
