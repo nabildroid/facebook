@@ -1,6 +1,6 @@
 <?php 
 class Comment extends common{
-	public $parent=null;
+	protected $parent=null;
 	public $html="";
 	public $info=[
 		"user"=>"",
@@ -19,6 +19,7 @@ class Comment extends common{
 		"next"=>"",
 		"form"=>""
 	];
+	private $fetched=0;
 	function __construct($id,$html="",$parent){
 		$this->parent=$parent;
 		parent::__construct();
@@ -26,7 +27,13 @@ class Comment extends common{
 		$this->info["id"]=$id;
 		$this->html=$html;
 		$this->parse();
-		$this->fetch_info();
+	}
+	public function __get($name){
+		//when needed access to parent must first fetch_info
+		if($name=="parent"){
+			$this->fetch_info();
+			return $this->parent;
+		}
 	}
 	/**
 		* some times facebook return page that contain all comments
@@ -51,7 +58,8 @@ class Comment extends common{
 		return ["comments"=>$data,"origin_post"=>$origin_post];
 	}
 	public function fetch_info(){
-		if($this->html)return;
+		if($this->html||$this->fetched)return;
+		var_dump("bad");
 		$this->http($this->info["id"]);
 		$type=Post::detectType($this->html);
 		$comments=[];
@@ -78,6 +86,7 @@ class Comment extends common{
 		//case of this is reply comment so it has form to reply
 		if(isset($form)&&$form)
 			$this->subcomments_info["form"]=$form;
+		$this->fetched=1;
 	}
 	public function parse(){
 		if(!$this->html)return;
@@ -141,6 +150,7 @@ class Comment extends common{
 		$this->info["like_link"]=$like_link;
 		$this->info["reply_length"]=$reply_number;
 		$this->subcomments_info["next"]=$reply_link;
+		$this->fetched=1;
 	}
 
 	public function makeContentFromHtmlContent($html){
@@ -154,24 +164,28 @@ class Comment extends common{
 
 	//action
 	public function like(){
+		$this->fetch_info();
 		if($this->info["like_link"]){
 			$this->http($this->info["like_link"]);
 			return true;
 		}else return false;
 	}
 	public function reply($txt){
+		$this->fetch_info();
 		if(!$this->subcomments_info["form"])
 			$this->subcomments(0);
 		$form=dom($this->subcomments_info["form"],"<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$txt]);
 	}
 	public function users_likes(){
+		$this->fetch_info();
 		if(!$this->info["likes"]["users"]&&$this->info["likes"]["all"]){
 			$this->info["likes"]["users"]=Post::fetch_users_likes($this->info["likes"]["all"],$this);
 		}
 		return $this->info["likes"]["users"];
 	}
 	public function subcomments($page){
+		$this->fetch_info();
 		if(is_numeric($page)){
 			if(isset($this->subcomments_info["items"][$page]))
 				return $this->subcomments_info["items"][$page];
