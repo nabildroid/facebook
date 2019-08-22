@@ -124,8 +124,14 @@ class  Post extends common{
 				$links=filter($users,function($link){return strpos($link[0],"<span")===false;});
 				$users=$links[0];
 				$next=$links[1];
+				$users=array_map(function($user)use(&$parent){
+					preg_match_all("/(id=\d+)|\/[\w\d.]+/",$user[1]["href"],$id);
+					if(isset($id[0][1])&&instr($id[0][1],"id=1"))
+						$id=intval(substr($id[0][1],3));
+					else $id=substr($id[0][0],1);
 
-				$users=array_map(function($user){return $user[1]["href"];},$users);
+					return new Profile($parent,["id"=>$id]);
+				},$users);
 				$all_users=array_merge($all_users,$users);
 
 			}while(isset($next[0][1]["href"]));

@@ -34,10 +34,12 @@ class Profile extends common{
 		}
 		//get profile picture
 		$section1=dom($section[1],"<div");
-		$profile=dom($section1[0],"<a",1)[0];
-		preg_match_all("/fbid=.(\d)*/",$profile[1]["href"],$profile);
-		$profile=intval(substr($profile[0][0],5));
-		$this->info["picture"]["profile"]=new Post($profile,$this);
+		$profile=dom($section1[0],"<a",1);
+		if(isset($profile[0])){
+			preg_match_all("/fbid=.(\d)*/",$profile[0][1]["href"],$profile);
+			$profile=intval(substr($profile[0][0],5));
+			$this->info["picture"]["profile"]=new Post($profile,$this);
+		}
 		//get bio
 		if(isset($section1[1])){
 			$bio=dom($section1[1],"<div");
@@ -50,6 +52,16 @@ class Profile extends common{
 		//action buttons
 		$section2=dom($section[2],"<a",1);
 		$this->info["actions"]=$section2;
+
+		//get user id(integer) from actions in more button
+		if(!$this->admin){
+			$id=findDom($section2,"owner_id");
+			if(isset($id[1]["href"])){
+				preg_match_all("/owner_id=\d+/",$id[1]["href"],$id);
+				$id=intval(substr($id[0][0],9));
+				$this->info["id"]=$id;
+			}
+		}
 	}
 	public function friends(){
 		$all=[];
