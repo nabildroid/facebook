@@ -20,6 +20,16 @@ class Common{
 		$this->html=$this->root->http($url,$data,$headers,$responseHeader);
 		$this->getMyId();
 	}
+	/**
+		* to prevent uncessary request that it's response aready exist
+		* @param $response the response that request suppose to return 
+		* @param $url,$data,$headers,responseHeader are responsable of such response
+		* @return null
+	**/
+	public function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0){
+		$this->html=$response;
+		$this->lastHttpRequest=[$url,$data,$headers,$responseHeader];		
+	}
 	public function dom($search,$getAttribute=0,$grabText=0){
 		return dom($this->html,$search,$getAttribute,$grabText);
 	}

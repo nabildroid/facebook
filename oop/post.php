@@ -54,7 +54,7 @@ class  Post extends common{
 		}
 	}
 	//get comments
-	public function comments($page=""){
+	public function comments($page=0){
 		if(!$this->comments_info["next"])$this->fetch_info();
 		if(is_numeric($page)){
 			if(isset($this->comments_info["items"][$page]))
@@ -62,10 +62,10 @@ class  Post extends common{
 			else{
 				for ($i=0; $i <=$page; $i++) { 
 					$this->http($this->comments_info["next"]);
-					if($this->detectType($this->html))
-						$data=$this->spliceImageHtml($this->html);
+					if(self::detectType($this->html))
+						$data=self::spliceImageHtml($this->html);
 					else
-						$data=$this->splicePostHtml($this->html);
+						$data=self::splicePostHtml($this->html);
 					$this->parseComments($data["comment_html"]);
 				}
 				return $this->comments_info["items"][count($this->comments_info["items"])-1];
@@ -137,21 +137,24 @@ class  Post extends common{
 	}
 	//get informaion about this post only by it id
 	public function fetch_info(){
-		$this->http("/".$this->info["id"]);
-		if($this->detectType($this->html))
-			$data=$this->spliceImageHtml($this->html);
+		$this->http($this->info["id"]);
+		if(self::detectType($this->html))
+			$data=self::spliceImageHtml($this->html);
 		else
-			$data=$this->splicePostHtml($this->html);
-
-		$this->info["from"]=Post::parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
+			$data=self::splicePostHtml($this->html);
+		$this->info["from"]=self::parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
 		$this->info["content"]=parseContent($data["content"]);
 		$this->info["likes"]["length"]=$data["likes_number"];
 		$this->info["likes"]["me"]=$data["aready_liked"];
 		$this->info["like_link"]=$data["like_link"];
+
+		if(isset($this->info["from"]["id"]))
+			$this->info["id"]=$this->info["from"]["id"];
 		if(isset($data["image"]))
 			$this->info["image"]=$data["image"];
 
 		$this->parseComments($data["comment_html"]);
+
 
 	}
 
@@ -194,7 +197,7 @@ class  Post extends common{
 		else $likes=0;
 
 		return [
-			"from"=>Post::parseFrom($from,$data),
+			"from"=>self::parseFrom($from,$data),
 			"data"=>$data,
 			"content"=>parseContent($text),
 			"likes_number"=>$likes,
@@ -204,15 +207,16 @@ class  Post extends common{
 
 	}
 	//get the type of such post if it's normal post or image post
-	public function detectType($html){
+	public static function detectType($html){
 		//0 post|0 group_post|0  page_post|1 image|
 		if(count(dom($html,'id="m_story_permalink_view"')))
 			return 0;
 		else if(count(dom($html,'id="MPhotoContent"')))
 			return 1;
+		else return false;
 	}
 	//grab information about image post 
-	public function spliceImageHtml($html){
+	public static function spliceImageHtml($html){
 		$actions=dom(dom($html,'id="MPhotoActionbar"')[0],"<a",1);
 		$html=doms($html,['id="MPhotoContent"',"<div"]);
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) and full-image
@@ -265,7 +269,7 @@ class  Post extends common{
 
 	}
 	//grab informaion about normal post
-	public function splicePostHtml($html){
+	public static function splicePostHtml($html){
 		$html=dom($html,'id="m_story_permalink_view"')[0];
 		$html=dom($html,"<div");
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) 

@@ -4,6 +4,7 @@ class Comment extends common{
 	public $html="";
 	public $info=[
 		"user"=>"",
+		"id"=>null,
 		"content"=>"",
 		"likes"=>[
 			"length"=>0,
@@ -18,14 +19,68 @@ class Comment extends common{
 		"next"=>"",
 		"form"=>""
 	];
-	function __construct($html,$parent){
+	function __construct($id,$html="",$parent){
 		$this->parent=$parent;
 		parent::__construct();
 		
+		$this->info["id"]=$id;
 		$this->html=$html;
 		$this->parse();
+		$this->fetch_info();
+	}
+	/**
+		* some times facebook return page that contain all comments
+		* but not the main post like when you click to reply 
+		* @param html content of comment page
+		* @return array [comments=>["form","comments"],origin_post=>"origin_post"]
+	**/
+	private function splitComments($html){
+		$data=doms($html,['<div','<div','<div']);
+		$origin_post="";
+		if(strpos($data[0],"<a")===0){
+			$origin_post=dom($data[0],"<a",1)[0];
+			$origin_post=$origin_post[1]["href"];
+		}
+		//get only replys and form for submit new reply
+		//delete before last div if it's not replys because the formal div number is 4 divs 
+		if(count($data)<4)
+			$data[count($data)-2]="";
+
+
+		$data=[$data[count($data)-2],$data[count($data)-1]];
+		return ["comments"=>$data,"origin_post"=>$origin_post];
+	}
+	public function fetch_info(){
+		if($this->html)return;
+		$this->http($this->info["id"]);
+		$type=Post::detectType($this->html);
+		$comments=[];
+		if($type!==false){
+			$post=new Post($this->info["id"],$this->root);
+			$post->fixHttpResponse($this->html,$this->info["id"]);
+			$post->fetch_info();
+			$comments=$post->comments();
+		}		
+		else{
+			$info=$this->splitComments($this->html);
+			preg_match_all("/story_fbid=\d+/",$info["origin_post"],$postId);
+			$postId=intval(substr($postId[0][0],11));
+			$post=new Post($postId,$this->root);
+			$data=self::parseComments($info["comments"],$post);
+			$form=$data["form"];
+			$comments=$data["items"];
+		} 
+
+		foreach ($comments as $comment)
+			if($comment->info["id"]==$this->info["id"]){
+				$this->copyFrom($comment);break;
+			}
+		//case of this is reply comment so it has form to reply
+		if(isset($form)&&$form)
+			$this->subcomments_info["form"]=$form;
 	}
 	public function parse(){
+		if(!$this->html)return;
 		$this->html=dom($this->html,"<div")[0];
 		$user=dom(dom($this->html,"<h3")[0],"<a",1)[0][1]["href"];
 		
@@ -125,14 +180,8 @@ class Comment extends common{
 					if(!$this->subcomments_info["next"])continue;
 					
 					$this->http($this->subcomments_info["next"]);
-					$data=doms($this->html,['id="objects_container"','<div','<div','<div']);
-					//get only replys and form for submit new reply
-
-					//delete before last div if it's not replys because the formal div number is 4 divs 
-					if(count($data)<4)
-						$data[count($data)-2]="";
-					$data=[$data[count($data)-2],$data[count($data)-1]];
-
+	
+					$data=$this->splitComments($this->html)["comments"];
 					$data=$this->parseComments($data,$this);
 					$this->subcomments_info["next"]=$data["next"];
 
@@ -157,19 +206,20 @@ class Comment extends common{
 			if(strpos($reaction[0],"<form")===0)
 				$form=array_shift($reaction);
 			else $form=array_pop($reaction);
-			$comments=dom(array_shift($reaction),"<div");
+			$comments=dom(array_shift($reaction),"<div",1);
 			$comments=filter($comments,function($str){
-				return strpos($str,"View more comments…")===false&&
-							 strpos($str,"View previous comments…")===false&&
-							 strpos($str,"<span>View previous replies</span>")===false&&
-							 strpos($str,"<span>View more replies</span>")===false;
+				return strpos($str[0],"View more comments…")===false&&
+							 strpos($str[0],"View previous comments…")===false&&
+							 strpos($str[0],"<span>View previous replies</span>")===false&&
+							 strpos($str[0],"<span>View more replies</span>")===false;
 			});
 			if($comments[1])
-				$next=dom($comments[1][0],"<a",1)[0][1]["href"];
+				$next=dom($comments[1][0][0],"<a",1)[0][1]["href"];
 
 			$comments=$comments[0];
 			$comments=array_map(function ($cmt_html) use (&$parent){
-				return new Comment($cmt_html,$parent);
+				$id=intval($cmt_html[1]["id"]);
+				return new Comment($id,$cmt_html[0],$parent);
 			},$comments);
 		}
 		return [
@@ -177,6 +227,15 @@ class Comment extends common{
 			"form"=>isset($form)?$form:[],
 			"next"=>isset($next)?$next:""
 		];
+	}
+	/**
+		*make this comment identical to @param $comment
+	**/
+	public function copyFrom(Comment $comment){
+		$this->info=$comment->info;
+		$this->subcomments_info=$comment->subcomments_info;
+		$this->html=$comment->html;
+		$this->parent=$comment->parent;
 	}
 
 }
