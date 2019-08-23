@@ -5,15 +5,16 @@ class Wall extends common{
 		$this->parent=$parent;
 		parent::__construct();
 	}
+	/**
+		* get all suggestion posts that facebook provide in main page 
+		* each time fb main page will show new set of posts so it's
+		* not necessary to make pagination in such function
+		* @return array of posts
+	*/
 	public function all(){
 		$this->http();
-		$html=$this->dom('<div id="m_newsfeed_stream"')[0];
-		//get next page
-		$nextPage=dom($html,'<a',1);
-		$nextPage=array_pop($nextPage)[1]["href"];
 		//get posts
-		$posts= array_filter(dom($html,"<div"));
-		$posts=dom(array_pop($posts),"<div",1);
+		$posts=$this->dom('role="article"',1);
 		//create posts objects
 		$tempPosts=[];
 		foreach ($posts as $post){
@@ -65,6 +66,7 @@ class Wall extends common{
 	}
 	/**
 	 * @param $param, is array(key/pair) it takes text(string),images(array),privacy(string),tags(array) and all are options
+	 * @return Post
 	*/
 	public function publish($param){
 		//prepare paramater
@@ -108,6 +110,9 @@ class Wall extends common{
 			//publish post
 			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_post",$forceInput);
 		}
+		//get such new post
+		$this->fixHttpResponse($this->html,"");
+		return $this->all()[0];
 	}
 }
 
