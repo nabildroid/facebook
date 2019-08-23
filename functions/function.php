@@ -1,18 +1,16 @@
 <?php 
 
 function jsondecode($txt){
-	$txt=html_entity_decode($txt);
 	$txt=stripslashes(trim($txt));
 	$txt= json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $txt), true );
 	return $txt;
 }
-function findInnerText($txt,$array){
-	foreach ($array as $arr) {
-		if($arr[0]==$txt)
-			return $arr; 
-	}
-}
-
+/**
+	* costumised filter function or only true values filter in default (without @param $callback)
+	* @param $arr the array that will filtered
+	* @param $callback is the indicator if element is accepted or nor
+	* @return array(array of accepted , array of the rest)
+**/
 function filter($arr,$callback=false){
 	$new=[];
 	$not=[];

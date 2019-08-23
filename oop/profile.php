@@ -63,6 +63,53 @@ class Profile extends common{
 			}
 		}
 	}
+	public function posts($page=0){
+		if(is_numeric($page)){
+			if(isset($this->info["posts"][$page]))
+				return $this->info["posts"][$page];
+			else{
+				for ($i=count($this->info["posts"]);$i <=$page; $i++) {
+					if(!$this->info["posts_next_page"])break;
+					$this->http($this->info["posts_next_page"]);
+					$content=$this->splitPosts();
+
+					$tempPosts=[];
+					foreach ($content["posts"] as $post){
+						$info=Post::GetInfoFromListedPost($post);
+						if($info)
+							$tempPosts[]=new Post($info["from"]["id"],$this,$info);
+					}
+					$this->info["posts"]=array_merge($this->info["posts"],[$tempPosts]);
+
+					if(isset($content["next"][1]["href"]))
+						$this->info["posts_next_page"]=$content["next"][1]["href"];
+
+				}
+				if(isset($this->info["posts"][count($this->info["posts"])-1]))
+					return $this->info["posts"][count($this->info["posts"])-1];
+				else return [];
+			}
+		}else {
+			return $this->info["posts"];
+		}
+	}
+	private function splitPosts(){
+		$content=$this->dom('id="structured_composer_async_container"');
+		if(isset($content[0])){
+			$posts=dom($content[0],["data-ft",'role="article"'],1);
+			$next=findDom(dom($content[0],"<a",1),"See More Stories");
+			return ["posts"=>$posts,"next"=>$next];
+		}else return ["posts"=>[],"next"=>""];
+	}
+
+	/**
+		* check if this profile sent friendResuest to such account
+		* @return boolean
+	*/
+	private function friendAsk(){
+		$this->permission(0);
+		return isset(findDom($this->info["actions"],"Confirm Friend")[1]["href"]);
+	}
 	public function friends(){
 		$all=[];
 		$next=$this->id()."?v=friends";
@@ -114,6 +161,7 @@ class Profile extends common{
 		},$users);	
 		return $users;
 	}
+
 	public function sendFriendRequest(){
 		$this->permission(0);
 		$url=findDom($this->info["actions"],"Add Friend");
@@ -121,10 +169,6 @@ class Profile extends common{
 			$this->http($url[1]["href"]);
 			return true;
 		}else return false;
-	}
-	public function friendAsk(){
-		$this->permission(0);
-		return isset(findDom($this->info["actions"],"Confirm Friend")[1]["href"]);
 	}
 	public function confirmFriendRequest(){
 		$this->permission(0);
@@ -162,45 +206,10 @@ class Profile extends common{
 		$this->submit_form($form[0],$form[1]["action"],[$txt]);
 	}
 
-	private function splitPosts(){
-		$content=$this->dom('id="structured_composer_async_container"');
-		if(isset($content[0])){
-			$posts=dom($content[0],["data-ft",'role="article"'],1);
-			$next=findDom(dom($content[0],"<a",1),"See More Stories");
-			return ["posts"=>$posts,"next"=>$next];
-		}else return ["posts"=>[],"next"=>""];
-	}
-	public function posts($page=0){
-		if(is_numeric($page)){
-			if(isset($this->info["posts"][$page]))
-				return $this->info["posts"][$page];
-			else{
-				for ($i=count($this->info["posts"]);$i <=$page; $i++) {
-					if(!$this->info["posts_next_page"])break;
-					$this->http($this->info["posts_next_page"]);
-					$content=$this->splitPosts();
-
-					$tempPosts=[];
-					foreach ($content["posts"] as $post){
-						$info=Post::GetInfoFromListedPost($post);
-						if($info)
-							$tempPosts[]=new Post($info["from"]["id"],$this,$info);
-					}
-					$this->info["posts"]=array_merge($this->info["posts"],[$tempPosts]);
-
-					if(isset($content["next"][1]["href"]))
-						$this->info["posts_next_page"]=$content["next"][1]["href"];
-
-				}
-				if(isset($this->info["posts"][count($this->info["posts"])-1]))
-					return $this->info["posts"][count($this->info["posts"])-1];
-				else return [];
-			}
-		}else {
-			return $this->info["posts"];
-		}
-	}
-	public function Message(){
+	/**
+		* @return new Message object associate between this profile and account profile
+	*/
+	public function message(){
 		$this->permission(0);
 		if($this->message)
 			return $this->message;
@@ -209,6 +218,7 @@ class Profile extends common{
 			return $this->message;
 		}
 	}
+	
 	private function permission($access){
 		if($this->admin!==$access)
 			throw new Exception("you haven't permission", 1);

@@ -42,9 +42,6 @@ class Pages extends common{
 		},$pages);
 		return $pages;
 	}
-	/**
-	* TODO  add dynamic way to split between section like findDom, usually my page hasn't like button ,suggestion pages has like button and number of likes ,invited pages hasn't number of likes and instend of that has name of who invite me
-	*/
 	public function myPages(){
 		$this->fetch();
 		if($this->html){

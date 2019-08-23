@@ -1,5 +1,5 @@
 <?php 
-class Common{
+abstract class Common{
 	public $root=null;
 	public $html="";
 	public $lastHttpRequest=null;
@@ -11,7 +11,7 @@ class Common{
 				$this->root=$this->root->parent;
 		}
 	}
-	public function http($url="",$data="",$headers=[],$responseHeader=0){		
+	protected function http($url="",$data="",$headers=[],$responseHeader=0){		
 		//check if previous request is equivalent to current one 
 		if($this->lastHttpRequest===[$url,$data,$headers,$responseHeader])
 			return $this->html;
@@ -26,18 +26,18 @@ class Common{
 		* @param $url,$data,$headers,responseHeader are responsable of such response
 		* @return null
 	**/
-	public function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0){
+	protected function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0){
 		$this->html=$response;
 		$this->lastHttpRequest=[$url,$data,$headers,$responseHeader];		
 	}
-	public function dom($search,$getAttribute=0,$grabText=0){
+	protected function dom($search,$getAttribute=0,$grabText=0){
 		return dom($this->html,$search,$getAttribute,$grabText);
 	}
 	/**
 		* parse all the html content and get from any form that has an action this account id it's usually named a "av" in form action paramater
 		* @return int this account id or null if the html content hasn't id
 	**/
-	public function getMyId(){
+	protected function getMyId(){
 		$id=$this->root->profile->id();
 		if($this->html&&!intval($id)){
 			preg_match_all("/<form.*action=.*av=.(\d)*?(?=&)/",$this->html,$id);
@@ -55,7 +55,7 @@ class Common{
 		* @param $target_submit if one submit must trigger in this form
 		* @param forceInput is key/value pair for forcing any input to take static value
 	*/
-	public function submit_form($html,$url,$values=[],$target_submit="",$forceInput=""){
+	protected function submit_form($html,$url,$values=[],$target_submit="",$forceInput=""){
 		$inputs=dom($html,["<input","<textarea"],1);
 		$files=[];
 		$data=[];

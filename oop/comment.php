@@ -29,35 +29,16 @@ class Comment extends common{
 		$this->parse();
 	}
 	public function __get($name){
-		//when needed access to parent must first fetch_info
+		//when needed access to parent must first fetch
 		if($name=="parent"){
-			$this->fetch_info();
+			$this->fetch();
 			return $this->parent;
 		}
 	}
 	/**
-		* some times facebook return page that contain all comments
-		* but not the main post like when you click to reply 
-		* @param html content of comment page
-		* @return array [comments=>["form","comments"],origin_post=>"origin_post"]
-	**/
-	private function splitComments($html){
-		$data=doms($html,['<div','<div','<div']);
-		$origin_post="";
-		if(strpos($data[0],"<a")===0){
-			$origin_post=dom($data[0],"<a",1)[0];
-			$origin_post=$origin_post[1]["href"];
-		}
-		//get only replys and form for submit new reply
-		//delete before last div if it's not replys because the formal div number is 4 divs 
-		if(count($data)<4)
-			$data[count($data)-2]="";
-
-
-		$data=[$data[count($data)-2],$data[count($data)-1]];
-		return ["comments"=>$data,"origin_post"=>$origin_post];
-	}
-	public function fetch_info(){
+		* this works only if only the id is provided
+	*/
+	public function fetch(){
 		if($this->html||$this->fetched)return;
 		var_dump("bad");
 		$this->http($this->id());
@@ -66,7 +47,7 @@ class Comment extends common{
 		if($type!==false){
 			$post=new Post($this->id(),$this->root);
 			$post->fixHttpResponse($this->html,$this->id());
-			$post->fetch_info();
+			$post->fetch();
 			$comments=$post->comments();
 		}		
 		else{
@@ -88,7 +69,11 @@ class Comment extends common{
 			$this->subcomments_info["form"]=$form;
 		$this->fetched=1;
 	}
-	public function parse(){
+
+	/**
+		* this works only if html(section of comments with publish form) is provided
+	*/
+	private function parse(){
 		if(!$this->html)return;
 		$this->html=dom($this->html,"<div")[0];
 		$user=dom(dom($this->html,"<h3")[0],"<a",1)[0][1]["href"];
@@ -143,7 +128,7 @@ class Comment extends common{
 			preg_match_all("/\d+/",$reply[0],$reply_number);
 			$reply_number=intval($reply_number[0][0]);
 		}
-		$this->info["content"]=parseContent($this->makeContentFromHtmlContent($html));
+		$this->info["content"]=parseContent($html);
 		$this->info["user"]=$user;
 		$this->info["likes"]["length"]=$likes;
 		$this->info["likes"]["all"]=$likes_users_link;
@@ -153,39 +138,31 @@ class Comment extends common{
 		$this->fetched=1;
 	}
 
-	public function makeContentFromHtmlContent($html){
-		$content="";
-		foreach ($html as $div) {
-			$content.=$div[0];
-		}
-		return $content;
-
-	}
-
-	//action
+	//actions
 	public function like(){
-		$this->fetch_info();
+		$this->fetch();
 		if($this->info["like_link"]){
 			$this->http($this->info["like_link"]);
 			return true;
 		}else return false;
 	}
 	public function reply($txt){
-		$this->fetch_info();
+		$this->fetch();
 		if(!$this->subcomments_info["form"])
 			$this->subcomments(0);
 		$form=dom($this->subcomments_info["form"],"<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$txt]);
 	}
+
 	public function users_likes(){
-		$this->fetch_info();
+		$this->fetch();
 		if(!$this->info["likes"]["users"]&&$this->info["likes"]["all"]){
 			$this->info["likes"]["users"]=Post::fetch_users_likes($this->info["likes"]["all"],$this);
 		}
 		return $this->info["likes"]["users"];
 	}
 	public function subcomments($page){
-		$this->fetch_info();
+		$this->fetch();
 		if(is_numeric($page)){
 			if(isset($this->subcomments_info["items"][$page]))
 				return $this->subcomments_info["items"][$page];
@@ -196,7 +173,7 @@ class Comment extends common{
 					$this->http($this->subcomments_info["next"]);
 	
 					$data=$this->splitComments($this->html)["comments"];
-					$data=$this->parseComments($data,$this);
+					$data=self::parseComments($data,$this);
 					$this->subcomments_info["next"]=$data["next"];
 
 					$this->subcomments_info["items"]=array_merge($this->subcomments_info["items"],[$data["items"]]);
@@ -213,9 +190,30 @@ class Comment extends common{
 			return $this->subcomments_info["items"];
 		}
 	}
-	//staic global funcitons
+	/**
+		* sometimes facebook return page that contain all comments
+		* ( like when you click to reply ), but not the main post
+		* @param html content of comment page
+		* @return array [comments=>["form","comments"],origin_post=>"origin_post"]
+	**/
+	private function splitComments($html){
+		$data=doms($html,['<div','<div','<div']);
+		$origin_post="";
+		if(strpos($data[0],"<a")===0){
+			$origin_post=dom($data[0],"<a",1)[0];
+			$origin_post=$origin_post[1]["href"];
+		}
+		//get only replys and form for submit new reply
+		//delete before last div if it's not replys because the formal div number is 4 divs 
+		if(count($data)<4)
+			$data[count($data)-2]="";
+
+
+		$data=[$data[count($data)-2],$data[count($data)-1]];
+		return ["comments"=>$data,"origin_post"=>$origin_post];
+	}
 	//grab all comments from the first page
-	static public function parseComments($reaction,$parent){
+	static function parseComments($reaction,$parent){
 		if(isset($reaction[0])){
 			if(strpos($reaction[0],"<form")===0)
 				$form=array_shift($reaction);
@@ -245,7 +243,7 @@ class Comment extends common{
 	/**
 		*make this comment identical to @param $comment
 	**/
-	public function copyFrom(Comment $comment){
+	private function copyFrom(Comment $comment){
 		$this->info=$comment->info;
 		$this->subcomments_info=$comment->subcomments_info;
 		$this->html=$comment->html;

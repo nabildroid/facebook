@@ -10,7 +10,7 @@ class Notification extends common{
 		parent::__construct();
 	}
 	
-	public function parseMenu($html){
+	protected function parseMenu($html){
 		$a=dom($html,"<a",1);
 		$message=findDom($a,"Message");
 		$notification=findDom($a,"Notification");
@@ -36,7 +36,7 @@ class Notification extends common{
 			$this->triggers["notification"]=$fnc;
 		else throw new Exception("the notification trigger must be a function", 1);
 	}
-	public function parseNotification(){
+	private function parseNotification(){
 
 		$this->http("notifications.php");
 		$noti=array();
@@ -60,7 +60,7 @@ class Notification extends common{
 		return $noti;
 	}
 
-	public function detectNotificationType($title){
+	private function detectNotificationType($title){
 		//check add post or photo
 		if(instr($title,"added a photo")||
 			 instr($title,"posted"))

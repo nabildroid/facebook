@@ -19,6 +19,14 @@ class Group extends common{
 		$this->info=mergeAssociativeArray($this->info,$info);
 		$this->info["posts_next_page"]=$this->id();
 	}
+	public function fetch(){
+		$this->http($this->id());
+		$this->detectMembership();
+		if($this->member===1){
+			$form=findDom($this->dom("<form",1),"<textarea");
+			$this->info["form"]=$form;
+		}
+	}
 	private function detectMembership(){
 		$join=findDom($this->dom("<form",1),"Join Group");
 		$leave=findDom($this->dom("<form",1),"Cancel Request");
@@ -31,14 +39,7 @@ class Group extends common{
 		}
 		else $this->member=1;
 	}
-	public function fetch_info(){
-		$this->http($this->id());
-		$this->detectMembership();
-		if($this->member===1){
-			$form=findDom($this->dom("<form",1),"<textarea");
-			$this->info["form"]=$form;
-		}
-	}
+	
 	//Group action
 	public function join($questions=[]){
 		if($this->member===0){
@@ -70,8 +71,7 @@ class Group extends common{
 			$next=findDom(dom($content[0],"<a",1),"See More Posts");
 			return ["posts"=>$posts,"next"=>$next];
 		}else return ["posts"=>[],"next"=>""];
-
-	}
+  }
 	public function posts($page=0){
 		if($this->member!==1)
 			throw new Exception("user didn't have the permission to read group posts");
@@ -104,7 +104,6 @@ class Group extends common{
 		}else {
 			return $this->info["posts"];
 		}
-
 	}
 	/**
 	 * @param $param, is array(key/pair) it takes text(string),images(array),privacy(string),tags(array) and all are options

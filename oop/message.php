@@ -16,10 +16,7 @@ class Message extends common{
 		$this->info=mergeAssociativeArray($this->info,$info);
 		$this->info["msg_next_page"]=$this->messageUrl();
 	}
-	public function messageUrl(){
-		return "/messages/read/?fbid=".$this->info["friend"];
-	}
-	public function fetch_info($force=0) {
+	public function fetch($force=0) {
 		if(!$force&&$this->info["form"])return;//for prevent multi fetch 
 		$this->http($this->messageUrl());
 		if($this->checkIfFirstConversation()){
@@ -31,12 +28,12 @@ class Message extends common{
 			$this->info["form"]=$form;
 		}
 	}
-	public function checkIfFirstConversation(){
+	private function checkIfFirstConversation(){
 		$criteria=findDom($this->dom("<a"),"Add Recipients");
 		return $criteria==true;
 	}
 	public function chat($page=0){
-		$this->fetch_info();
+		$this->fetch();
 		if($this->info["firstConversation"])return [];
 
 		if(is_numeric($page)){
@@ -83,7 +80,7 @@ class Message extends common{
 		}
 	}
 	public function send($param){
-		$this->fetch_info();
+		$this->fetch();
 		$param=mergeAssociativeArray([
 			"text"=>"",
 			"images"=>[]
@@ -93,7 +90,7 @@ class Message extends common{
 		if($this->info["firstConversation"]){
 			if($param["images"]&&$param["text"]){
 				$this->send(mergeAssociativeArray($param,["images"=>[]]));
-				$this->fetch_info(1);
+				$this->fetch(1);
 				$this->send(mergeAssociativeArray($param,["text"=>""]));
 			}elseif($param["images"])$form=$this->info["form"][1];
 			else $form=$this->info["form"][0];
@@ -110,4 +107,9 @@ class Message extends common{
 			$this->submit_form($form[0],$form[1]["action"],$inputs);
 		}
 	}
+
+	private function messageUrl(){
+		return "/messages/read/?fbid=".$this->info["friend"];
+	}
+
 }

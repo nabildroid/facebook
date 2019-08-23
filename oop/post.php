@@ -1,5 +1,4 @@
 <?php 
-
 class  Post extends common{
 	public $parent=null;
 	public $admin=0;//if this post is mine or not
@@ -34,12 +33,13 @@ class  Post extends common{
 		}
 		$this->info["id"]=$id;
 	}
-	public function checkIsMine(){
+	//detect wether this post is for me or not
+	private function checkIsMine(){
 		if(isset($this->info["from"]["user"])&&$this->info["from"]["user"]){
 			if($this->info["from"]["user"]==$this->root->profile->id())
 				return $this->admin=true;
 		}else{
-			$this->fetch_info();
+			$this->fetch();
 			return $this->checkIsMine();
 		}
 		return $this->admin=false;
@@ -50,14 +50,14 @@ class  Post extends common{
 			$content=$this->info["content"];
 			$flat=flatContent($content);
 			if(strpos($flat,"...More")!==false){
-				$this->fetch_info();
+				$this->fetch();
 			} 
 			return $this->info["content"];
 		}
 	}
 	//get comments
 	public function comments($page=0){
-		if(!$this->comments_info["next"])$this->fetch_info();
+		if(!$this->comments_info["next"])$this->fetch();
 		if(is_numeric($page)){
 			if(isset($this->comments_info["items"][$page]))
 				return $this->comments_info["items"][$page];
@@ -65,9 +65,9 @@ class  Post extends common{
 				for ($i=0; $i <=$page; $i++) { 
 					$this->http($this->comments_info["next"]);
 					if(self::detectType($this->html))
-						$data=self::spliceImageHtml($this->html);
+						$data=self::splitImageHtml($this->html);
 					else
-						$data=self::splicePostHtml($this->html);
+						$data=self::splitPostHtml($this->html);
 					$this->parseComments($data["comment_html"]);
 				}
 				return $this->comments_info["items"][count($this->comments_info["items"])-1];
@@ -75,81 +75,19 @@ class  Post extends common{
 		}else {
 			return $this->comments_info["items"];
 		}
-
-	}
-	//like action
-	public function like(){
-		if($this->info["like_link"]&&!$this->info["likes"]["me"]){
-			$this->http($this->info["like_link"]);
-			$this->info["likes"]["me"]=true;
-			return true;
-		}
-		else return false;
-	}
-	//deslike action
-	public function unlike(){
-		if($this->info["like_link"]&&$this->info["likes"]["me"]){
-			$this->http($this->info["like_link"]);
-			$this->http($this->dom("<a",1)[0][1]["href"]);
-			$this->info["likes"]["me"]=false;
-			return true;
-		}
-	}
-	//comment action
-	public function comment($txt){
-		if(!$this->comments_info["form"])
-			$this->fetch_info();
-		$form=dom($this->comments_info["form"],"<form",1)[0];
-		$this->submit_form($form[0],$form[1]["action"],[$txt]);
-	}
+  }
+  //get all who liked this post
 	public function users_likes(){
 		return self::fetch_users_likes("",$this);
 	}
-	//get all users who likes this post
-	static public function fetch_users_likes($url="",$parent){
-		//ufi/reaction/profile/browser/?ft_ent_identifier=ID_HERE
-			$all_users=[];
-		if($url||empty($parent->info["likes"]["users"])){
-			$next=($url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$parent->id());
-	
-			do{
-				$next=is_array($next)?$next[0][1]["href"]:$next;//first next is string then it array
-				$parent->http($next);
-				$parent->html=$parent->dom("<ul")[0];
-				$users=dom($parent->html,"<a",1);
-				//get only the url of users and next page if it available
-				$users=filter($users,function($user){
-					return strpos($user[0],"<span")===false||strpos($user[0],"See More")!=false;
-				})[0];
-				//separe between next page and users
-				$links=filter($users,function($link){return strpos($link[0],"<span")===false;});
-				$users=$links[0];
-				$next=$links[1];
-				$users=array_map(function($user)use(&$parent){
-					preg_match_all("/(id=\d+)|\/[\w\d.]+/",$user[1]["href"],$id);
-					if(isset($id[0][1])&&instr($id[0][1],"id=1"))
-						$id=intval(substr($id[0][1],3));
-					else $id=substr($id[0][0],1);
 
-					return new Profile($parent,["id"=>$id]);
-				},$users);
-				$all_users=array_merge($all_users,$users);
-
-			}while(isset($next[0][1]["href"]));
-			
-			if(!$url)
-				$parent->info["likes"]["users"]=$all_users;
-			
-			return $all_users;
-		}
-	}
-	//get informaion about this post only by it id
-	public function fetch_info(){
+	//get informaion about this post from it id
+	public function fetch(){
 		$this->http($this->id());
 		if(self::detectType($this->html))
-			$data=self::spliceImageHtml($this->html);
+			$data=$this->splitImageHtml($this->html);
 		else
-			$data=self::splicePostHtml($this->html);
+			$data=$this->splitPostHtml($this->html);
 		$this->info["from"]=$this->parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
 		$this->info["content"]=parseContent($data["content"]);
 		$this->info["likes"]["length"]=$data["likes_number"];
@@ -163,13 +101,12 @@ class  Post extends common{
 
 		$this->makeFrom();
 		$this->parseComments($data["comment_html"]);
-
-
 	}
-
-	//satic global functions get information about such post from it html
-	//but this html grabbed from list of posts like in main facebook page (user wall)
-	public static function GetInfoFromListedPost($post){
+	/**
+	 * get information about such post from it html
+	 * but this html grabbed from list of posts like in main facebook page (user wall)
+	*/
+	static function GetInfoFromListedPost($post){
 		$info=[];
 		$data=jsondecode($post[1]["data-ft"]);
 		$html=dom($post[0],"<div");
@@ -215,17 +152,8 @@ class  Post extends common{
 		];
 
 	}
-	//get the type of such post if it's normal post or image post
-	public static function detectType($html){
-		//0 post|0 group_post|0  page_post|1 image|
-		if(count(dom($html,'id="m_story_permalink_view"')))
-			return 0;
-		else if(count(dom($html,'id="MPhotoContent"')))
-			return 1;
-		else return false;
-	}
 	//grab information about image post 
-	public static function spliceImageHtml($html){
+	private function splitImageHtml($html){
 		$actions=dom(dom($html,'id="MPhotoActionbar"')[0],"<a",1);
 		$html=doms($html,['id="MPhotoContent"',"<div"]);
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) and full-image
@@ -239,7 +167,7 @@ class  Post extends common{
 		$text=array_pop($content[0])[0];
 		$from=$content[0];
 		$image=dom($content[1],"<a",1);//content[1] has the link of full_size
-		$image=findInnerText("View Full Size",$image);
+		$image=findDom($image,"View Full Size");
 
 		//reaction
 		$reaction=filter(doms($reaction,["<div","<div","<div"]))[0];
@@ -273,12 +201,9 @@ class  Post extends common{
 			"aready_liked"=>$areadyliked,
 			"comment_html"=>$reaction
 		];
-
-		
-
 	}
 	//grab informaion about normal post
-	public static function splicePostHtml($html){
+	private function splitPostHtml($html){
 		$html=dom($html,'id="m_story_permalink_view"')[0];
 		$html=dom($html,"<div");
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) 
@@ -289,7 +214,7 @@ class  Post extends common{
 		$html=filter($html)[0];
 		$from=dom(array_shift($html),"<h3")[0];//here you can find the infomation about where 
 		$from=dom($from,"<a",1);
-		$text=$html;
+		$content=$html;
 
 		$reaction=filter(doms($reaction,["<div","<div"]))[0];
 		$actions=dom(array_shift($reaction),"<a",1);//##### like action
@@ -317,15 +242,62 @@ class  Post extends common{
 		return [
 			"from"=>$from,
 			"data"=>$data,
-			"content"=>$text,
+			"content"=>$content,
 			"likes_number"=>$likes,
 			"like_link"=>$like_link,
 			"aready_liked"=>$areadyliked,
 			"comment_html"=>$reaction
 		];
 	}
+	//get the type of such post if it's normal post or image post
+	static function detectType($html){
+		//0 post|0 group_post|0  page_post|1 image|
+		if(count(dom($html,'id="m_story_permalink_view"')))
+			return 0;
+		else if(count(dom($html,'id="MPhotoContent"')))
+			return 1;
+		else return false;
+	}
+	//get all users who likes this post
+	static function fetch_users_likes($url="",$parent){
+		//ufi/reaction/profile/browser/?ft_ent_identifier=ID_HERE
+			$all_users=[];
+		if($url||empty($parent->info["likes"]["users"])){
+			$next=($url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$parent->id());
+	
+			do{
+				$next=is_array($next)?$next[0][1]["href"]:$next;//first next is string then it array
+				$parent->http($next);
+				$parent->html=$parent->dom("<ul")[0];
+				$users=dom($parent->html,"<a",1);
+				//get only the url of users and next page if it available
+				$users=filter($users,function($user){
+					return strpos($user[0],"<span")===false||strpos($user[0],"See More")!=false;
+				})[0];
+				//separe between next page and users
+				$links=filter($users,function($link){return strpos($link[0],"<span")===false;});
+				$users=$links[0];
+				$next=$links[1];
+				$users=array_map(function($user)use(&$parent){
+					preg_match_all("/(id=\d+)|\/[\w\d.]+/",$user[1]["href"],$id);
+					if(isset($id[0][1])&&instr($id[0][1],"id=1"))
+						$id=intval(substr($id[0][1],3));
+					else $id=substr($id[0][0],1);
+
+					return new Profile($parent,["id"=>$id]);
+				},$users);
+				$all_users=array_merge($all_users,$users);
+
+			}while(isset($next[0][1]["href"]));
+			
+			if(!$url)
+				$parent->info["likes"]["users"]=$all_users;
+			
+			return $all_users;
+		}
+	}
 	//grab all comments from the first page
-	public function parseComments($reaction){
+	private function parseComments($reaction){
 		$comments=Comment::parseComments($reaction,$this);
 		$this->comments_info["items"]=array_merge($this->comments_info["items"],[$comments["items"]]);
 		$this->comments_info["next"]=!empty($comments["next"])?$comments["next"]:"";
@@ -337,7 +309,7 @@ class  Post extends common{
 	/**
 		* create classes for info["from"] for user group page ...
 	*/
-	public function makeFrom(){
+	private function makeFrom(){
 		if(!isset($this->info["from"]))return;
 		if(isset($this->info["from"]["user"])&&$this->info["from"]["user"])
 			$this->info["from"]["user"]=new Profile($this,["id"=>$this->info["from"]["user"]]);
@@ -346,9 +318,8 @@ class  Post extends common{
 		if(isset($this->info["from"]["group"])&&$this->info["from"]["group"])
 			$this->info["from"]["group"]=new Group(["id"=>$this->info["from"]["group"]],$this);
 	} 
-
 	//grab the user who publish this post and in which section (group|share from)
-	public function parseFrom($from,$data=""){
+	private function parseFrom($from,$data=""){
 		$user="";		$page="";		$group="";		$origin_post=""; $id="";
 		//delete any <a that does't has href
 		$from=filter($from,function($a){return isset($a[1]["href"]);})[0];
@@ -402,7 +373,32 @@ class  Post extends common{
 			"group"=>$group,
 		];
 	}
+
+
+	//like action
+	public function like(){
+		if($this->info["like_link"]&&!$this->info["likes"]["me"]){
+			$this->http($this->info["like_link"]);
+			$this->info["likes"]["me"]=true;
+			return true;
+		}
+		else return false;
+	}
+	//deslike action
+	public function unlike(){
+		if($this->info["like_link"]&&$this->info["likes"]["me"]){
+			$this->http($this->info["like_link"]);
+			$this->http($this->dom("<a",1)[0][1]["href"]);
+			$this->info["likes"]["me"]=false;
+			return true;
+		}
+	}
+	//comment action
+	public function comment($txt){
+		if(!$this->comments_info["form"])
+			$this->fetch();
+		$form=dom($this->comments_info["form"],"<form",1)[0];
+		$this->submit_form($form[0],$form[1]["action"],[$txt]);
+	}
 }
-
-
- ?>
+?>

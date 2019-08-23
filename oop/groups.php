@@ -6,7 +6,7 @@ class Groups extends Common{
 		parent::__construct();
 	}
 	public function myGroups(){
-		$this->http("/groups/?seemore");
+		$this->http("groups/?seemore");
 		$my=$this->dom("<ul")[0];
 		$groups=dom($my,"<a",1);
 		$groups=array_map(function($group){
@@ -18,7 +18,7 @@ class Groups extends Common{
 		return $groups;
 	}
 	public function suggestionGroups(){
-		$this->http("/groups");
+		$this->http("groups");
 		$suggetion=findDom($this->dom("<ul"),"Join");
 		$groups=dom($suggetion,"<li");
 		$groups=array_map(function($group){

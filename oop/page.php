@@ -21,7 +21,7 @@ class Page extends common{
 		$this->info["posts_next_page"]=$this->id();
 	}
 
-	public function fetch_info(){
+	public function fetch(){
 		$this->http($this->id());
 		$tool=findDom(dom($this->html,"<table"),"More");//contain the like/dislike button and messaging and follow
 		$tool=dom($tool,"<a",1);
@@ -39,7 +39,7 @@ class Page extends common{
 			$this->info["form"]=$form;
 		}
 	}
-	public function posts($page=""){
+	public function posts($page=0){
 		if(is_numeric($page)){
 			if(isset($this->info["posts"][$page]))
 				return $this->info["posts"][$page];
@@ -71,10 +71,7 @@ class Page extends common{
 		}
 
 	}
-	private function permission($access){
-		if($this->admin!==$access)
-			throw new Exception("you haven't permission", 1);
-	}
+
 	//page action
 	public function like(){
 		$this->permission(0);
@@ -122,5 +119,9 @@ class Page extends common{
 		}
 	}
 
+	private function permission($access){
+		if($this->admin!==$access)
+			throw new Exception("you haven't permission", 1);
+	}
 
 }
