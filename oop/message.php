@@ -63,7 +63,7 @@ class Message extends common{
 
 						return [
 							"content"=>$content,
-							"from"=>$sender
+							"from"=>$sender?new Profile($this,["id"=>$sender]):$this->root->profile
 						];
 					},$msgs);
 
