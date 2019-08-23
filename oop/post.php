@@ -2,7 +2,6 @@
 
 class  Post extends common{
 	public $parent=null;
-	public $commonHtml="";
 	public $admin=0;//if this post is mine or not
 	public $info=[
 		"id"=>null,//id of the post
@@ -37,7 +36,7 @@ class  Post extends common{
 	}
 	public function checkIsMine(){
 		if(isset($this->info["from"]["user"])&&$this->info["from"]["user"]){
-			if($this->info["from"]["user"]==$this->root->profile->info["id"])
+			if($this->info["from"]["user"]==$this->root->profile->id())
 				return $this->admin=true;
 		}else{
 			$this->fetch_info();
@@ -111,7 +110,7 @@ class  Post extends common{
 		//ufi/reaction/profile/browser/?ft_ent_identifier=ID_HERE
 			$all_users=[];
 		if($url||empty($parent->info["likes"]["users"])){
-			$next=($url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$parent->info["id"]);
+			$next=($url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$parent->id());
 	
 			do{
 				$next=is_array($next)?$next[0][1]["href"]:$next;//first next is string then it array
@@ -146,7 +145,7 @@ class  Post extends common{
 	}
 	//get informaion about this post only by it id
 	public function fetch_info(){
-		$this->http($this->info["id"]);
+		$this->http($this->id());
 		if(self::detectType($this->html))
 			$data=self::spliceImageHtml($this->html);
 		else

@@ -22,7 +22,7 @@ class Profile extends common{
 		$this->admin=$admin;
 	}
 	public function fetch(){
-		$this->http($this->info["id"]);
+		$this->http($this->id());
 		$html=doms($this->html,['id="root"',"<div","<div"])[0];
 		//get cover picture
 		$section=dom($html,"<div");
@@ -65,7 +65,7 @@ class Profile extends common{
 	}
 	public function friends(){
 		$all=[];
-		$next=$this->info["id"]."?v=friends";
+		$next=$this->id()."?v=friends";
 		while ($next) {
 			$this->http($next);
 			$html=doms($this->html,["<div","<div","<div"])[1];
@@ -205,7 +205,7 @@ class Profile extends common{
 		if($this->message)
 			return $this->message;
 		else {
-			$this->message=new Message(["friend"=>$this->info["id"]],$this);
+			$this->message=new Message(["friend"=>$this->id()],$this);
 			return $this->message;
 		}
 	}

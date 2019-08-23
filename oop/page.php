@@ -18,10 +18,11 @@ class Page extends common{
 		
 		$this->admin=$admin;
 		$this->info=mergeAssociativeArray($this->info,$info);
-		$this->info["posts_next_page"]=$this->info["id"];
+		$this->info["posts_next_page"]=$this->id();
 	}
+
 	public function fetch_info(){
-		$this->http($this->info["id"]);
+		$this->http($this->id());
 		$tool=findDom(dom($this->html,"<table"),"More");//contain the like/dislike button and messaging and follow
 		$tool=dom($tool,"<a",1);
 		//like_like whether it like or dislike like

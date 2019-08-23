@@ -38,7 +38,7 @@ class Common{
 		* @return int this account id or null if the html content hasn't id
 	**/
 	public function getMyId(){
-		$id=$this->root->profile->info["id"];
+		$id=$this->root->profile->id();
 		if($this->html&&!intval($id)){
 			preg_match_all("/<form.*action=.*av=.(\d)*?(?=&)/",$this->html,$id);
 			if(!isset($id[0][0]))return null;
@@ -111,6 +111,15 @@ class Common{
 			foreach ($files as $file)
 				unlink($file);
 		}
+	}
+
+	/**
+		*@return such class id if it exist
+	**/
+	public function id(){
+		if(isset($this->info["id"])&&$this->info["id"])
+			return $this->info["id"];
+		else return null;
 	}
 
 }

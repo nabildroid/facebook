@@ -17,7 +17,7 @@ class Group extends common{
 		
 		$this->member=$member;
 		$this->info=mergeAssociativeArray($this->info,$info);
-		$this->info["posts_next_page"]=$this->info["id"];
+		$this->info["posts_next_page"]=$this->id();
 	}
 	private function detectMembership(){
 		$join=findDom($this->dom("<form",1),"Join Group");
@@ -32,7 +32,7 @@ class Group extends common{
 		else $this->member=1;
 	}
 	public function fetch_info(){
-		$this->http($this->info["id"]);
+		$this->http($this->id());
 		$this->detectMembership();
 		if($this->member===1){
 			$form=findDom($this->dom("<form",1),"<textarea");
@@ -53,7 +53,7 @@ class Group extends common{
 	}
 	public function leave(){
 		if($this->member===1){
-			$this->http("/group/leave/?group_id=".$this->info["id"]);
+			$this->http("/group/leave/?group_id=".$this->id());
 			$this->member=0;
 			return true;
 		}elseif($this->member===2&&$this->info["join"]){
@@ -118,7 +118,7 @@ class Group extends common{
 		],$param);
 
 		//main function
-		$this->http($this->info["id"]);
+		$this->http($this->id());
 		$form=findDom($this->dom("<form",1),"<textarea");	
 
 

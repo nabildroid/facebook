@@ -60,12 +60,12 @@ class Comment extends common{
 	public function fetch_info(){
 		if($this->html||$this->fetched)return;
 		var_dump("bad");
-		$this->http($this->info["id"]);
+		$this->http($this->id());
 		$type=Post::detectType($this->html);
 		$comments=[];
 		if($type!==false){
-			$post=new Post($this->info["id"],$this->root);
-			$post->fixHttpResponse($this->html,$this->info["id"]);
+			$post=new Post($this->id(),$this->root);
+			$post->fixHttpResponse($this->html,$this->id());
 			$post->fetch_info();
 			$comments=$post->comments();
 		}		
@@ -80,7 +80,7 @@ class Comment extends common{
 		} 
 
 		foreach ($comments as $comment)
-			if($comment->info["id"]==$this->info["id"]){
+			if($comment->id()==$this->id()){
 				$this->copyFrom($comment);break;
 			}
 		//case of this is reply comment so it has form to reply
