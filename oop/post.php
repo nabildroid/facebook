@@ -30,6 +30,8 @@ class  Post extends common{
 			$this->info["likes"]["me"]=$info["aready_liked"];		
 			$this->info["like_link"]=$info["like_link"];		
 			$this->info["content"]=$info["content"];		
+
+			$this->makeFrom();
 		}
 		$this->info["id"]=$id;
 	}
@@ -149,7 +151,7 @@ class  Post extends common{
 			$data=self::spliceImageHtml($this->html);
 		else
 			$data=self::splicePostHtml($this->html);
-		$this->info["from"]=self::parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
+		$this->info["from"]=$this->parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
 		$this->info["content"]=parseContent($data["content"]);
 		$this->info["likes"]["length"]=$data["likes_number"];
 		$this->info["likes"]["me"]=$data["aready_liked"];
@@ -160,6 +162,7 @@ class  Post extends common{
 		if(isset($data["image"]))
 			$this->info["image"]=$data["image"];
 
+		$this->makeFrom();
 		$this->parseComments($data["comment_html"]);
 
 
@@ -331,6 +334,20 @@ class  Post extends common{
 		if(!$this->comments_info["form"])		
 			$this->comments_info["form"]=$comments["form"];
 	}
+
+	/**
+		* create classes for info["from"] for user group page ...
+	*/
+	public function makeFrom(){
+		if(!isset($this->info["from"]))return;
+		if(isset($this->info["from"]["user"])&&$this->info["from"]["user"])
+			$this->info["from"]["user"]=new Profile($this,["id"=>$this->info["from"]["user"]]);
+		if(isset($this->info["from"]["page"])&&$this->info["from"]["page"])
+			$this->info["from"]["page"]=new Page(["id"=>$this->info["from"]["page"]],$this);
+		if(isset($this->info["from"]["group"])&&$this->info["from"]["group"])
+			$this->info["from"]["group"]=new Group(["id"=>$this->info["from"]["group"]],$this);
+	} 
+
 	//grab the user who publish this post and in which section (group|share from)
 	public function parseFrom($from,$data=""){
 		$user="";		$page="";		$group="";		$origin_post=""; $id="";
@@ -382,8 +399,8 @@ class  Post extends common{
 			"user"=>$user,
 			"id"=>$id,
 			"origin_post"=>$origin_post,
-			"page_id"=>$page,
-			"group_id"=>$group,
+			"page"=>$page,
+			"group"=>$group,
 		];
 	}
 }
