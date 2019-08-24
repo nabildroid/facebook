@@ -16,8 +16,8 @@ class Message extends common{
 		$this->info=mergeAssociativeArray($this->info,$info);
 		$this->info["msg_next_page"]=$this->messageUrl();
 	}
-	public function fetch($force=0) {
-		if(!$force&&$this->info["form"])return;//for prevent multi fetch 
+	private function fetch($force=0) {
+		if(!$force&&$this->fetched)return;//for prevent multi fetch 
 		$this->http($this->messageUrl());
 		if($this->checkIfFirstConversation()){
 			$this->info["firstConversation"]=1;
@@ -27,6 +27,7 @@ class Message extends common{
 			$form=findDom($this->dom("<form",1),"<textarea");	
 			$this->info["form"]=$form;
 		}
+		$this->fetched=1;
 	}
 	private function checkIfFirstConversation(){
 		$criteria=findDom($this->dom("<a"),"Add Recipients");

@@ -33,16 +33,36 @@ class  Post extends common{
 		}
 		$this->info["id"]=$id;
 	}
+	//get informaion about this post from it id
+	public function fetch(){
+		if($this->fetched)return;
+		$this->http($this->id());
+		if(self::detectType($this->html))
+			$data=$this->splitImageHtml($this->html);
+		else
+			$data=$this->splitPostHtml($this->html);
+		$this->info["from"]=$this->parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
+		$this->info["content"]=parseContent($data["content"]);
+		$this->info["likes"]["length"]=$data["likes_number"];
+		$this->info["likes"]["me"]=$data["aready_liked"];
+		$this->info["like_link"]=$data["like_link"];
+
+		if(isset($this->info["from"]["id"]))
+			$this->info["id"]=$this->info["from"]["id"];
+		if(isset($data["image"]))
+			$this->info["image"]=$data["image"];
+
+		$this->makeFrom();
+		$this->parseComments($data["comment_html"]);
+		$this->checkIsMine();
+		$this->fetched=1;
+	}
 	//detect wether this post is for me or not
 	private function checkIsMine(){
 		if(isset($this->info["from"]["user"])&&$this->info["from"]["user"]){
 			if($this->info["from"]["user"]==$this->root->profile->id())
 				return $this->admin=true;
-		}else{
-			$this->fetch();
-			return $this->checkIsMine();
-		}
-		return $this->admin=false;
+		}return $this->admin=false;
 	}
 	//get Full content
 	public function fullContent(){
@@ -57,7 +77,7 @@ class  Post extends common{
 	}
 	//get comments
 	public function comments($page=0){
-		if(!$this->comments_info["next"])$this->fetch();
+		$this->fetch();
 		if(is_numeric($page)){
 			if(isset($this->comments_info["items"][$page]))
 				return $this->comments_info["items"][$page];
@@ -81,27 +101,7 @@ class  Post extends common{
 		return self::fetch_users_likes("",$this);
 	}
 
-	//get informaion about this post from it id
-	public function fetch(){
-		$this->http($this->id());
-		if(self::detectType($this->html))
-			$data=$this->splitImageHtml($this->html);
-		else
-			$data=$this->splitPostHtml($this->html);
-		$this->info["from"]=$this->parseFrom($data["from"],isset($data["data"])?$data["data"]:"");
-		$this->info["content"]=parseContent($data["content"]);
-		$this->info["likes"]["length"]=$data["likes_number"];
-		$this->info["likes"]["me"]=$data["aready_liked"];
-		$this->info["like_link"]=$data["like_link"];
 
-		if(isset($this->info["from"]["id"]))
-			$this->info["id"]=$this->info["from"]["id"];
-		if(isset($data["image"]))
-			$this->info["image"]=$data["image"];
-
-		$this->makeFrom();
-		$this->parseComments($data["comment_html"]);
-	}
 	/**
 	 * get information about such post from it html
 	 * but this html grabbed from list of posts like in main facebook page (user wall)
@@ -279,11 +279,7 @@ class  Post extends common{
 				$users=$links[0];
 				$next=$links[1];
 				$users=array_map(function($user)use(&$parent){
-					preg_match_all("/(id=\d+)|\/[\w\d.]+/",$user[1]["href"],$id);
-					if(isset($id[0][1])&&instr($id[0][1],"id=1"))
-						$id=intval(substr($id[0][1],3));
-					else $id=substr($id[0][0],1);
-
+					$id=Profile::idFromUrl($user[1]["href"]);
 					return new Profile($parent,["id"=>$id]);
 				},$users);
 				$all_users=array_merge($all_users,$users);
@@ -377,6 +373,7 @@ class  Post extends common{
 
 	//like action
 	public function like(){
+		$this->fetch();
 		if($this->info["like_link"]&&!$this->info["likes"]["me"]){
 			$this->http($this->info["like_link"]);
 			$this->info["likes"]["me"]=true;
@@ -386,6 +383,7 @@ class  Post extends common{
 	}
 	//deslike action
 	public function unlike(){
+		$this->fetch();
 		if($this->info["like_link"]&&$this->info["likes"]["me"]){
 			$this->http($this->info["like_link"]);
 			$this->http($this->dom("<a",1)[0][1]["href"]);
@@ -395,6 +393,7 @@ class  Post extends common{
 	}
 	//comment action
 	public function comment($txt){
+		$this->fetch();
 		if(!$this->comments_info["form"])
 			$this->fetch();
 		$form=dom($this->comments_info["form"],"<form",1)[0];

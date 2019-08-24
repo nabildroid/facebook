@@ -6,7 +6,8 @@ class Pages extends common{
 		parent::__construct();
 	}
 	private  function fetch(){
-		$this->http("/pages");
+		if($this->fetched)return;
+		$this->http("pages");
 		$this->html=findDom($this->dom("<table"),"Like");
 		if(!$this->html)return [];
 		$html=$this->dom("<div");
@@ -14,7 +15,8 @@ class Pages extends common{
 			if(strpos($h,"<table")!==false||strpos($h,"<a")===false)return true;
 			else return false;
 		})[0];
-		$this->html=$html;		
+		$this->html=$html;
+		$this->fetched=1;	
 	}
 	private function processInlinePagesHtml($pages){
 		$pages=filter($pages,function($page){

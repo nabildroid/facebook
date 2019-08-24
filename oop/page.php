@@ -21,7 +21,8 @@ class Page extends common{
 		$this->info["posts_next_page"]=$this->id();
 	}
 
-	public function fetch(){
+	private function fetch(){
+		if($this->fetched)return;
 		$this->http($this->id());
 		$tool=findDom(dom($this->html,"<table"),"More");//contain the like/dislike button and messaging and follow
 		$tool=dom($tool,"<a",1);
@@ -38,8 +39,10 @@ class Page extends common{
 			$form=findDom($this->dom("<form",1),"<textarea");
 			$this->info["form"]=$form;
 		}
+		$this->fetched=1;
 	}
 	public function posts($page=0){
+		$this->fetch();
 		if(is_numeric($page)){
 			if(isset($this->info["posts"][$page]))
 				return $this->info["posts"][$page];
@@ -69,18 +72,21 @@ class Page extends common{
 		}else {
 			return $this->info["posts"];
 		}
-
 	}
 
 	//page action
 	public function like(){
 		$this->permission(0);
+		$this->fetch();
+
 		if($this->info["like_link"]&&strpos($this->info["like_link"],"unfan")===false)
 			$this->http($this->info["like_link"]);
 		return true;
 	}
 	public function dislike(){
 		$this->permission(0);
+		$this->fetch();
+
 		if($this->info["like_link"]&&strpos($this->info["like_link"],"unfan")!==false)
 			$this->http($this->info["like_link"]);
 		return true;
@@ -95,6 +101,8 @@ class Page extends common{
 	*/
 	public function publish($param){
 		$this->permission(1);
+		$this->fetch();
+
 		//prepare paramater
 		$param=mergeAssociativeArray([
 			"text"=>"",

@@ -3,6 +3,9 @@ abstract class Common{
 	public $root=null;
 	public $html="";
 	public $lastHttpRequest=null;
+
+	protected $fetched=0; //toggle for prevent more then one fetch
+
 	public function __construct(){
 		//prepare the root variable
 		if(!$this->root){
@@ -11,7 +14,11 @@ abstract class Common{
 				$this->root=$this->root->parent;
 		}
 	}
-	protected function http($url="",$data="",$headers=[],$responseHeader=0){		
+	/**
+		* @todo BAD BAD BAD ... it's provide a way to access full account :( :( 
+		* it public now because of some satic function need to call http in post of exemple
+	*/
+	public  function http($url="",$data="",$headers=[],$responseHeader=0){		
 		//check if previous request is equivalent to current one 
 		if($this->lastHttpRequest===[$url,$data,$headers,$responseHeader])
 			return $this->html;

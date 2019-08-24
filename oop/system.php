@@ -1,5 +1,10 @@
 <?php
 class  System{
+	
+	/**
+		* @todo BAD BAD BAD ... it's provide a way to access full account :( :( 
+		* it public now because of some satic function need to call http in post of exemple
+	*/
 	public function http($url,$data="",$headers=[],$responseHeader=0){
 		if(strpos($url,"http")!==0)
 			$url="https://mbasic.facebook.com/".$url;
@@ -17,7 +22,6 @@ class  System{
 		}else return $http;
 	}
 
-	
 }
 
 

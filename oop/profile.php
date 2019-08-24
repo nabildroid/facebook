@@ -2,7 +2,6 @@
 class Profile extends common{
 	public $parent=null;
 	private $admin=0;
-	private $message=null;
 	public $info=[
 		"id"=>"profile",
 		"picture"=>[
@@ -21,7 +20,8 @@ class Profile extends common{
 		if($info)$this->info=mergeAssociativeArray($this->info,$info);
 		$this->admin=$admin;
 	}
-	public function fetch(){
+	private function fetch(){
+		if($this->fetched)return;
 		$this->http($this->id());
 		$html=doms($this->html,['id="root"',"<div","<div"])[0];
 		//get cover picture
@@ -62,8 +62,11 @@ class Profile extends common{
 				$this->info["id"]=$id;
 			}
 		}
+
+		$this->fetched=1;
 	}
 	public function posts($page=0){
+		$this->fetch();
 		if(is_numeric($page)){
 			if(isset($this->info["posts"][$page]))
 				return $this->info["posts"][$page];
@@ -111,6 +114,8 @@ class Profile extends common{
 		return isset(findDom($this->info["actions"],"Confirm Friend")[1]["href"]);
 	}
 	public function friends(){
+		$this->fetch();
+
 		$all=[];
 		$next=$this->id()."?v=friends";
 		while ($next) {
@@ -144,6 +149,8 @@ class Profile extends common{
 	}
 	public function pendingRequests(){
 		$this->permission(1);
+		$this->fetch();
+
 		$this->http("friends/center/requests?seemore");
 		$users=filter($this->dom("<td"),function($td){return strpos($td,"<img")!==0;})[0];
 		$users=array_map(function($user){
@@ -164,6 +171,8 @@ class Profile extends common{
 
 	public function sendFriendRequest(){
 		$this->permission(0);
+		$this->fetch();
+
 		$url=findDom($this->info["actions"],"Add Friend");
 		if(isset($url[1]["href"])){
 			$this->http($url[1]["href"]);
@@ -172,6 +181,8 @@ class Profile extends common{
 	}
 	public function confirmFriendRequest(){
 		$this->permission(0);
+		$this->fetch();
+
 		if($this->friendAsk()){
 			$url=findDom($this->info["actions"],"Confirm Friend");	
 			$this->http($url[1]["href"]);
@@ -180,6 +191,8 @@ class Profile extends common{
 	}
 	public function rejectFriendRequest(){
 		$this->permission(0);
+		$this->fetch();
+
 		if($this->friendAsk()){
 			$url=findDom($this->info["actions"],"Delete Request");	
 			$this->http($url[1]["href"]);
@@ -189,18 +202,24 @@ class Profile extends common{
 
 	public function setProfilePhoto($url){
 		$this->permission(1);
+		$this->fetch();
+
 		$this->http("photos/upload/?profile_pic");
 		$form=$this->dom("<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$url]);
 	}
 	public function setCoverPhoto($url){
 		$this->permission(1);
+		$this->fetch();
+
 		$this->http("photos/upload/?cover_photo");
 		$form=$this->dom("<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$url]);
 	}
 	public function  setBio($txt){
 		$this->permission(1);
+		$this->fetch();
+
 		$this->http("profile/basic/intro/bio");
 		$form=$this->dom("<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$txt]);
@@ -211,14 +230,22 @@ class Profile extends common{
 	*/
 	public function message(){
 		$this->permission(0);
-		if($this->message)
-			return $this->message;
-		else {
-			$this->message=new Message(["friend"=>$this->id()],$this);
-			return $this->message;
-		}
+		if(!intval($this->id()))
+			$this->fetch();
+
+		return new Message(["friend"=>$this->id()],$this);
 	}
-	
+	/**
+		*@param $url string like /bla.bla.00?refid=18&__tn__=R
+		*@return either id(int) or id(string)
+	*/
+	static function idFromUrl($url){
+		preg_match_all("/(id=\d+)|\/[\w\d.]+/",$url,$id);
+		if(isset($id[0][1])&&instr($id[0][1],"id=10"))
+			$id=intval(substr($id[0][1],3));
+		else $id=substr($id[0][0],1);
+		return $id;
+	}
 	private function permission($access){
 		if($this->admin!==$access)
 			throw new Exception("you haven't permission", 1);

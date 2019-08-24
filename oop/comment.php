@@ -19,7 +19,7 @@ class Comment extends common{
 		"next"=>"",
 		"form"=>""
 	];
-	private $fetched=0;
+
 	function __construct($id,$html="",$parent){
 		$this->parent=$parent;
 		parent::__construct();
@@ -38,9 +38,8 @@ class Comment extends common{
 	/**
 		* this works only if only the id is provided
 	*/
-	public function fetch(){
+	private function fetch(){
 		if($this->html||$this->fetched)return;
-		var_dump("bad");
 		$this->http($this->id());
 		$type=Post::detectType($this->html);
 		$comments=[];
@@ -128,8 +127,13 @@ class Comment extends common{
 			preg_match_all("/\d+/",$reply[0],$reply_number);
 			$reply_number=intval($reply_number[0][0]);
 		}
-		$this->info["content"]=parseContent($html);
-		$this->info["user"]=$user;
+
+		//join all content;
+		$content="";
+		foreach ($html as $h)
+			$content.=$h[0];
+		$this->info["content"]=parseContent($content);
+		$this->info["user"]=new Profile($this,["id"=>Profile::idFromUrl($user)]);
 		$this->info["likes"]["length"]=$likes;
 		$this->info["likes"]["all"]=$likes_users_link;
 		$this->info["like_link"]=$like_link;
@@ -146,6 +150,12 @@ class Comment extends common{
 			return true;
 		}else return false;
 	}
+
+
+	/**
+		* reply to comment not to subcomment!!
+		* @todo @return new Comment
+	*/
 	public function reply($txt){
 		$this->fetch();
 		if(!$this->subcomments_info["form"])

@@ -100,7 +100,7 @@ function branchApplay($arr,$tags){
 //main parseContent
 function parseContent($html){
 	$tags=["<p","<div","<a","<img","<span"];
-	if(is_array($html))$html=join($html);
+	if(is_array($html))$html=implode("", $html);
 	$html=dom($html,$tags,1,1);
 	$html1=branchApplay($html,$tags);
 	// echo json_encode(cleanHtml($html1));

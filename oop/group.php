@@ -19,13 +19,15 @@ class Group extends common{
 		$this->info=mergeAssociativeArray($this->info,$info);
 		$this->info["posts_next_page"]=$this->id();
 	}
-	public function fetch(){
+	private function fetch(){
+		if($this->fetched)return;
 		$this->http($this->id());
 		$this->detectMembership();
 		if($this->member===1){
 			$form=findDom($this->dom("<form",1),"<textarea");
 			$this->info["form"]=$form;
 		}
+		$this->fetched=1;
 	}
 	private function detectMembership(){
 		$join=findDom($this->dom("<form",1),"Join Group");
@@ -42,6 +44,7 @@ class Group extends common{
 	
 	//Group action
 	public function join($questions=[]){
+		$this->fetch();
 		if($this->member===0){
 			if($this->info["join"]){
 				$form=$this->info["join"];
@@ -53,6 +56,7 @@ class Group extends common{
 		}
 	}
 	public function leave(){
+		$this->fetch();
 		if($this->member===1){
 			$this->http("/group/leave/?group_id=".$this->id());
 			$this->member=0;
@@ -73,6 +77,7 @@ class Group extends common{
 		}else return ["posts"=>[],"next"=>""];
   }
 	public function posts($page=0){
+		$this->fetch();
 		if($this->member!==1)
 			throw new Exception("user didn't have the permission to read group posts");
 		if(is_numeric($page)){
@@ -109,6 +114,7 @@ class Group extends common{
 	 * @param $param, is array(key/pair) it takes text(string),images(array),privacy(string),tags(array) and all are options
 	*/
 	public function publish($param){
+		$this->fetch();
 		//prepare paramater
 		$param=mergeAssociativeArray([
 			"text"=>"",

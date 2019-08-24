@@ -10,7 +10,7 @@ class Notification extends common{
 		parent::__construct();
 	}
 	
-	protected function parseMenu($html){
+	public function parseMenu($html){
 		$a=dom($html,"<a",1);
 		$message=findDom($a,"Message");
 		$notification=findDom($a,"Notification");
