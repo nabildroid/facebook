@@ -1,6 +1,5 @@
 <?php 
 class Groups extends Common{
-	public $parent=null;
 	function __construct($parent){
 		$this->parent=$parent;
 		parent::__construct();

@@ -1,6 +1,5 @@
 <?php 
 class Notification extends common{
-	public $parent=null;
 	public $triggers=[
 		"message"=>null,
 		"notification"=>null

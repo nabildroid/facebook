@@ -1,6 +1,7 @@
 <?php 
 abstract class Common{
 	public $root=null;
+	public $parent=null;
 	public $html="";
 	public $lastHttpRequest=null;
 
@@ -33,7 +34,7 @@ abstract class Common{
 		* @param $url,$data,$headers,responseHeader are responsable of such response
 		* @return null
 	**/
-	protected function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0){
+	public function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0){
 		$this->html=$response;
 		$this->lastHttpRequest=[$url,$data,$headers,$responseHeader];		
 	}
@@ -128,7 +129,6 @@ abstract class Common{
 			return $this->info["id"];
 		else return null;
 	}
-
 }
 
  ?>

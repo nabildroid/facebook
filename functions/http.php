@@ -1,5 +1,8 @@
 <?php 
+$http_number=0;
 function ping($url,$data="",$headers=[],$responseHeader=0){
+	global $http_number;
+	$http_number++;
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
