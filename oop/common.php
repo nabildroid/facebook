@@ -26,7 +26,6 @@ abstract class Common{
 		else $this->lastHttpRequest=[$url,$data,$headers,$responseHeader];
 
 		$this->html=$this->root->http($url,$data,$headers,$responseHeader);
-		$this->getMyId();
 	}
 	/**
 		* to prevent uncessary request that it's response aready exist
@@ -41,20 +40,7 @@ abstract class Common{
 	protected function dom($search,$getAttribute=0,$grabText=0){
 		return dom($this->html,$search,$getAttribute,$grabText);
 	}
-	/**
-		* parse all the html content and get from any form that has an action this account id it's usually named a "av" in form action paramater
-		* @return int this account id or null if the html content hasn't id
-	**/
-	protected function getMyId(){
-		$id=$this->root->profile->id();
-		if($this->html&&!intval($id)){
-			preg_match_all("/<form.*action=.*av=.(\d)*?(?=&)/",$this->html,$id);
-			if(!isset($id[0][0]))return null;
-			$id=explode("=",$id[0][0]);
-			$id=intval(array_pop($id));
-		}
-		return $this->root->profile->info["id"]=$id;
-	}
+
 	/**
 		*submit any form 
 		* @param $html is the content(HTML) of form that hold any inputs
@@ -121,6 +107,17 @@ abstract class Common{
 		}
 	}
 
+
+	##### GETTER -- SETTER #####
+
+	public function getParent(){
+		if($this->PARENT_TYPE){
+			if(!is_a($this->parent,$this->PARENT_TYPE))
+				$this->fetch();
+		}
+		return $this->parent;
+	}
+
 	/**
 		*@return such class id if it exist
 	**/
@@ -129,6 +126,43 @@ abstract class Common{
 			return $this->info["id"];
 		else return null;
 	}
+
+	public function getUser(){
+		if(!$this->user)
+			$this->fetch();
+		return $this->user;
+	}
+
+	public function getContent(){
+		if(!$this->content)
+			$this->fetch();
+		return $this->content;
+	}
+
+
+	public function getLikes($prop){
+		if(!$this->likes[$prop])
+			$this->fetch();
+		return $this->likes[$prop];
+	}
+
+	public function getChilds($prop){
+		if(!$this->childs[$prop])
+			$this->fetch();
+		return $this->childs[$prop];
+	}
+	public function getSource($prop){
+		if(!$this->source[$prop])
+			$this->fetch();
+		return $this->source[$prop];
+	}
+
+
+
+
+
+
+
 }
 
  ?>

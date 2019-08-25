@@ -2,18 +2,16 @@
 trait comment_parse{
 	/**
 	 * this works only if html(section of comments with publish form) is provided
+	 * parse single comment html 
 	 */
-	private function parse(){
-		if(!$this->html)return;
-		var_dump("hello world");
+	private function parseSingleComment(){
 		$this->html=dom($this->html,"<div")[0];
 		$user=dom(dom($this->html,"<h3")[0],"<a",1)[0][1]["href"];
 		
-		/////
 		$html=dom($this->html,"<div",1);
 		//delete any div with empty content
 		$html=filter($html,function($div){return trim($div[0])==true;})[0];
-		//separate between content and tools
+		//separate between content and tools (likes reply..)
 
 		$tools=["",array_pop($html)];//[reaction tool , reply section]
 		if(strlen($tools[1][0])<600)//generally the reply section has short html content
@@ -22,7 +20,6 @@ trait comment_parse{
 
 		//Note::html contain the content 
 
-		
 		$reaction=dom($tools[0][0],"<a",1);
 		//get like action and likes_number		
 		$likes=array_shift($reaction);
@@ -72,8 +69,7 @@ trait comment_parse{
 		$this->likes["like"]=$like_link;
 		$this->childs["length"]=$reply_number;
 		$this->childs["next_page"]=$reply_link;
-		//note: parse doesn't provide add form (html)
-		$this->fetched=1;
+		//note: parse doesn't provide add form (html) to reply (add)
 	}
 
 	/**
@@ -83,7 +79,7 @@ trait comment_parse{
 	 * @return array [replys=>["form","replys"],origin_post=>"origin_post"]
 	 */
 	private function splitReplys(){
-		$data=doms($this->http,['<div','<div','<div']);
+		$data=doms($this->html,['<div','<div','<div']);
 		$origin_post="";
 		if(strpos($data[0],"<a")===0){
 			$origin_post=dom($data[0],"<a",1)[0];
@@ -98,7 +94,8 @@ trait comment_parse{
 		$data=[$data[count($data)-2],$data[count($data)-1]];
 		return ["replys"=>$data,"origin_post"=>$origin_post];
 	}
-	//grab all comments from the first page
+
+	//grab all comments from the post page
 	static function parseComments($reaction,$parent){
 		if(isset($reaction[0])){
 			if(strpos($reaction[0],"<form")===0)
@@ -116,7 +113,6 @@ trait comment_parse{
 
 			$comments=$comments[0];
 			$comments=array_map(function ($cmt_html) use (&$parent){
-				var_dump($cmt_html[0]);
 				$id=intval($cmt_html[1]["id"]);
 				$cmt=new Comment($parent,$id);
 				$cmt->fixHttpResponse($cmt_html[0],$id);

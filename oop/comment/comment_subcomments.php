@@ -19,12 +19,12 @@ trait comment_subcomments{
 				if(!$next)break;
 
 				$this->http($next);
-				$data=$this->splitComments()["comments"];
+				$data=$this->splitReplys()["replys"];
 				$data=self::parseComments($data,$this);
 				
-				$this->childs["next_page"]=$next=$data["next"];
+				$this->childs["next_page"]=$next=$data["next_page"];
 				$this->childs["items"]=array_merge($this->childs["items"],[$data["items"]]);
-				$this->childs["add"]=$data["form"];
+				$this->childs["add"]=$data["add"];
 
 			}
 			if(isset($this->childs["items"][count($this->childs["items"])-1]))

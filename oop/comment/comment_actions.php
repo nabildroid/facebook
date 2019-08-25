@@ -14,9 +14,11 @@ trait comment_actions{
 	 */
 	public function reply($txt){
 		$this->fetch();
+
+		// if add doesn't exist we should get comment subcomments in other word 
+		// we must follow link $this->childs["next_pge"] which's link of reply page
 		if(!$this->childs["add"])
-			$this->fetch(1);
-		
+			$this->subcomments();
 		$form=dom($this->childs["add"],"<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$txt]);
 	}
