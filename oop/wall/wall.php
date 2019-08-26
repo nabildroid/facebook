@@ -10,9 +10,6 @@ class Wall extends common{
 	}
 
 	
-
-
-	
 }
 
 

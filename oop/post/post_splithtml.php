@@ -115,7 +115,7 @@ trait post_splithtml{
 	private function splitPostHtml(){
 		$html=dom($this->html,'id="m_story_permalink_view"')[0];
 		$html=dom($html,"<div");
-		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) 
+		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) [html with attributes]
 		$reaction=$html[1];// section of comments likes and some other actions
 		$html=dom($content,"<div",1)[0];
 		$data=jsondecode($html[1]["data-ft"]);//attaribute that contain some json infomation about post [allways the user id is in this data as content_owner_id_new]

@@ -67,9 +67,10 @@ class Post extends common{
 		//source
 		$source=self::parseSource($data["source"]["html"],$data["source"]["attribute"]);
 		//source basic
-		$this->user=$this->checkIsMine($source["user"])
-									?$this->root->profile
-									:new Profile($this,$source["user"]);
+		if($source["user"])
+			$this->user=$this->checkIsMine($source["user"])
+										?$this->root->profile
+										:new Profile($this,$source["user"]);						
 		$this->id=$source["id"];
 
 		//source options

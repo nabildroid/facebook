@@ -51,7 +51,7 @@ trait post_parsesource{
 
 
 		return [
-			"user"=>$user,
+			"user"=>Profile::idFromUrl($user),
 			"id"=>$id,
 			"origin_post"=>$origin_post,
 			"page"=>$page,

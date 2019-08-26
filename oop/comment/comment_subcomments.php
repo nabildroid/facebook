@@ -2,7 +2,6 @@
 trait comment_subcomments{
 	public function subcomments($page=0){
 		$this->fetch();
-
 		if(isset($this->childs["items"][$page]))
 			return $this->childs["items"][$page];
 		else{
@@ -14,11 +13,10 @@ trait comment_subcomments{
 				$this->fetch(1);
 				return $this->subcomments($page);
 			}
-
-			for ($i=count($this->childs["items"]); $i <$page; $i++) { 
+			for ($i=count($this->childs["items"]); $i <=$page; $i++) { 
 				if(!$next)break;
-
 				$this->http($next);
+				
 				$data=$this->splitReplys()["replys"];
 				$data=self::parseComments($data,$this);
 				

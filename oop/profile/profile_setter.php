@@ -1,6 +1,6 @@
 <?php 
-trait profile_setting{
-	public function setProfilePhoto($url){
+trait profile_setter{
+	public function setProfilePicture($url){
 		$this->permission(1);
 		$this->fetch();
 
@@ -8,7 +8,7 @@ trait profile_setting{
 		$form=$this->dom("<form",1)[0];
 		$this->submit_form($form[0],$form[1]["action"],[$url]);
 	}
-	public function setCoverPhoto($url){
+	public function setCoverPicture($url){
 		$this->permission(1);
 		$this->fetch();
 

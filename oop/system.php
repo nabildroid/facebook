@@ -12,7 +12,15 @@ class  System{
 			"Cookie:".$this->cookie
 		],$headers),$responseHeader);
 		if(is_string($http)){
-			$html=doms($http,["<div","<div","<div"]);
+			
+			$html=dom($http,"<div");
+			while(count($html)===1){
+				$html=dom($html[0],"<div");
+				//delete bottom menu
+				if(count($html)>1&&instr($html[count($html)-1],'href="/logout.php?'))
+					array_pop($html);
+			}
+			
 			if(!isset($html[0]))return $http;
 			$menu=array_shift($html);
 			$content=array_shift($html);

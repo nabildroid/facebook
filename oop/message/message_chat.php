@@ -28,7 +28,7 @@ trait message_chat{
 
 						return [
 							"content"=>$content,
-							"from"=>$sender?new Profile($this,["id"=>$sender]):$this->root->profile
+							"from"=>$sender?new Profile($this,$sender):$this->root->profile
 						];
 					},$msgs);
 

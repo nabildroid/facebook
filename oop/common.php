@@ -84,7 +84,7 @@ abstract class Common{
 					all URLS of pictures are in @param $input
 				*/
 			 	elseif(isset($input["type"])&&$input["type"]=="file"){
-					$file_path="./temp_images/".uniqid().".jpg";
+					$file_path="../temp_images/".uniqid().".jpg";
 					$img=array_shift($values);
 					if($img){
 						file_put_contents($file_path,file_get_contents($img));
@@ -163,7 +163,7 @@ abstract class Common{
 			$this->fetch();
 		return $this->picture[$prop];
 	}
-	public function getBio($prop){
+	public function getBio(){
 		if(!$this->bio)
 			$this->fetch();
 		return $this->bio;

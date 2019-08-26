@@ -10,11 +10,9 @@ trait post_comments{
 			$next=$this->id;
 			if($this->childs["next_page"])
 				$next=$this->childs["next_page"];
-			if(!$next){
-				$this->fetch(1);
-				return $this->comments($page);
-			}
-			for ($i=count($this->childs["items"]); $i <$page; $i++) { 
+			//note: a desester here
+			
+			for ($i=count($this->childs["items"]); $i <=$page; $i++) { 
 				$this->http($next);
 				if(self::detectType($this->html))
 					$data=$this->splitImageHtml();

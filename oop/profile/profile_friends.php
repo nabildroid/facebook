@@ -4,25 +4,30 @@ trait profile_friends{
 		$this->fetch();
 
 		$all=[];
-		$next=$this->id()."?v=friends";
+		$next=$this->id."?v=friends";
 		while ($next) {
 			$this->http($next);
-			$html=doms($this->html,["<div","<div","<div"])[1];
-			$users=dom($html,"<div");
-			if($this->admin){
-				$users=array_pop($users);
-				$users=dom($users,"<div");
-			}
+			$users=doms($this->html,["<div","<div","<div"]);
+			//select right div that has all friends
+			if(count($users)>2)
+				$users=$users[1];
+			elseif($this->admin)$users=$users[1];
+			else  $users=$users[0];
+
+			$users=dom($users,"<table");
+			//sometimes the first element is url for Find Friends
+			if(!instr($users[0],"<img"))
+				array_shift($users);
 
 			$friends=array_map(function($friend){
-
+				$a=dom($friend,"<td")[1];
 				$a=dom($friend,"<a",1)[0];
 				preg_match_all("/[a-z0-9.=]+/", $a[1]["href"],$id);
 				if($id[0][0]=="profile.php")
 					$id=intval(substr($id[0][1],3));
 				else $id=$id[0][0];
 				//@note: the id could be a string !!!!!
-				return new Profile($this,["id"=>$id]);
+				return new Profile($this,$id);
 			},$users);
 			$all=array_merge($all,$friends);
 
@@ -49,10 +54,10 @@ trait profile_friends{
 			$confirm[0]="Confirm Friend";
 			$reject=findDom($a,"Delete Request");
 			$reject[0]="Delete Request";
-			return new Profile($this,[
-				"id"=>$id,
-				"actions"=>[$confirm,$reject]
-			]);
+			$user=new Profile($this,$id);
+			//note:here should be merged array
+			$user->actions=[$confirm,$reject];
+			return $user;
 		},$users);	
 		return $users;
 	}	

@@ -1,62 +1,72 @@
 <?php 
 class Profile extends common {
-	private $admin=0;
-	public $info=[
-		"id"=>"profile",
-		"picture"=>[
-			"profile"=>"",
-			"cover"=>""
-		],
-		"bio"=>"",
-		"actions"=>null,
-		"posts"=>[],
-		"posts_next_page"=>"profile.php",
-	];
-
 	use profile_friends;
 	use profile_posts;
 	use profile_requestFriend;
-	use profile_setting;
+	use profile_setter;
 
-	function  __construct($parent,$info,$admin=0){
+	private $admin=0;
+
+	public $id;
+	public $name;
+	public $bio;
+	public $picture=[
+		"profile"=>"",
+		"cover"=>""
+	];
+	public $childs=[
+		"items"=>[],
+		"next_page"=>""
+	];
+	public $actions; // array of possible actions like send friend request
+	
+
+	function  __construct($parent,$id,$admin=0){
 		$this->parent=$parent;
 		parent::__construct();
 
-		if($info)$this->info=mergeAssociativeArray($this->info,$info);
+		$this->id=$id;
 		$this->admin=$admin;
 	}
-	private function fetch(){
-		if($this->fetched)return;
-		$this->http($this->id());
+	protected function fetch($force=0){
+		if(!$force&&$this->fetched)return;
+		/**
+		 * facebook return about page when fetching profile with only user id
+		 * so ?v=timeline is important for getting also the posts of user 
+		 */
+		$this->http($this->id."?v=timeline");
 		$html=doms($this->html,['id="root"',"<div","<div"])[0];
 		//get cover picture
 		$section=dom($html,"<div");
 		$cover=dom($section[0],"<a",1);
 		if(isset($cover[0])){
 			preg_match_all("/fbid=.(\d)*/",$cover[0][1]["href"],$cover);
-			$cover=intval(substr($cover[0][0],5));
-			$this->info["picture"]["cover"]=new Post($cover,$this);
+			if(isset($cover[0][0])){
+				$cover=intval(substr($cover[0][0],5));
+				$this->picture["cover"]=new Post($this,$cover);
+			}
 		}
 		//get profile picture
 		$section1=dom($section[1],"<div");
 		$profile=dom($section1[0],"<a",1);
 		if(isset($profile[0])){
 			preg_match_all("/fbid=.(\d)*/",$profile[0][1]["href"],$profile);
-			$profile=intval(substr($profile[0][0],5));
-			$this->info["picture"]["profile"]=new Post($profile,$this);
+			if(isset($profile[0][0])){
+				$profile=intval(substr($profile[0][0],5));
+				$this->picture["profile"]=new Post($this,$profile);
+			}
 		}
 		//get bio
 		if(isset($section1[1])){
 			$bio=dom($section1[1],"<div");
 			if(isset($bio[0]))
-				$this->info["bio"]=$bio[0];
-			else{
-				$this->info["bio"]=flatContent(parseContent($section1[1]));
-			}
+				$this->bio=$bio[0];
+			else
+				$this->bio=flatContent(parseContent($section1[1]));
 		}
 		//action buttons
 		$section2=dom($section[2],"<a",1);
-		$this->info["actions"]=$section2;
+		$this->actions=$section2;
 
 		//get user id(integer) from actions in more button
 		if(!$this->admin){
@@ -64,11 +74,13 @@ class Profile extends common {
 			if(isset($id[1]["href"])){
 				preg_match_all("/owner_id=\d+/",$id[1]["href"],$id);
 				$id=intval(substr($id[0][0],9));
-				$this->info["id"]=$id;
+				$this->id=$id;
 			}
 		}
 
+		//get posts from main page (page index 0)
 		$this->fetched=1;
+		$this->posts(0);
 	}
 
 	/**
@@ -77,17 +89,10 @@ class Profile extends common {
    */
 	private function friendAsk(){
 		$this->permission(0);
-		return isset(findDom($this->info["actions"],"Confirm Friend")[1]["href"]);
+		return isset(findDom($this->actions,"Confirm Friend")[1]["href"]);
 	}
 
-	private function splitPosts(){
-		$content=$this->dom('id="structured_composer_async_container"');
-		if(isset($content[0])){
-			$posts=dom($content[0],["data-ft",'role="article"'],1);
-			$next=findDom(dom($content[0],"<a",1),"See More Stories");
-			return ["posts"=>$posts,"next"=>$next];
-		}else return ["posts"=>[],"next"=>""];
-	}
+
 
 	/**
 	 * @param $url string like /bla.bla.00?refid=18&__tn__=R
@@ -95,9 +100,12 @@ class Profile extends common {
 	 */
 	static function idFromUrl($url){
 		preg_match_all("/(id=\d+)|\/[\w\d.]+/",$url,$id);
-		if(isset($id[0][1])&&instr($id[0][1],"id=10"))
+
+		if(isset($id[0][1])&&instr($id[0][1],"id=1")&&strlen($id[0][1])>10)
 			$id=intval(substr($id[0][1],3));
-		else $id=substr($id[0][0],1);
+		elseif(isset($id[0][0])&&$id[0][0])
+			$id=substr($id[0][0],1);
+		else $id="";
 		return $id;
 	}
 	private function permission($access){
