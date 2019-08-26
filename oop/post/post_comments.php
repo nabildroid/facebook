@@ -3,29 +3,37 @@ trait post_comments{
 	//get comments
 	public function comments($page=0){
 		$this->fetch();
-		if(isset($this->comments_info["items"][$page]))
-			return $this->comments_info["items"][$page];
+		if(isset($this->childs["items"][$page]))
+			return $this->childs["items"][$page];
 		else{
-			for ($i=0; $i <=$page; $i++) { 
-				$this->http($this->comments_info["next"]);
-				if(self::detectType($this->html))
-					$data=self::splitImageHtml($this->html);
-				else
-					$data=self::splitPostHtml($this->html);
-				$this->parseComments($data["comment_html"]);
+			//prepare the url
+			$next=$this->id;
+			if($this->childs["next_page"])
+				$next=$this->childs["next_page"];
+			if(!$next){
+				$this->fetch(1);
+				return $this->comments($page);
 			}
-			return $this->comments_info["items"][count($this->comments_info["items"])-1];
+			for ($i=count($this->childs["items"]); $i <$page; $i++) { 
+				$this->http($next);
+				if(self::detectType($this->html))
+					$data=$this->splitImageHtml();
+				else
+					$data=$this->splitPostHtml();
+				$this->parseComments($data["comments_html"]);
+				$next=$this->childs["next_page"];
+			}
+			return $this->childs["items"][count($this->childs["items"])-1];
 		}
   }
   
   //grab all comments from the first page
   private function parseComments($reaction){
   	$comments=Comment::parseComments($reaction,$this);
-  	$this->comments_info["items"]=array_merge($this->comments_info["items"],[$comments["items"]]);
-  	$this->comments_info["next"]=!empty($comments["next_page"])?$comments["next_page"]:"";
   	
-  	if(!$this->comments_info["form"])		
-  		$this->comments_info["form"]=$comments["add"];
+  	$this->childs["items"]=array_merge($this->childs["items"],[$comments["items"]]);
+  	$this->childs["next_page"]=$comments["next_page"];	
+  	$this->childs["add"]=$comments["add"];
   }
 
 

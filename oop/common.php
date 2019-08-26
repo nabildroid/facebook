@@ -27,12 +27,13 @@ abstract class Common{
 
 		$this->html=$this->root->http($url,$data,$headers,$responseHeader);
 	}
+
 	/**
 		* to prevent uncessary request that it's response aready exist
 		* @param $response the response that request suppose to return 
 		* @param $url,$data,$headers,responseHeader are responsable of such response
 		* @return null
-	**/
+	  */
 	public function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0){
 		$this->html=$response;
 		$this->lastHttpRequest=[$url,$data,$headers,$responseHeader];		
@@ -42,13 +43,13 @@ abstract class Common{
 	}
 
 	/**
-		*submit any form 
-		* @param $html is the content(HTML) of form that hold any inputs
-		* @param $url where the form action happen 
-		* @param $values array of all values that will submitted by order, can be a text or **url** for files
-		* @param $target_submit if one submit must trigger in this form
-		* @param forceInput is key/value pair for forcing any input to take static value
-	*/
+	 *submit any form 
+	 * @param $html is the content(HTML) of form that hold any inputs
+	 * @param $url where the form action happen 
+	 * @param $values array of all values that will submitted by order, can be a text or **url** for files
+	 * @param $target_submit if one submit must trigger in this form
+	 * @param forceInput is key/value pair for forcing any input to take static value
+	 */
 	protected function submit_form($html,$url,$values=[],$target_submit="",$forceInput=""){
 		$inputs=dom($html,["<input","<textarea"],1);
 		$files=[];
@@ -119,12 +120,12 @@ abstract class Common{
 	}
 
 	/**
-		*@return such class id if it exist
-	**/
-	public function id(){
-		if(isset($this->info["id"])&&$this->info["id"])
-			return $this->info["id"];
-		else return null;
+	 *@return such class id if it exist
+	 */
+	public function getId(){
+		if(!$this->id)
+			$this->fetch();
+		return $this->id;
 	}
 
 	public function getUser(){
@@ -155,6 +156,17 @@ abstract class Common{
 		if(!$this->source[$prop])
 			$this->fetch();
 		return $this->source[$prop];
+	}
+
+	public function getPicture($prop){
+		if(!$this->picture[$prop])
+			$this->fetch();
+		return $this->picture[$prop];
+	}
+	public function getBio($prop){
+		if(!$this->bio)
+			$this->fetch();
+		return $this->bio;
 	}
 
 

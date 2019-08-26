@@ -45,7 +45,6 @@ class Comment extends common{
 	 */
 	protected function fetch($force=0){
 		if(!$force&&$this->fetched)return;
-		var_dump("fetched");
 		//request the comment by it id
 		$this->http($this->id);
 		//detect the type of response page (either Post page or Reply page or singleComment html)

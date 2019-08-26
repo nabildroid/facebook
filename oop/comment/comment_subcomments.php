@@ -15,14 +15,15 @@ trait comment_subcomments{
 				return $this->subcomments($page);
 			}
 
-			for ($i=count($this->childs["items"]); $i <=$page; $i++) { 
+			for ($i=count($this->childs["items"]); $i <$page; $i++) { 
 				if(!$next)break;
 
 				$this->http($next);
 				$data=$this->splitReplys()["replys"];
 				$data=self::parseComments($data,$this);
 				
-				$this->childs["next_page"]=$next=$data["next_page"];
+				$next=$data["next_page"];
+				$this->childs["next_page"]=$next;
 				$this->childs["items"]=array_merge($this->childs["items"],[$data["items"]]);
 				$this->childs["add"]=$data["add"];
 

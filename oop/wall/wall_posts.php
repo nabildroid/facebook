@@ -12,10 +12,10 @@ trait wall_posts{
 		$posts=$this->dom('role="article"',1);
 		//create posts objects
 		$tempPosts=[];
-		foreach ($posts as $post){
-			$info=Post::GetInfoFromListedPost($post);
-			if($info)
-				$tempPosts[]=new Post($info["from"]["id"],$this,$info);
+		foreach ($posts as $html){
+			$post=new Post($this);
+			$post->fixHttpResponse($html,null);
+			$tempPosts[]=$post;
 		}
 		return $tempPosts;
 	}

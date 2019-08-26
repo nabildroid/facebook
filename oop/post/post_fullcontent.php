@@ -2,13 +2,14 @@
 trait post_fullcontent{
 	//get Full content
 	public function fullContent(){
-		if($this->info["content"]){
-			$content=$this->info["content"];
+		$this->fetch();
+		if($this->content){
+			$content=$this->content;
 			$flat=flatContent($content);
-			if(strpos($flat,"...More")!==false){
-				$this->fetch();
+			if(instr($flat,"...More")){
+				$this->fetch(1);
 			} 
-			return $this->info["content"];
+			return $this->content;
 		}
 	}
 }

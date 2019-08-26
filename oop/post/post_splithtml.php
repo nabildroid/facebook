@@ -12,20 +12,20 @@ trait post_splithtml{
 
 	/**
 	 * get information about such post from it html
-	 * but this html grabbed from list of posts like in main facebook page (user wall)
+	 * but this html grabbed from list of posts in main facebook page (user wall)
+	 * the hidden @param $this->html must be a array contain [attribute,html] of post
 	 */
-	static function GetInfoFromListedPost($post){
+	private function parseInlinePost(){
 		$info=[];
-		$data=jsondecode($post[1]["data-ft"]);
-		$html=dom($post[0],"<div");
+		$data=jsondecode($this->html[1]["data-ft"]);
+		$html=dom($this->html[0],"<div");
 
-		//data [id,user,type_of_post(group or page or friend)]
+		//data [id,user,parentType]
 
-		//html [content,likes_number]
+		//html [content,likes_length]
 		$content=dom($html[0],"<div");
 
-		$from=dom(array_shift($content),"<a",1);
-		// $from=parseFrom($content,$data);  / ! \
+		$source=dom(array_shift($content),"<a",1);
 
 		$text=join($content,"");
 
@@ -41,7 +41,7 @@ trait post_splithtml{
 			$like_link=$like_link[0][0][1]["href"];
 		else $like_link="";
 		
-		$areadyliked=isset(filter($actions,function($action){
+		$alreadyliked=isset(filter($actions,function($action){
 			return strpos($action[0],"<b>Like</b>")!==false;
 		})[0][0]);
 
@@ -49,21 +49,22 @@ trait post_splithtml{
 		if(strlen($likes[0])>4)
 			$likes=intval(substr($likes[0],strpos($likes[0],"</span>")+7));
 		else $likes=0;
-
+		/**
+		 * @todo get the number of total comments
+		 */
 		return [
-			"from"=>self::parseFrom($from,$data),
-			"data"=>$data,
-			"content"=>parseContent($text),
-			"likes_number"=>$likes,
+			"source"=>["html"=>$source,"attribute"=>$data],
+			"content"=>$text,
+			"likes_length"=>$likes,
 			"like_link"=>$like_link,
-			"aready_liked"=>$areadyliked
+			"already_liked"=>$alreadyliked
 		];
 
 	}
 	//grab information about image post 
-	private function splitImageHtml($html){
-		$actions=dom(dom($html,'id="MPhotoActionbar"')[0],"<a",1);
-		$html=doms($html,['id="MPhotoContent"',"<div"]);
+	private function splitImageHtml(){
+		$actions=dom(dom($this->html,'id="MPhotoActionbar"')[0],"<a",1);
+		$html=doms($this->html,['id="MPhotoContent"',"<div"]);
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) and full-image
 		$reaction=$html[1];// section of comments likes and some other actions
 
@@ -73,7 +74,7 @@ trait post_splithtml{
 		$content[0]=dom($content[0],["<a","<div"],1);//not filtred
 
 		$text=array_pop($content[0])[0];
-		$from=$content[0];
+		$source=$content[0];
 		$image=dom($content[1],"<a",1);//content[1] has the link of full_size
 		$image=findDom($image,"View Full Size");
 
@@ -87,7 +88,7 @@ trait post_splithtml{
 			return strpos($action[0],"Like")!=false;
 		})[0][0][1]["href"];
 
-		$areadyliked=isset(filter($actions,function($action){
+		$alreadyliked=isset(filter($actions,function($action){
 			return strpos($action[0],"presentation")!==false;
 		})[0][0]);
 
@@ -101,18 +102,18 @@ trait post_splithtml{
 		$likes=!intval($likes)&&$likes?1:intval($likes);
 
 		return [
-			"from"=>$from,
+			"source"=>["html"=>$source,"attribute"=>null],
 			"image"=>$image,
 			"content"=>$text,
-			"likes_number"=>$likes,
+			"likes_length"=>$likes,
 			"like_link"=>$like_link,
-			"aready_liked"=>$areadyliked,
-			"comment_html"=>$reaction
+			"already_liked"=>$alreadyliked,
+			"comments_html"=>$reaction
 		];
 	}
 	//grab informaion about normal post
-	private function splitPostHtml($html){
-		$html=dom($html,'id="m_story_permalink_view"')[0];
+	private function splitPostHtml(){
+		$html=dom($this->html,'id="m_story_permalink_view"')[0];
 		$html=dom($html,"<div");
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) 
 		$reaction=$html[1];// section of comments likes and some other actions
@@ -120,8 +121,8 @@ trait post_splithtml{
 		$data=jsondecode($html[1]["data-ft"]);//attaribute that contain some json infomation about post [allways the user id is in this data as content_owner_id_new]
 		$html=doms($html[0],["<div","<div"]);
 		$html=filter($html)[0];
-		$from=dom(array_shift($html),"<h3")[0];//here you can find the infomation about where 
-		$from=dom($from,"<a",1);
+		$source=dom(array_shift($html),"<h3")[0];//here you can find the infomation about where 
+		$source=dom($source,"<a",1);
 		$content=$html;
 
 		$reaction=filter(doms($reaction,["<div","<div"]))[0];
@@ -133,7 +134,7 @@ trait post_splithtml{
 		/**
 		 * @todo presentation criteria is not efficient way because it attribute and exist in picture (not tested in all situation)
 		 */
-		$areadyliked=isset(filter($actions,function($action){
+		$alreadyliked=isset(filter($actions,function($action){
 			return strpos($action[0],"presentation")!==false;
 		})[0][0]);
 
@@ -148,13 +149,12 @@ trait post_splithtml{
 		$likes=!intval($likes)&&$likes?1:intval($likes);
 
 		return [
-			"from"=>$from,
-			"data"=>$data,
+			"source"=>["html"=>$source,"attribute"=>null],
 			"content"=>$content,
-			"likes_number"=>$likes,
+			"likes_length"=>$likes,
 			"like_link"=>$like_link,
-			"aready_liked"=>$areadyliked,
-			"comment_html"=>$reaction
+			"already_liked"=>$alreadyliked,
+			"comments_html"=>$reaction
 		];
 	}
 }

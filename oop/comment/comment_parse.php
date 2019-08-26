@@ -63,7 +63,7 @@ trait comment_parse{
 			$content.=$h[0];
 
 		$this->content=parseContent($content);
-		$this->user=new Profile($this,["id"=>Profile::idFromUrl($user)]);
+		$this->user=new Profile($this,Profile::idFromUrl($user));
 		$this->likes["length"]=$likes;
 		$this->likes["url"]=$likes_users_link;
 		$this->likes["like"]=$like_link;
@@ -108,8 +108,21 @@ trait comment_parse{
 							 strpos($str[0],"<span>View previous replies</span>")===false&&
 							 strpos($str[0],"<span>View more replies</span>")===false;
 			});
-			if($comments[1])
-				$next=dom($comments[1][0][0],"<a",1)[0][1]["href"];
+
+			/**
+			 *get filtred url for next page
+			 *you should add those too
+			 * strpos($str[0],"View previous comments…")===false&&
+			 * strpos($str[0],"<span>View previous replies</span>")===false&&
+			 * but it return first page and second then will return back to first
+			 */
+			if($comments[1]){
+				$next=findDom($comments[1],"View more comments…");
+				if(!$next)$next=findDom($comments[1],"<span>View more replies</span>");
+				if(isset($next[0])&&$next[0])
+					$next=dom($next[0],"<a",1)[0][1]["href"];
+				else $next="";
+			}
 
 			$comments=$comments[0];
 			$comments=array_map(function ($cmt_html) use (&$parent){

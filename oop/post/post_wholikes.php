@@ -9,9 +9,8 @@ trait post_wholikes{
 		static function fetch_wholikes($url="",$parent){
 			//ufi/reaction/profile/browser/?ft_ent_identifier=ID_HERE
 				$all_users=[];
-			if($url||empty($parent->info["likes"]["users"])){
-				$next=($url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$parent->id());
-		
+			if($url||empty($parent->likes["users"])){
+				$next=$url?$url:"/ufi/reaction/profile/browser/?ft_ent_identifier=".$parent->getId();
 				do{
 					$next=is_array($next)?$next[0][1]["href"]:$next;//first next is string then it array
 					$parent->http($next);
@@ -27,15 +26,14 @@ trait post_wholikes{
 					$next=$links[1];
 					$users=array_map(function($user)use(&$parent){
 						$id=Profile::idFromUrl($user[1]["href"]);
-						return new Profile($parent,["id"=>$id]);
+						return new Profile($parent,$id);
 					},$users);
 					$all_users=array_merge($all_users,$users);
 
 				}while(isset($next[0][1]["href"]));
 				
 				if(!$url)
-					$parent->info["likes"]["users"]=$all_users;
-				
+					$parent->likes["users"]=$all_users;
 				return $all_users;
 			}
 		}
