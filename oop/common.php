@@ -141,27 +141,27 @@ abstract class Common{
 	}
 
 
-	public function getLikes($prop){
-		if(!$this->likes[$prop])
+	public function getLikes($prop=""){
+		if(!$this->likes||$prop&&!$this->likes[$prop])
 			$this->fetch();
-		return $this->likes[$prop];
+		return $prop?$this->likes[$prop]:$this->likes;
 	}
 
-	public function getChilds($prop){
-		if(!$this->childs[$prop])
+	public function getChilds($prop=""){
+		if(!$this->childs||$prop&&!$this->childs[$prop])
 			$this->fetch();
-		return $this->childs[$prop];
+		return $prop?$this->childs[$prop]:$this->childs;
 	}
-	public function getSource($prop){
-		if(!$this->source[$prop])
+	public function getSource($prop=""){
+		if(!$this->source||$prop&&!$this->source[$prop])
 			$this->fetch();
-		return $this->source[$prop];
+		return $prop?$this->source[$prop]:$this->source;
 	}
 
-	public function getPicture($prop){
-		if(!$this->picture[$prop])
+	public function getPicture($prop=""){
+		if(!$this->picture||$prop&&!$this->picture[$prop])
 			$this->fetch();
-		return $this->picture[$prop];
+		return $prop?$this->picture[$prop]:$this->picture;
 	}
 	public function getBio(){
 		if(!$this->bio)

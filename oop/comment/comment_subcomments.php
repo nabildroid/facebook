@@ -6,13 +6,7 @@ trait comment_subcomments{
 			return $this->childs["items"][$page];
 		else{
 			//prepare the url
-			$next=$this->id;
-			if($this->childs["next_page"])
-				$next=$this->childs["next_page"];
-			if(!$next){
-				$this->fetch(1);
-				return $this->subcomments($page);
-			}
+			$next=$this->childs["next_page"];
 			for ($i=count($this->childs["items"]); $i <=$page; $i++) { 
 				if(!$next)break;
 				$this->http($next);

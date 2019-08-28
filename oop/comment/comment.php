@@ -25,7 +25,8 @@ class Comment extends common{
 		"length"=>0, //number of replys
 		"items"=>[], //array contain multi arrays of comment array for each page 
 		"next_page"=>"",//url lead to next page of subcomments
-		"add"=>""    //html form for create a reply 
+		"next_page_indicator"=>"",//sometimes initiale caption of next reply page is "View previous replies" and othertime is "View previous replies" 
+		"add"=>"",    //html form for create a reply 
 	];
 
 	function __construct($parent,$id=null){
@@ -47,18 +48,19 @@ class Comment extends common{
 		if(!$force&&$this->fetched)return;
 		//request the comment by it id
 		$this->http($this->id);
+		
 		//detect the type of response page (either Post page or Reply page or singleComment html)
 		$type=Post::detectType($this->html);
 		$comments=[];
 		//Post page (create new post fix it http then parse it comment)
-		if($type!==false){
-			$post=new Post($this->id,$this->root);
+		if($type!==false){			
+			$post=new Post($this->root,$this->id);
 			$post->fixHttpResponse($this->html,$this->id);
 			$comments=$post->comments();
 		}		
 		/*single comment html note:bad criteria
 		  the html is already fixed by fixHttpResponse*/
-		elseif(strrpos($this->html,"<h3")==5){
+		elseif(strpos($this->html,"<h3")==5){
 			$this->parseSingleComment();
 		}
 		//Reply page (get all replys make new Post (parent) assign it to such replys)
@@ -84,7 +86,7 @@ class Comment extends common{
 
 			/**
 			 * case of next page in reply  doesn't has any sence
-			**/
+			 */
 		}
 
 		$this->fetched=1;
@@ -92,14 +94,16 @@ class Comment extends common{
 
 	/**
 	 * make this comment identical to @param $comment
+	 * @todo is not important to get fetched information, sometimes the id is enough
+	 * so instend of getting for exemple from getUser() get it from user
 	 */
 	private function copyFrom(Comment $comment){
 		$this->parent=$comment->parent;
-		$this->id=$comment->id;
+		$this->id=$comment->getId();
 		$this->user=$comment->getUser();
 		$this->content=$comment->getContent();
-		$this->likes=$comment->likes;
-		$this->childs=$comment->childs;
+		$this->likes=$comment->getLikes();
+		$this->childs=$comment->getChilds();
 	}
 
 

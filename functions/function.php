@@ -186,8 +186,19 @@ function mergeAssociativeArray($origin,$new){
 	}
 	return $origin;
 }
-
+/**
+ * search in string 
+ * @param $str  string that the search will apply to
+ * @param $s target could be string or array 
+ * @return boolean if @param $s is string or if it array return will be string that match
+ */
 function instr($str,$s){
+	if(is_array($s)){
+			foreach ($s as $key) {
+				if(strpos($str,$key)!==false)
+					return $key;
+			}return false;
+	}else
 	return strpos($str,$s)!==false;
 }
 
