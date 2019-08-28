@@ -1,5 +1,7 @@
 <?php 
 class Account extends system{
+	//note: FREE_FACEBOOK  must be a constant
+	protected $FREE_FACEBOOK=0;
 	public $wall;
 	public $pages;
 	public $groups;
