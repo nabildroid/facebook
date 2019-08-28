@@ -17,7 +17,7 @@ trait post_splithtml{
 	 */
 	private function parseInlinePost(){
 		$info=[];
-		$data=jsondecode($this->html[1]["data-ft"]);
+		$attributes=jsondecode($this->html[1]["data-ft"]);
 		$html=dom($this->html[0],"<div");
 
 		//data [id,user,parentType]
@@ -53,7 +53,7 @@ trait post_splithtml{
 		 * @todo get the number of total comments
 		 */
 		return [
-			"source"=>["html"=>$source,"attribute"=>$data],
+			"source"=>["html"=>$source,"attribute"=>$attributes],
 			"content"=>$text,
 			"likes_length"=>$likes,
 			"like_link"=>$like_link,
@@ -61,7 +61,7 @@ trait post_splithtml{
 		];
 
 	}
-	//grab information about image post 
+	//grab information about image post note:doesn't provide attributes(data-ft)
 	private function splitImageHtml(){
 		$actions=dom(dom($this->html,'id="MPhotoActionbar"')[0],"<a",1);
 		$html=doms($this->html,['id="MPhotoContent"',"<div"]);
@@ -127,7 +127,7 @@ trait post_splithtml{
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) [html with attributes]
 		$reaction=$html[1];// section of comments likes and some other actions
 		$html=dom($content,"<div",1)[0];
-		$data=jsondecode($html[1]["data-ft"]);//attaribute that contain some json infomation about post [allways the user id is in this data as content_owner_id_new]
+		$attributes=jsondecode($html[1]["data-ft"]);//attaribute that contain some json infomation about post [allways the user id is in this data as content_owner_id_new]
 		$html=doms($html[0],["<div","<div"]);
 		$html=filter($html)[0];
 		$source=dom(array_shift($html),"<h3")[0];//here you can find the infomation about where 
@@ -158,7 +158,7 @@ trait post_splithtml{
 		$likes=!intval($likes)&&$likes?1:intval($likes);
 
 		return [
-			"source"=>["html"=>$source,"attribute"=>null],
+			"source"=>["html"=>$source,"attribute"=>$attributes],
 			"content"=>$content,
 			"likes_length"=>$likes,
 			"like_link"=>$like_link,
