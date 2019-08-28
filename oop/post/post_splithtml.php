@@ -101,8 +101,17 @@ trait post_splithtml{
 		$likes=array_pop($likes);
 		$likes=!intval($likes)&&$likes?1:intval($likes);
 
+		//get id of such image from his like_link
+		$id="";
+		preg_match_all("/(identifier=\d+)|\/\d+/",urldecode($like_link),$id);
+		if(isset($id[0][0])){
+			preg_match_all("/\d+/",$id[0][0],$id);
+			if(isset($id[0][0]))
+				$id=intval($id[0][0]);
+		}
+		
 		return [
-			"source"=>["html"=>$source,"attribute"=>null],
+			"source"=>["html"=>$source,"attribute"=>["top_level_post_id"=>$id]],
 			"image"=>$image,
 			"content"=>$text,
 			"likes_length"=>$likes,
