@@ -99,8 +99,8 @@ class Profile extends common {
 	 * @return either id(int) or id(string)
 	 */
 	static function idFromUrl($url){
+		if(intval($url))return intval($url);
 		preg_match_all("/(id=\d+)|\/[\w\d.]+/",$url,$id);
-
 		if(isset($id[0][1])&&instr($id[0][1],"id=1")&&strlen($id[0][1])>10)
 			$id=intval(substr($id[0][1],3));
 		elseif(isset($id[0][0])&&$id[0][0])

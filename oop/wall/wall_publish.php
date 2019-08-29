@@ -60,7 +60,8 @@ trait wall_publish{
 		}
 		//get such new post
 		$this->fixHttpResponse($this->html);
-		return $this->posts()[0];
+		foreach ($this->posts() as $post)
+			if($post->getAdmin()){return $post;}
 	}
 }
 ?>
