@@ -46,9 +46,17 @@ trait post_parsesource{
 					return !$value||strpos($a[1]["href"],$value)===0;
 			});
 			if(isset($source[0][0]))
-				$values[$key]=$source[0][0][1]["href"];
+				$selector[$key]=$source[0][0][1]["href"];
+			else $selector[$key]="";
 			$source=$source[1];
 		}
+		//add id to selector (add id to the template for merging)
+		$selector["id"]="";
+		//merge selector (values of source from html) with values(values of source from json attributes)
+		$values=mergeAssociativeArray($selector,$values);
+		var_dump($values);
+		exit;
+
 		//process ids
 		$values["user"]=Profile::idFromUrl($values["user"]);
 

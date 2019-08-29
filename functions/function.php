@@ -180,7 +180,7 @@ function findDom($doms,$target){
 */
 function mergeAssociativeArray($origin,$new){
 	foreach ($origin as $key => $value) {
-		if(isset($new[$key])){
+		if(isset($new[$key])&&$new[$key]){
 			$origin[$key]=$new[$key];
 		}
 	}
