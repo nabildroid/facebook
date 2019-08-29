@@ -21,7 +21,7 @@ abstract class Common{
 	*/
 	public  function http($url="",$data="",$headers=[],$responseHeader=0){		
 		//check if previous request is equivalent to current one 
-		if($this->lastHttpRequest===[$url,$data,$headers,$responseHeader])
+		if($this->lastHttpRequest==[$url,$data,$headers,$responseHeader])
 			return $this->html;
 		else $this->lastHttpRequest=[$url,$data,$headers,$responseHeader];
 
@@ -120,10 +120,11 @@ abstract class Common{
 	}
 
 	/**
+	 *@param $int get integer 
 	 *@return such class id if it exist
 	 */
-	public function getId(){
-		if(!$this->id)
+	public function getId($int=0){
+		if($int||!$this->id)
 			$this->fetch();
 		return $this->id;
 	}
@@ -168,7 +169,10 @@ abstract class Common{
 			$this->fetch();
 		return $this->bio;
 	}
-
+	public function getAdmin(){
+		$this->fetch();
+		return $this->admin;
+	}
 
 
 
