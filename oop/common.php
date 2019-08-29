@@ -56,18 +56,29 @@ abstract class Common{
 		$data=[];
 		foreach ($inputs as $input) {
 			if(isset($input[1]))$input=$input[1];
-				//text inputs
-				if($input["find_tag"]=="<textarea"||$input["type"]=="text")
-					$data[$input["name"]]=array_shift($values);
 
-				//hidden inputs
-				elseif($input["type"]=="hidden"&&isset($input["name"])){
-					//when uploading multi images some hidden input takes mylti values 
-					//and such input his name allways and with [] to indicate array 
+				//when uploading multi images some hidden input takes multi values 
+				//and such input his name always end with [] to indicate array 
+				if(isset($input["name"]))
 					$input["name"]=str_replace("[]", "",$input["name"]);
 
+				//text inputs
+				if($input["find_tag"]=="<textarea"||$input["type"]=="text"){
+					$value=array_shift($values);
+
+					//check if $input["name"] is referent to array or note  
+					if(isset($data[$input["name"]])&&$value){//referent to array
+						if(!is_array($data[$input["name"]]))
+							$data[$input["name"]]=[$data[$input["name"]],$value];
+						else array_push($data[$input["name"]],$value);
+					}else $data[$input["name"]]=$value;
+				}
+				//hidden inputs
+				elseif($input["type"]=="hidden"&&isset($input["name"])){
 					$value=isset($input["value"])?$input["value"]:"";
-					if(isset($data[$input["name"]])&&$value){
+
+					//check if $input["name"] is referent to array or note  
+					if(isset($data[$input["name"]])&&$value){//referent to array
 						if(!is_array($data[$input["name"]]))
 							$data[$input["name"]]=[$data[$input["name"]],$value];
 						else array_push($data[$input["name"]],$value);
