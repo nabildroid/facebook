@@ -22,7 +22,8 @@ trait post_comments{
 				else
 					continue;
 
-				$this->parseComments($data["comments_html"]);
+
+				$this->parseCommentSection($data["comments_html"]);
 				$next=$this->childs["next_page"];
 			}
 			if(isset($this->childs["items"][$page]))
@@ -32,8 +33,8 @@ trait post_comments{
   }
   
   //grab all comments from the first page
-  private function parseComments($reaction){
-  	$comments=Comment::parseComments($reaction,$this);
+  private function parseCommentSection($reaction){
+  	$comments=Comment::parseCommentSection($reaction,$this);
   	$this->childs["items"]=array_merge($this->childs["items"],[$comments["items"]]);
   	$this->childs["next_page"]=$comments["next_page"];	
   	$this->childs["add"]=$comments["add"];

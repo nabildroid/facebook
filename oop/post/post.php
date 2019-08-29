@@ -89,7 +89,7 @@ class Post extends common{
 			$this->image=$data["image"];
 		//comments
 		if(isset($data["comments_html"]))
-			$this->parseComments($data["comments_html"]);
+			$this->parseCommentSection($data["comments_html"]);
 
 		
 

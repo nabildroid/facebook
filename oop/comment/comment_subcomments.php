@@ -12,7 +12,7 @@ trait comment_subcomments{
 				$this->http($next);
 				
 				$data=$this->splitReplys()["replys"];
-				$data=self::parseComments($data,$this);
+				$data=self::parseCommentSection($data,$this);
 				
 				$next=$data["next_page"];
 				$this->childs["next_page"]=$next;

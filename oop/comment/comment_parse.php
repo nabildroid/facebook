@@ -96,7 +96,7 @@ trait comment_parse{
 	}
 
 	//grab all comments from the post page
-	static function parseComments($reaction,$parent){
+	static function parseCommentSection($reaction,$parent){
 		if(isset($reaction[0])){
 
 			//indicators of pagination

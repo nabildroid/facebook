@@ -69,7 +69,7 @@ class Comment extends common{
 			preg_match_all("/story_fbid=\d+/",$info["origin_post"],$postId);
 			$postId=intval(substr($postId[0][0],11));
 			$post=new Post($postId,$this->root);
-			$data=self::parseComments($info["replys"],$post);
+			$data=self::parseCommentSection($info["replys"],$post);
 			$add=$data["add"];
 			$comments=$data["items"];
 		} 
