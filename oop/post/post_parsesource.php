@@ -54,8 +54,6 @@ trait post_parsesource{
 		$selector["id"]="";
 		//merge selector (values of source from html) with values(values of source from json attributes)
 		$values=mergeAssociativeArray($selector,$values);
-		var_dump($values);
-		exit;
 
 		//process ids
 		$values["user"]=Profile::idFromUrl($values["user"]);
