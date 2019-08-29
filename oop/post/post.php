@@ -80,8 +80,11 @@ class Post extends common{
 		//todo: source must be a object
 		if($source["page"])
 			$this->source["page"]=$source["page"];
-		if($source["group"])
-			$this->source["group"]=$source["group"];
+		if($source["group"]){
+			$group_id=Group::idFromUrl($source["group"]);
+			//note: is this->root right parent for such group or this post may be his parent!!
+			$this->source["group"]=new Group($this->root,$group_id);
+		}
 
 
 		//image
