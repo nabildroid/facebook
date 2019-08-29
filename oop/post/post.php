@@ -27,7 +27,8 @@ class Post extends common{
 	public $childs=[  
 		/* @todo "length"=>0, //number of replys */
 		"items"=>[], //array contain multi arrays of comment array for each page 
-		"next_page"=>"",//url lead to next page of comment
+		"next_page"=>null,//url lead to next page of comment
+		"next_page_indicator"=>"",//sometimes initiale caption of next reply page is "View previous replies" and othertime is "View previous replies" 
 		"add"=>""    //html form for create a reply 
 	];
 

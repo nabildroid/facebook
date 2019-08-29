@@ -3,12 +3,12 @@ include "../index.php";
 
 
 ##post from id
-$post=new Post($user,3015042911900890);
+$post=new Post($user,2376163555834069);
 
 
 ##like/unlike
 $alread_liked=$post->getLikes("mine");
-var_dump("alread_liked:".$alread_liked);
+// var_dump("alread_liked:".$alread_liked);
 // if($alread_liked)
 // 	$post->unlike();
 // else $post->like();
@@ -18,12 +18,21 @@ var_dump("alread_liked:".$alread_liked);
 // $post->comment("Hello world".time());
 
 ##get comments
-$post->comments(0);
-$cmts=$post->comments(1);
-$cmt=$cmts[random_int(0,count($cmts)-1)];
-## get random comment content
-var_dump(flatContent($cmt->getContent()));
-var_dump($cmt->getUser()->getId());
+
+var_dump("---------------RANDOM POST COMMNETS");
+
+for ($i=0; $i <4 ; $i++) { 
+	var_dump("-------page".$i);
+	$cmts=$post->comments($i);
+	foreach ($cmts as $cmt) {
+		var_dump("-author: ".$cmt->getUser()->getId());
+		var_dump("---content: ".flatContent($cmt->getContent()));
+		var_dump("---likes number: ".$cmt->getLikes("length"));
+	}
+}
+
+
+
 ##like comment
 //$cmts[random_int(0,count($cmts)-1)]->like();
 

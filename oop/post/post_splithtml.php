@@ -122,8 +122,8 @@ trait post_splithtml{
 	}
 	//grab informaion about normal post
 	private function splitPostHtml(){
-		$html=dom($this->html,'id="m_story_permalink_view"')[0];
-		$html=dom($html,"<div");
+		$html=dom($this->html,'id="m_story_permalink_view"');
+		$html=dom($html[0],"<div");
 		$content=$html[0];// content of the post and the owner and where it came from (group/page/profile) [html with attributes]
 		$reaction=$html[1];// section of comments likes and some other actions
 		$html=dom($content,"<div",1)[0];

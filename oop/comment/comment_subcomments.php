@@ -20,8 +20,8 @@ trait comment_subcomments{
 				$this->childs["add"]=$data["add"];
 
 			}
-			if(isset($this->childs["items"][count($this->childs["items"])-1]))
-				return $this->childs["items"][count($this->childs["items"])-1];
+			if(isset($this->childs["items"][$page]))
+				return $this->childs["items"][$page];
 			else return [];
 		}
 	}

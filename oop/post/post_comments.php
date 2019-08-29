@@ -8,27 +8,32 @@ trait post_comments{
 		else{
 			//prepare the url
 			$next=$this->id;
-			if($this->childs["next_page"])
+			if($this->childs["next_page"]!==null)
 				$next=$this->childs["next_page"];
-			//note: a desester here
 			
 			for ($i=count($this->childs["items"]); $i <=$page; $i++) { 
+				if(!$next)break;
 				$this->http($next);
-				if(self::detectType($this->html))
+				$type=self::detectType($this->html);
+				if($type===1)
 					$data=$this->splitImageHtml();
-				else
+				elseif($type===0)
 					$data=$this->splitPostHtml();
+				else
+					continue;
+
 				$this->parseComments($data["comments_html"]);
 				$next=$this->childs["next_page"];
 			}
-			return $this->childs["items"][count($this->childs["items"])-1];
+			if(isset($this->childs["items"][$page]))
+				return $this->childs["items"][$page];
+			else return [];
 		}
   }
   
   //grab all comments from the first page
   private function parseComments($reaction){
   	$comments=Comment::parseComments($reaction,$this);
-  	
   	$this->childs["items"]=array_merge($this->childs["items"],[$comments["items"]]);
   	$this->childs["next_page"]=$comments["next_page"];	
   	$this->childs["add"]=$comments["add"];
