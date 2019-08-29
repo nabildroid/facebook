@@ -104,11 +104,12 @@ trait comment_parse{
 			$indicatorsOfPrevPage=["View previous comments…","<span>View previous replies</span>"];
 			$indicators=array_merge($indicatorsOfNextPage,$indicatorsOfPrevPage);
 
-			//get form of reply (add reply html form)
-			if(strpos($reaction[0],"<form")===0)
-				$add=array_shift($reaction);
-			else $add=array_pop($reaction);
-
+			//get form of reply (add reply html form) if the post allowing to write comment/reply
+			if(count($reaction)>1){
+				if(strpos($reaction[0],"<form")===0)
+					$add=array_shift($reaction);
+				else $add=array_pop($reaction);
+			}
 			$comments=dom(array_shift($reaction),"<div",1);
 			//split pagination links
 			$comments=filter($comments,function($str) use(&$indicators){
