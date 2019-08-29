@@ -105,55 +105,57 @@ trait comment_parse{
 			$indicators=array_merge($indicatorsOfNextPage,$indicatorsOfPrevPage);
 
 			//get form of reply (add reply html form) if the post allowing to write comment/reply
-			if(count($reaction)>1){
-				if(strpos($reaction[0],"<form")===0)
-					$add=array_shift($reaction);
-				else $add=array_pop($reaction);
-			}
-			$comments=dom(array_shift($reaction),"<div",1);
-			//split pagination links
-			$comments=filter($comments,function($str) use(&$indicators){
-				return !instr($str[0],$indicators);
+			$reaction=filter($reaction,function($part){
+				return strpos($part,"<form")===0;
 			});
+			$add=$reaction[0];
+			$comments=$reaction[1];
+			
+			if($comments){
+				$comments=dom(array_shift($comments),"<div",1);
+				//split pagination links
+				$comments=filter($comments,function($str) use(&$indicators){
+					return !instr($str[0],$indicators);
+				});
 
-			//get filtred url for next page
-			if($comments[1]){
-				/*
-				 * sometimes facebook return as indicator of next page "View more comments…"
-				 * or "View previous comments…" or both so we need stor the initiale indicator
-				 * sepcialy when getting replys 
-				 */
-				if(isset($parent->childs["next_page_indicator"])){
-					if(!$parent->childs["next_page_indicator"]){
-						$pagination_caption=instr($comments[1][0][0],$indicators);
-						$parent->childs["next_page_indicator"]=$pagination_caption;
+				//get filtred url for next page
+				if($comments[1]){
+					/*
+					 * sometimes facebook return as indicator of next page "View more comments…"
+					 * or "View previous comments…" or both so we need stor the initiale indicator
+					 * sepcialy when getting replys 
+					 */
+					if(isset($parent->childs["next_page_indicator"])){
+						if(!$parent->childs["next_page_indicator"]){
+							$pagination_caption=instr($comments[1][0][0],$indicators);
+							$parent->childs["next_page_indicator"]=$pagination_caption;
+						}
+						$next=findDom($comments[1],$parent->childs["next_page_indicator"]);
+					}else{
+						//get next page with inducator 'View more...'
+						$next=findDom($comments[1],"View more");
 					}
-					$next=findDom($comments[1],$parent->childs["next_page_indicator"]);
-				}else{
-					//get next page with inducator 'View more...'
-					$next=findDom($comments[1],"View more");
+
+					if(isset($next[0])&&$next[0])
+						$next=dom($next[0],"<a",1)[0][1]["href"];
+					else $next="";
 				}
-
-				if(isset($next[0])&&$next[0])
-					$next=dom($next[0],"<a",1)[0][1]["href"];
-				else $next="";
+				//create comments
+				$comments=$comments[0];
+				$comments=array_map(function ($cmt_html) use (&$parent){
+					$id=intval($cmt_html[1]["id"]);
+					if(!$id)return;
+					$cmt=new Comment($parent,$id);
+					$cmt->fixHttpResponse($cmt_html[0],$id);
+					return $cmt;
+				},$comments);
+				$comments=filter($comments)[0];
 			}
-			//create comments
-			$comments=$comments[0];
-			$comments=array_map(function ($cmt_html) use (&$parent){
-				$id=intval($cmt_html[1]["id"]);
-				if(!$id)return;
-				$cmt=new Comment($parent,$id);
-				$cmt->fixHttpResponse($cmt_html[0],$id);
-				return $cmt;
-			},$comments);
-			$comments=filter($comments)[0];
-
 		}
 		return [
 			"items"=>isset($comments)?$comments:[],
 			"next_page"=>isset($next)?$next:"",
-			"add"=>isset($add)?$add:[]
+			"add"=>isset($add[0])?$add[0]:[]
 		];
 	}
 }
