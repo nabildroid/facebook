@@ -77,9 +77,8 @@ class Post extends common{
 		//source options
 		if($source["origin_post"])
 			$this->source["origin"]=new Post($this,$source["origin_post"]);
-		//todo: source must be a object
 		if($source["page"])
-			$this->source["page"]=$source["page"];
+			$this->source["page"]=new Page($this->root,$source["page"]);
 		if($source["group"]){
 			$group_id=Group::idFromUrl($source["group"]);
 			//note: is this->root right parent for such group or this post may be his parent!!

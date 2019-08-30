@@ -2,32 +2,40 @@
 trait page_posts{
 	public function posts($page=0){
 		$this->fetch();
-		
-		if(isset($this->info["posts"][$page]))
-			return $this->info["posts"][$page];
-		else{
-			for ($i=count($this->info["posts"]);$i <=$page; $i++) {
-				if(!$this->info["posts_next_page"])break;
-				
-				$this->http($this->info["posts_next_page"]);
-				$posts=dom($this->html,["data-ft",'role="article"'],1);
-				$tempPosts=[];
-				foreach ($posts as $post){
-					$info=Post::GetInfoFromListedPost($post);
-					if($info)
-						$tempPosts[]=new Post($info["from"]["id"],$this,$info);
-				}
-				$this->info["posts"]=array_merge($this->info["posts"],[$tempPosts]);
 
-				$next=findDom(dom($this->html,"<a",1),"Show more");
-				if(isset($next[1]["href"]))
-					$this->info["posts_next_page"]=$next[1]["href"];
+		//prepare the url
+		if(!$this->childs["items"])
+			$next=$this->id;
+		else $next=$this->childs["next_page"];
 
+		for ($i=count($this->childs["items"]);$i <=$page; $i++) {
+			if(!$next)break;
+			$this->http($next."?v=timeline");
+			$content=$this->splitPosts();
+			$tempPosts=[];
+			foreach ($content["posts"] as $html){
+				$post=new Post($this);
+				$post->fixHttpResponse($html,null);
+				$tempPosts[]=$post;
 			}
-			if(isset($this->info["posts"][count($this->info["posts"])-1]))
-				return $this->info["posts"][count($this->info["posts"])-1];
-			else return [];
+
+			$this->childs["items"]=array_merge($this->childs["items"],[$tempPosts]);
+			$this->childs["next_page"]=$content["next_page"];
+			$next=$this->childs["next_page"];
 		}
+		
+		if(isset($this->childs["items"][$page]))
+			return $this->childs["items"][$page];
+		else return [];
+	}
+
+	private function splitPosts(){
+		$posts=dom($this->html,["data-ft",'role="article"'],1);
+		$next=findDom(dom($this->html,"<a",1),"Show more");
+		if(isset($next[1]["href"]))
+			$next=$next[1]["href"];
+		else $next="";
+		return ["posts"=>$posts,"next_page"=>$next];
 	}
 }
 

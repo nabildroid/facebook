@@ -23,23 +23,25 @@ class Pages extends common{
 		})[0];
 		$pages=array_map(function($d){
 			$info=[];
-			$data= dom($d,["<span","<a"],1);
-			$imageANDname=dom($data[0][0],"<img",1)[0];
-			$info["image"]=$imageANDname["src"];
-			$info["name"]=$imageANDname["alt"];
-			$info["id"]=$data[1][1]["href"];
-			$last_element=array_pop($data);
-			if(isset($last_element[1])&&$last_element[1]["find_tag"]=="<a"){
-				$info["like_link"]=$last_element[1]["href"];
-				$before_last_element=array_pop($data);
-				if(preg_match("/\d+/",$before_last_element[0])){
-					preg_match_all('!\d+!', $before_last_element[0], $matches);
-					if(isset($matches[0]))
-						$info["likes_length"]=$matches[0][0];
-				}
+			$data=dom($d,"<div",1)[0];
+			//get id from id attribute 
+			if(isset($data[1]["id"])){
+				preg_match_all("/\d+/",$data[1]["id"],$id);
 			}
-			
-			return $info;
+			$id=isset($id[0][0])&&$id[0][0]?$id[0][0]:"";
+			//get name of page
+			$name=dom($data[0],"<span")[0][0];
+			//get like link
+			$like_link=findDom(dom($data[0],"<a",1),"Like");
+			if(isset($like_link[1]["href"]))
+				$like_link=$like_link[1]["href"];
+			else $like_link="";
+
+			return [
+				"id"=>$id,
+				"name"=>$name,
+				"like_link"=>$like_link
+			];
 		},$pages);
 		return $pages;
 	}
@@ -52,10 +54,7 @@ class Pages extends common{
 				}
 			if(is_array($this->html))return [];
 			$pages=doms($this->html,["<div","<div"]);
-			$pages=$this->processInlinePagesHtml($pages);
-			return array_map(function ($page){
-				return new Page($page,$this,1);
-			},$pages);
+			return $this->createPages($pages,1);
 		}else return [];
 	}
 	public function  invitedPages(){
@@ -67,10 +66,7 @@ class Pages extends common{
 				}
 			if(is_array($this->html))return [];
 			$pages=doms($this->html,["<div","<div"]);
-			$pages=$this->processInlinePagesHtml($pages);
-			return array_map(function ($page){
-				return new Page($page,$this);
-			},$pages);
+			return $this->createPages($pages);
 		}else return [];
 	}
 	public function suggestionPages(){
@@ -82,13 +78,19 @@ class Pages extends common{
 				}
 			if(is_array($this->html))return [];
 			$pages=doms($this->html,["<div","<div"]);
-			$pages=$this->processInlinePagesHtml($pages);
-			return array_map(function ($page){
-				return new Page($page,$this);
-			},$pages);
+			return $this->createPages($pages);
 		}else return [];
 	}
 
+	private function createPages($pages,$admin=0){
+		$pages=$this->processInlinePagesHtml($pages);
+		return array_map(function ($page_info)use($admin){
+			$page=new Page($this,$page_info["id"],$admin);
+			$page->likes["link"]=$page_info["like_link"];
+
+			return $page;
+		},$pages);
+	}
 
 }
 

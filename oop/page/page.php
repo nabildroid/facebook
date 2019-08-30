@@ -1,48 +1,55 @@
 <?php 
 class Page extends common{
-	public $admin=0;
-	public $info=[
-		"id"=>null,
-		"name"=>null,
-		"likes_length"=>null,
-		"like_link"=>null,
-		"follow_link"=>null,
-		"posts"=>[],
-		"posts_next_page"=>null,
-		"form"=>""
-	];
-
 	use page_actions;
 	use page_posts;
 	use page_publish;
 
-	function  __construct($info=[],$parent,$admin=0){
+	public $admin=0;
+	public $id;
+
+	//likes information including link to make a like 
+	public $likes=[
+		"length"=>0,  //number of likes
+		"mine"=>0,    //if this account has been liked this post
+		"like"=>""    //url for make a new like to such comment
+	];
+
+	public $childs=[
+		"items"=>[],
+		"next_page"=>"",
+		"add"=>""
+	];
+
+
+	function  __construct($parent,$id,$admin=0){
 		$this->parent=$parent;
 		parent::__construct();
 		
+		$this->id=$id;
 		$this->admin=$admin;
-		$this->info=mergeAssociativeArray($this->info,$info);
-		$this->info["posts_next_page"]=$this->id();
 	}
 
-	private function fetch(){
-		if($this->fetched)return;
-		$this->http($this->id());
+	private function fetch($force=0){
+		if(!$force&&$this->fetched)return;
+
+		$this->http($this->id);
 		$tool=findDom(dom($this->html,"<table"),"More");//contain the like/dislike button and messaging and follow
 		$tool=dom($tool,"<a",1);
 		//like_like whether it like or dislike like
 		$like_link=findDom($tool,"Like");
 		if(isset($like_link[1]["href"]))
-			$this->info["like_link"]=$like_link[1]["href"];
+			$this->likes["like"]=$like_link[1]["href"];
 		else{
 			$like_link=findDom($tool,"Unlike");
 			if(isset($like_link[1]["href"]))
-				$this->info["like_link"]=$like_link[1]["href"];
+				$this->likes["like"]=$like_link[1]["href"];
 		}
+
 		if($this->admin){
 			$form=findDom($this->dom("<form",1),"<textarea");
-			$this->info["form"]=$form;
+			$this->childs["add"]=$form;
 		}
+
 		$this->fetched=1;
 	}
 

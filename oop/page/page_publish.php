@@ -14,7 +14,7 @@ trait page_publish{
 			"images"=>[],
 		],$param);
 
-		$form=$this->info["form"];
+		$form=$this->childs["add"];
 		$forceInput=[];
 
 		if(!$param["images"]){//publish text
@@ -30,6 +30,8 @@ trait page_publish{
 			//publish post
 			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_post",$forceInput);
 		}
+		$this->fixHttpResponse($this->html);
+		return $this->posts()[0];
 	}
 }
 
