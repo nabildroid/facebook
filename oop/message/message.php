@@ -1,33 +1,41 @@
 <?php 
 class Message extends common{
-	public $info=[
-		"friend"=>null, 
-		"msg_next_page"=>null,
-		"msgs"=>[],
-		"form"=>"",
-		"firstConversation"=>0
-	];
-
 	use message_chat;
 	use message_send;
 
-	function  __construct($info,$parent){
+	public $friend; //friend object
+	/**
+	 * is this first time of message between acount and friend
+	 * because facebook has two pages one for first messages and 
+	 * second for an old time messages
+	 */
+	public $firstConversation=0; 
+	public $childs=[//contain messages 
+		"items"=>[], //messages
+		"next_page"=>"", //next page of messages (see old messages)
+		"add"=>"" //form for send new message
+	];
+
+	
+	/**
+	 * @param $friend must be type of Profile or Page
+	 */
+	function  __construct($parent,$friend){
 		$this->parent=$parent;
 		parent::__construct();
 
-		$this->info=mergeAssociativeArray($this->info,$info);
-		$this->info["msg_next_page"]=$this->messageUrl();
+		$this->friend=$friend;
 	}
 	private function fetch($force=0) {
 		if(!$force&&$this->fetched)return;//for prevent multi fetch 
 		$this->http($this->messageUrl());
 		if($this->checkIfFirstConversation()){
-			$this->info["firstConversation"]=1;
-			$this->info["form"]=$this->dom("<form",1);
+			$this->firstConversation=1;
+			$this->childs["add"]=$this->dom("<form",1);
 		}else{
-			$this->info["firstConversation"]=0;
+			$this->firstConversation=0;
 			$form=findDom($this->dom("<form",1),"<textarea");	
-			$this->info["form"]=$form;
+			$this->childs["add"]=$form;
 		}
 		$this->fetched=1;
 	}
@@ -38,7 +46,7 @@ class Message extends common{
 	}
 
 	private function messageUrl(){
-		return "/messages/read/?fbid=".$this->info["friend"];
+		return "/messages/read/?fbid=".$this->friend->getId();
 	}
 
 }

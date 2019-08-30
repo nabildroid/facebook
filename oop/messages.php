@@ -30,14 +30,12 @@ class Messages extends common{
 			$link=dom($m,"<a",1)[0];
 			$id=$link[1]["href"];//contain friend id and 
 			preg_match_all("/[\d]+/",urldecode($id),$id);
-			if($id[0][0]==$this->root->profile->id())
+			if($id[0][0]==$this->root->profile->getId())
 				$id=$id[0][1];
 			else $id=$id[0][0];
-
+			//note: add the name pf user to his profile for easy to check if any message in chat is for mine or not
 			$snippet=dom($m,"<span")[0];
-			return new Message([
-				"friend"=>intval($id),
-			],$this);
+			return new Message($this,new Profile($this,$id));
 		},$msgs);
 		return $msgs;
 	}

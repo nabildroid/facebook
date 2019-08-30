@@ -50,7 +50,7 @@ abstract class Common{
 	 * @param $target_submit if one submit must trigger in this form
 	 * @param forceInput is key/value pair for forcing any input to take static value
 	 */
-	protected function submit_form($html,$url,$values=[],$target_submit="",$forceInput=""){
+	protected function submit_form($html,$url,$values=[],$target_submit="",$forceInput="",$debug=0){
 		$inputs=dom($html,["<input","<textarea"],1);
 		$files=[];
 		$data=[];
@@ -109,7 +109,7 @@ abstract class Common{
 			foreach ($forceInput as $key => $value)
 				$data[$key]=$value;
 		}
-		
+		if($debug)var_dump($data);
 		if(!$files)$data=http_build_query($data);
 
 		$this->http($url,$data);
