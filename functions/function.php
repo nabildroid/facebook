@@ -174,13 +174,14 @@ function findDom($doms,$target){
 	else return [];
 }
 /**
-*@param $origin the template of the array
-*@param $new where the template take thier values
-*@return template with new value
-*/
-function mergeAssociativeArray($origin,$new){
+ * @param $origin the template of the array
+ * @param $new where the template take thier values
+ * @param (boolean) $takeEmptyChild override template value even if the @param $new has empty value
+ * @return template with new value
+ */
+function mergeAssociativeArray($origin,$new,$takeEmptyChild=0){
 	foreach ($origin as $key => $value) {
-		if(isset($new[$key])&&$new[$key]){
+		if(isset($new[$key])&&($new[$key]||!$new["$key"]&&$takeEmptyChild)){
 			$origin[$key]=$new[$key];
 		}
 	}
