@@ -32,20 +32,38 @@ function ignoreSameComposition($arr){
 			$index=$index["child"][0];
 		}
 
-		if(is_array($index["child"])&&$index["child"]){
+		if(isset($index["child"])&&is_array($index["child"])&&$index["child"]){
 			$arr[$i]["child"]=ignoreSameComposition($index["child"]);
 			if(isset($index["attr"]))
 				$arr[$i]["attr"]=$index["attr"];
+
+			//check if all his childs has same type as the parent
+			if($arr[$i]["type"]!=2){
+				$check=count($arr[$i]["child"])>1;
+				foreach ($arr[$i]["child"] as $child) {
+					if(isset($child["type"])&&$arr[$i]["type"]!=$child["type"]){
+						$check=false;
+						break;
+					}
+				}
+				if($check){
+					
+					array_splice($arr,$i,1,$arr[$i]["child"]);
+				}
+			}
+
 		}
 		else $arr[$i]=$index;
 	}
 	return $arr;
 }
+
+
 function cleanHtml($arr){
 	$new=[];//new array that will hold clean  Html
 	if(!is_array($arr))$arr=[$arr];//to force all parameter to be array
 	for ($i=0; $i <count($arr) ; $i++) { 
-		$type=0;$child=[];
+		$type=4;$child=[];
 		$attr=[];
 		if(!isset($arr[$i]))continue;
 		if(is_string($arr[$i]))
@@ -66,18 +84,19 @@ function cleanHtml($arr){
 	}
 	return $new;
 }
+
 function detectTagType($tag){
 	if($tag=="<a")
 		return 1;
 	elseif($tag=="<img")
 		return 2;
 	elseif($tag=="<p")
-		return 3;
+		return 5;
 	elseif($tag=="<div")
+		return 3;
+	elseif($tag=="<span") // it makes the content more complex
 		return 4;
-	// elseif($tag=="<span") // it makes the content more complex
-	// 	return 5;
-	else return 0;//text
+	else return 4;//text
 }
 function branchApplay($arr,$tags){
 	for ($i=0; $i <count($arr) ; $i++) { 
