@@ -2,6 +2,7 @@
 include __DIR__."/functions/dom.php";
 include __DIR__."/functions/http.php";
 include __DIR__."/functions/function.php";
+include __DIR__."/functions/parsecontent.php";
 spl_autoload_register(function ($name){
 
 	$origin=$name;

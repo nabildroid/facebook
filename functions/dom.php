@@ -132,11 +132,10 @@ function multiSearch($search,$cn,$i){
 function strcut($str,$s,$e,$split=""){
 	$target="";
 	$remain="";
-	$str=preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
-	for ($i=0; $i <count($str) ; $i++) { 
+	for ($i=0; $i <strlen($str) ; $i++) { 
 		if($i>=$s-1&&$i<$e+1){
 			$target.=$str[$i];
-			if($i+1==$e||$i>count($str)-2){
+			if($i+1==$e||$i>strlen($str)-2){
 				$remain.=$split;
 			}
 		}
