@@ -1,3 +1,4 @@
 <?php 
-include __DIR__."/config.php";
- ?>
+namespace Facebook;
+require __DIR__ . '/vendor/autoload.php';
+?>

@@ -1,5 +1,9 @@
 <?php 
-include "../index.php";
+
+use Facebook\Profile\Profile;
+use Facebook\Comment\Comment;
+use Facebook\Post\Post;
+use Facebook\Utils\Content;
 
 
 $mine=$user->profile;
@@ -44,15 +48,16 @@ $mine=$user->profile;
 	// $pendingRequests[0]->rejectUserRequest();
 
 # user profile
-$user=new Profile($user,100001226455561);
+$user=new Profile($user,100035851089336);
 
 // var_dump("ID: ".$user->getId());
-// var_dump("bio: ".$user->getBio());
+// var_dump("bio: ");
+// var_dump($user->getBio());
 // if($user->getPicture("profile"))
 // var_dump("picture profile: ".$user->getPicture("profile")->getId());
 // if($user->getPicture("cover"))
 // var_dump("picture cover: ".$user->getPicture("cover")->getId());
-##posts
+// #posts
 // var_dump("--------------POSTS");
 // for ($i=0; $i <3 ; $i++) { 
 // 	var_dump("---page:".$i);
@@ -63,27 +68,28 @@ $user=new Profile($user,100001226455561);
 // }
 
 ##one post comments
-$post=$user->posts(0)[1];
-var_dump($post->getId());
-for ($i=0; $i <2 ; $i++) { 
-	$cmts=$post->comments($i);
-	var_dump("#############PAGE: ".$i);
-	foreach ($cmts as $cmt) {
-		var_dump("------------");
-		var_dump(flatContent($cmt->getContent()));
-		var_dump("------------");
-	}
-}
+// $post=$user->posts(0)[4];
+// var_dump($post->getId());
+// for ($i=0; $i <2 ; $i++) { 
+// 	$cmts=$post->comments($i);
+// 	var_dump("#############PAGE: ".$i);
+// 	foreach ($cmts as $cmt) {
+// 		var_dump("------------");
+// 		var_dump($cmt->getContent());
+// 		var_dump("------------");
+// 	}
+// }
 
 
 
 
 ##friends
-// var_dump("--------------friends");
-// $friends=$user->friends();
-// foreach ($friends as $friend) {
-// 	var_dump("friend id: ".$friend->getId());
-// }
+var_dump("--------------friends");
+$friends=$user->friends();
+var_dump(count($friends));
+foreach ($friends as $friend) {
+	var_dump("friend id: ".$friend->getId());
+}
 ##actions
 
 // $user->sendFriendRequest();

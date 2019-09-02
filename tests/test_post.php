@@ -1,21 +1,23 @@
 <?php 
-include "../index.php";
-
+use Facebook\Comment\Comment;
+use Facebook\Post\Post;
+use Facebook\Utils\Content;
 
 ##post from id
-$post=new Post($user,2376163555834069);
+$post=new Post($user,103382544200115);
 
-
+var_dump($post->getPicture());
+exit;
 ##like/unlike
 $alread_liked=$post->getLikes("mine");
-// var_dump("alread_liked:".$alread_liked);
-// if($alread_liked)
-// 	$post->unlike();
-// else $post->like();
+var_dump("alread_liked:".$alread_liked);
+if($alread_liked)
+	$post->unlike();
+else $post->like();
 
 
 ##comment
-// $post->comment("Hello world".time());
+$post->comment("Hello world".time());
 
 ##get comments
 
@@ -26,23 +28,26 @@ for ($i=0; $i <4 ; $i++) {
 	$cmts=$post->comments($i);
 	foreach ($cmts as $cmt) {
 		var_dump("-author: ".$cmt->getUser()->getId());
-		var_dump("---content: ".flatContent($cmt->getContent()));
+		var_dump("-------------");
+		var_dump($cmt->getContent());
+		var_dump("-------------");
 		var_dump("---likes number: ".$cmt->getLikes("length"));
+		echo "\n\n";
 	}
 }
 
 
 
 ##like comment
-//$cmts[random_int(0,count($cmts)-1)]->like();
+$cmts[random_int(0,count($cmts)-1)]->like();
 
 ##reply to comment
-// $cmts[random_int(0,count($cmts)-1)]->reply("Hello World".time());
+$cmts[random_int(0,count($cmts)-1)]->reply("Hello World".time());
 
 
 
 ##get fullcontent
-var_dump(flatContent($post->fullcontent()));
+var_dump(($post->fullcontent()));
 
 ##get user
 $user=$post->getUser();
