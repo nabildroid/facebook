@@ -28,16 +28,16 @@ class Pages extends common{
 		})[0];
 		$pages=array_map(function($d){
 			$info=[];
-			$data=Http::dom($d,"<div",1)[0];
+			$data=html::dom($d,"<div",1)[0];
 			//get id from id attribute 
 			if(isset($data[1]["id"])){
 				preg_match_all("/\d+/",$data[1]["id"],$id);
 			}
 			$id=isset($id[0][0])&&$id[0][0]?$id[0][0]:"";
 			//get name of page
-			$name=Http::dom($data[0],"<span")[0][0];
+			$name=html::dom($data[0],"<span")[0][0];
 			//get like link
-			$like_link=Html::findDom(Http::dom($data[0],"<a",1),"Like");
+			$like_link=Html::findDom(html::dom($data[0],"<a",1),"Like");
 			if(isset($like_link[1]["href"]))
 				$like_link=$like_link[1]["href"];
 			else $like_link="";

@@ -12,9 +12,10 @@ trait actions{
 				$this->submit_form($form[0],$form[1]["action"]);
 				$form_questions=Html::findDom($this->dom("<form",1),"<textarea");
 				if($form_questions){
-					$this->submit_form($form_questions[0],$form_questions[1]["action"],$questions,"","",1);
+					$this->submit_form($form_questions[0],$form_questions[1]["action"],$questions);
 				}
 				$this->admin=2;
+				sleep(1);
 			}
 		}
 	}
@@ -32,7 +33,7 @@ trait actions{
 			$form=$this->actions;
 			$this->submit_form($form[0],$form[1]["action"]);
 			$this->admin=0;
-		}else throw new Exception("user didn't have the permission to leave such group");
+		}else throw new \Exception("user didn't have the permission to leave such group");
 	}
 }
 ?>

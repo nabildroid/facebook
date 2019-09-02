@@ -120,7 +120,7 @@ class Profile extends \Facebook\Common {
 	}
 	private function permission($access){
 		if($this->admin!==$access)
-			throw new Exception("you haven't permission", 1);
+			throw new \Exception("you haven't permission", 1);
 	}
 
 }

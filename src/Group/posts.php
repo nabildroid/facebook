@@ -8,7 +8,7 @@ trait posts{
 	public function posts($page=0){
 		$this->fetch();
 		if($this->admin!=1)
-			throw new Exception("user didn't have the permission to read group posts");	
+			throw new \Exception("user didn't have the permission to read group posts");	
 
 		//prepare the url
 		if(!$this->childs["items"])

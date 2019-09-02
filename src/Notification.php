@@ -31,13 +31,13 @@ class Notification extends common{
 	public function setMessageTrigger($fnc){
 		if(is_callable($fnc))
 			$this->triggers["message"]=$fnc;
-		else throw new Exception("the message trigger must be a function", 1);
+		else throw new \Exception("the message trigger must be a function", 1);
 	}
 
 	public function setNotificationTrigger($fnc){
 		if(is_callable($fnc))
 			$this->triggers["notification"]=$fnc;
-		else throw new Exception("the notification trigger must be a function", 1);
+		else throw new \Exception("the notification trigger must be a function", 1);
 	}
 	private function parseNotification(){
 

@@ -11,9 +11,9 @@ trait publish{
 	public function publish($param){
 		$this->fetch();
 		if($this->admin!=1)
-			throw new Exception("user didn't have the permission to post in group");	
+			throw new \Exception("user didn't have the permission to post in group");	
 		//prepare paramater
-		$param=Uril::mergeAssociativeArray([
+		$param=Util::mergeAssociativeArray([
 			"text"=>"",
 			"images"=>[],
 			"tags"=>[]
@@ -21,7 +21,7 @@ trait publish{
 
 		//main function
 		$this->http($this->id);
-		$form=findHtml::Dom($this->dom("<form",1),"<textarea");	
+		$form=Html::findDom($this->dom("<form",1),"<textarea");	
 
 
 		$forceInput=[];
@@ -35,7 +35,7 @@ trait publish{
 					break;
 				}
 			if($error_type)
-				throw new Exception("taged users must be array of Profiles", 1);
+				throw new \Exception("taged users must be array of Profiles", 1);
 			else
 				$param["tags"]=array_map(function($tag){return $tag->getId(1);},$param["tags"]);
 			$forceInput["users_with"]=join($param["tags"],",");

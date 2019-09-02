@@ -1,4 +1,4 @@
 temp_images/*
-# tests/*
+tests/*
 vendor
 index.php

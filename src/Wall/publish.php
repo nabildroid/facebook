@@ -30,9 +30,9 @@ trait publish{
 					break;
 				}
 			if($error_type)
-				throw new Exception("taged users must be array of Profiles", 1);
+				throw new \Exception("taged users must be array of Profiles", 1);
 			elseif(($this->currentPrivacy($form[0])==="only me"&&!$param["privacy"])||$param["privacy"]==="only me")
-			throw new Exception("trying to tag friend in private post ", 1);
+			throw new \Exception("trying to tag friend in private post ", 1);
 		}
 
 		$forceInput=[];
