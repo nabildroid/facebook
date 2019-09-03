@@ -35,13 +35,12 @@ class Pages extends common{
 			}
 			$id=isset($id[0][0])&&$id[0][0]?$id[0][0]:"";
 			//get name of page
-			$name=html::dom($data[0],"<span")[0][0];
+			$name=html::dom($data[0],"<span")[0];
 			//get like link
 			$like_link=Html::findDom(html::dom($data[0],"<a",1),"Like");
 			if(isset($like_link[1]["href"]))
 				$like_link=$like_link[1]["href"];
 			else $like_link="";
-
 			return [
 				"id"=>$id,
 				"name"=>$name,
@@ -92,7 +91,7 @@ class Pages extends common{
 		return array_map(function ($page_info)use($admin){
 			$page=new Page($this,$page_info["id"],$admin);
 			$page->likes["link"]=$page_info["like_link"];
-
+			$page->name=trim($page_info["name"]);
 			return $page;
 		},$pages);
 	}

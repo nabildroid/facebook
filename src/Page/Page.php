@@ -9,6 +9,7 @@ class Page extends \Facebook\Common{
 
 	public $admin=0;
 	public $id;
+	public $name;
 
 	//likes information including link to make a like 
 	public $likes=[
@@ -32,10 +33,16 @@ class Page extends \Facebook\Common{
 		$this->admin=$admin;
 	}
 
-	private function fetch($force=0){
+	public function fetch($force=0){
 		if(!$force&&$this->fetched)return;
 
 		$this->http($this->id);
+
+		//get name
+		$name=Html::doms($this->html,["<h1","<div","<span"]);
+		if(isset($name[0])&&$name[0])
+			$this->name=trim($name[0]);
+
 		$tool=Html::findDom(Html::dom($this->html,"<table"),"More");//contain the like/dislike button and messaging and follow
 		$tool=Html::dom($tool,"<a",1);
 		//like_like whether it like or dislike like
