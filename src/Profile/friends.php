@@ -12,13 +12,10 @@ trait friends{
 			$this->http($next);
 			$users=Html::doms($this->html,["<div","<div","<div"]);
 			//select right div that has all friends
-			echo "__________NOT__WORKING___________";
-			var_dump($users);
-			exit;
-			if(count($users)>2)
-				$users=$users[1];
-			elseif($this->admin)$users=$users[1];
-			else  $users=$users[0];
+			//fast solution for error of selecting bad div that conatin friends
+			if(count($users)>1)
+				$users=strlen($users[1])>strlen($users[0])?$users[1]:$users[0];
+			else $users=$users[0];
 
 			$users=Html::dom($users,"<table");
 			//sometimes the first element is url for Find Friends
@@ -28,12 +25,10 @@ trait friends{
 			$friends=array_map(function($friend){
 				$a=Html::dom($friend,"<td")[1];
 				$a=Html::dom($friend,"<a",1)[0];
-				preg_match_all("/[a-z0-9.=]+/", $a[1]["href"],$id);
-				if($id[0][0]=="profile.php")
-					$id=intval(substr($id[0][1],3));
-				else $id=$id[0][0];
-				//@note: the id could be a string !!!!!
-				return new Profile($this,$id);
+				$id=Profile::idFromUrl($a[1]["href"]);
+				$user=new Profile($this,$id);
+				$user->name=trim($a[0]);
+				return $user;
 			},$users);
 			$all=array_merge($all,$friends);
 
@@ -61,6 +56,7 @@ trait friends{
 			$reject=Html::findDom($a,"Delete Request");
 			$reject[0]="Delete Request";
 			$user=new Profile($this,$id);
+			$user->name=trim($a[0][0]);
 			//note:here should be merged array
 			$user->actions=[$confirm,$reject];
 			return $user;
