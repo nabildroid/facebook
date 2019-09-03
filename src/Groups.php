@@ -13,8 +13,9 @@ class Groups extends Common{
 		$my=$this->dom("<ul")[0];
 		$groups=Html::dom($my,"<a",1);
 		$groups=array_map(function($group){
-			//"name"=>$group[0]
+			$name=trim($group[0]);
 			$group=new Group($this,Group::IdFromUrl($group[1]["href"]),1);
+			$group->name=$name;
 			return $group;
 		},$groups);
 		return $groups;
@@ -28,9 +29,11 @@ class Groups extends Common{
 			$group=Html::dom($group,"<td");
 			$info=Html::dom($group[0],"<a",1)[0];
 			$join=Html::dom($group[1],"<a",1)[0];
-			//"name"=>$info[0]
+			$name=trim($info[0]);
 			$group=new Group($this,Group::IdFromUrl($info[1]["href"]));
+			$group->name=$name;
 			$group->actions=$join;
+
 			return $group;
 
 		},$groups);

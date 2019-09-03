@@ -10,7 +10,7 @@ class Group extends \Facebook\Common{
 
 	public $admin=0;//0=>visitor 1=>member 2=>pending memberchip request
 	public $id;
-
+	public $name;
 	public $childs=[
 		"items"=>[],
 		"next_page"=>"",
@@ -30,6 +30,11 @@ class Group extends \Facebook\Common{
 		if(!$force&&$this->fetched)return;
 		$this->http($this->id);
 		$this->detectMembership();
+
+		//get name
+		$name=Html::doms($this->html,["<h1","div"]);
+		if(isset($name[0])&&$name[0])
+			$this->name=trim($name[0]);
 
 		if($this->admin===1){
 			$form=Html::findDom($this->dom("<form",1),"<textarea");
