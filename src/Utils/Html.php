@@ -3,7 +3,7 @@ namespace Facebook\Utils;
 
 class Html{
 	static function dom($cn,$search,$header=0,$grabText=0){
-		//version:2.0.2
+		//version:2.0.3
 		
 		// $cn 	   => content
 		// $search => what we are loking for 
@@ -77,7 +77,7 @@ class Html{
 							{$i=$c+3;break;}
 					}	
 				}
-				if($cn[$i]=="<" && $cn[$i+1]!="/" && !self::autoCloseTagsDetect($cn,$i+1))
+				if($cn[$i]=="<" && $cn[$i+1]!="/" && $cn[$i+1]!=" " && !self::autoCloseTagsDetect($cn,$i+1))
 					{$tag++;}
 				elseif($cn[$i]=="<" && $cn[$i+1] =="/" && !self::autoCloseTagsDetect($cn,$i+1))
 					{$tag--;}
