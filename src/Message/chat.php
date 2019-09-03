@@ -16,6 +16,13 @@ trait chat{
 		for ($i=count($this->childs["items"]);$i <=$page; $i++) {
 			if(!$next)break;
 			$this->http($next);
+			//get friend name note: it's not test in all scenarios
+			if(!$this->friend->getName()){
+				$friendName=$this->dom("<span")[0];
+				if(isset($friendName[0])&&trim($friendName[0]))
+					$this->friend->name=trim($friendName[0]);
+			}
+
 			$content=$this->splitMessages();
 
 			$this->childs["items"]=array_merge($this->childs["items"],[$content["msgs"]]);
@@ -24,7 +31,7 @@ trait chat{
 		}
 
 		if(isset($this->childs["items"][$page]))
-			return $this->childs["items"][$page];
+			return  array_reverse($this->childs["items"][$page]);
 		else return [];
 	}
 
@@ -61,14 +68,15 @@ trait chat{
 		$time=Html::dom($msg[1],"<abbr")[0];
 
 		$msg=$msg[0];
+		$sections=Util::strcut($msg,0,strpos($msg,"</a>")+3);
 		//get sender of such message (string)
-		$sender=Html::dom($msg,"<strong")[0];
+		$sender=Html::dom($sections[0],"<strong")[0];
 		//get content 
-		$content=Html::dom($msg,"<div")[0];
-		$content=Content::parse($content);
+		$content=Content::parse($sections[1]);
+		$friendName=$this->friend->getName(1);
 
 		return [
-			"sender"=>$sender,
+			"sender"=>$sender==$friendName?1:0,
 			"content"=>$content
 		];
 	}
