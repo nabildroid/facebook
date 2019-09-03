@@ -90,7 +90,10 @@ trait splithtml{
 		//get link of like action
 		$like_link=Util::filter($actions,function($action){
 			return strpos($action[0],"Like")!=false;
-		})[0][0][1]["href"];
+		});
+		if(isset($like_link[0][0][1]["href"]))
+			$like_link=$like_link[0][0][1]["href"];
+		else $like_link="";
 
 		$alreadyliked=isset(Util::filter($actions,function($action){
 			return strpos($action[0],"presentation")!==false;
@@ -143,7 +146,10 @@ trait splithtml{
 		//get link of like action
 		$like_link=Util::filter($actions,function($action){
 			return strpos($action[0],"Like")!=false;
-		})[0][0][1]["href"];
+		});
+		if(isset($like_link[0][0][1]["href"]))
+			$like_link=$like_link[0][0][1]["href"];
+		else $like_link="";
 		/**
 		 * @todo presentation criteria is not efficient way because it attribute and exist in picture (not tested in all situation)
 		 */

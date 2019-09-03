@@ -3,7 +3,7 @@ namespace Facebook\Utils;
 
 class Html{
 	static function dom($cn,$search,$header=0,$grabText=0){
-		//version:2.0.1
+		//version:2.0.2
 		
 		// $cn 	   => content
 		// $search => what we are loking for 
@@ -124,10 +124,11 @@ class Html{
 	static function multiSearch($search,$cn,$i){
 		if(is_array($search))
 			foreach ($search as $key) {
-				if(substr($cn,$i,strlen($key))==$key)
-					return $key;
+				$indicator=substr($cn,$i,strlen($key)+1);
+				if(preg_match("/^".$key."(?!\w)/",$indicator))
+				return $key;
 			}
-		elseif(substr($cn,$i,strlen($search))==$search)
+		elseif(preg_match("/^".$search."(?!\w)/",substr($cn,$i,strlen($search)+1)))
 			return $search;
 		else return false;
 	}
