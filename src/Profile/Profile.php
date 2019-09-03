@@ -107,7 +107,7 @@ class Profile extends \Facebook\Common {
 	 */
 	static function idFromUrl($url){
 		if(intval($url))return intval($url);
-		preg_match_all("/^\/profile\.php\?id\=\d+|^\/[\d\w.]+?(?=\?)/",$url,$id);
+		preg_match_all("/^\/profile\.php\?id\=\d+|^\/(?!\w+\.php)[\d\w.]+?(?=\?)/",$url,$id);
 		if(isset($id[0][0])){
 			$id=$id[0][0];
 			if(Util::instr($id,"profile.php")){
