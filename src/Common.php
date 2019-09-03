@@ -189,6 +189,11 @@ abstract class Common{
 		$this->fetch();
 		return $this->admin;
 	}
+	public function getName(){
+		if(!$this->name)
+			$this->fetch();
+		return $this->name;
+	}
 
 
 

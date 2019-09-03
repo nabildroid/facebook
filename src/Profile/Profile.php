@@ -63,6 +63,12 @@ class Profile extends \Facebook\Common {
 				$this->picture["profile"]=new Post($this,$profile);
 			}
 		}
+		//get user name
+		$name=Html::dom($section1[0],"<strong");
+		if(isset($name[0])){
+			$this->name=trim($name[0]);
+		}
+
 		//get bio
 		if(isset($section1[1])){
 			$bio=Html::dom($section1[1],"<div");
