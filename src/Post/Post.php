@@ -77,24 +77,30 @@ class Post extends \Facebook\Common{
 		//source
 		$source=self::parseSource($data["source"]["html"],$data["source"]["attribute"]);
 		//source basic
-		if($source["user"])
-			$this->user=$this->checkIsMine($source["user"])
-										?$this->root->profile
-										:new Profile($this,$source["user"]);						
-		$this->id=$source["id"];
+		if($source["user"]){
+			if($this->checkIsMine($source["user"]["id"]))
+				$this->user=$this->root->profile;
+			else{
+				$this->user=new Profile($this,$source["user"]["id"]);
+				$this->user->name=$source["user"]["name"];
+			}		
+		}
+		$this->id=$source["id"]["id"];
 
 		//source options
-		if($source["origin_post"])
-			$this->source["origin"]=new Post($this,$source["origin_post"]);
-		if($source["page"])
-			$this->source["page"]=new Page($this->root,$source["page"]);
-		if($source["group"]){
-			$group_id=Group::idFromUrl($source["group"]);
+		if($source["origin_post"]["id"]){
+			$this->source["origin"]=new Post($this,$source["origin_post"]["id"]);
+		}
+		if($source["page"]["id"]){
+			$this->source["page"]=new Page($this->root,$source["page"]["id"]);
+			$this->source["page"]->name=$source["page"]["name"];
+		}
+		if($source["group"]["id"]){
+			$group_id=Group::idFromUrl($source["group"]["id"]);
 			//note: is this->root right parent for such group or this post may be his parent!!
 			$this->source["group"]=new Group($this->root,$group_id);
+			$this->source["group"]->name=$source["group"]["name"];
 		}
-
-
 		//image
 		if(isset($data["image"][1]["href"]))
 			$this->picture=$data["image"][1]["href"];

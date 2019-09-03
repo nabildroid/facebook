@@ -35,7 +35,7 @@ trait parsesource{
 		
 		//difference between user and page in header is the page name always end with /? but the user end with only ?
 
-
+		//note: selector must be preg_match_all not string specially in page !
 		$selector=[
 		 	"group"=>"/groups/", //get group id
 			"origin_post"=>"/story.php?", //get origin post id
@@ -43,13 +43,18 @@ trait parsesource{
 			"user"=>"" //any thing left is for user i guess
 		];
 
+		$names=[];//contain page and group and user names
 		foreach ($selector as $key => $value) {
 			//!value condition is for case of empty $selector["user"] value so that helps to take lefts
 			$source=Util::filter($source,function($a)use($value){
-					return !$value||strpos($a[1]["href"],$value)===0;
+					return !$value||Util::instr($a[1]["href"],$value);
 			});
-			if(isset($source[0][0]))
+			if(isset($source[0][0])){
 				$selector[$key]=$source[0][0][1]["href"];
+				//save name in $names
+				if($key!="origin_post")
+					$names[$key]=trim($source[0][0][0]);
+			}
 			else $selector[$key]="";
 			$source=$source[1];
 		}
@@ -60,7 +65,13 @@ trait parsesource{
 
 		//process ids
 		$values["user"]=Profile::idFromUrl($values["user"]);
-
+		//add names to values
+		foreach ($values as $key => $value) {
+			$values[$key]=[
+				"id"=>$value,
+				"name"=>isset($names[$key])?$names[$key]:""
+			];
+		}
 		return $values;
 	}
 }
