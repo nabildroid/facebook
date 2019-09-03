@@ -164,29 +164,91 @@ class Content{
 		return $content;
 	}
 	/**
-		*concatenate all single child of type 0
-		*@param $arr is what the parseContent() return;
-		*@return string
-	**/
+	 * make html from readableContent
+	 * @param $arr is what the parse() returns;
+	 * @return string (html)
+	 */
 	static function flat($arr){
-		return $arr;
 		$content="";
-		for ($i=0; $i < count($arr) ; $i++) { 
-			if(!isset($arr[$i]))continue;
-			$index=$arr[$i];
-			while(is_array($index["child"])&&count($index["child"])==1)
-				$index=$index["child"][0];
-			if(is_array($index["child"])&&$index["child"]){
-				$temp=flat($index["child"]);
-				if($temp)
-					$content.="<child>".$temp;
-			}elseif(!is_array($index["child"])&&$index["child"])
-				$content.=$index["child"];
-			elseif($index) $content.=$index;
+		if(is_string($arr))return $arr;
+
+		foreach ($arr as $elm){
+			$issetChild=isset($elm["content"])&&$elm["content"];
+			if(($elm["type"]=="block"||$elm["type"]=="post")&&$issetChild){
+				$content.="<div>";
+				$content.=self::flat($elm["content"]);
+				$content.="</div>";
+			}
+			elseif($elm["type"]=="emoji"){
+				$content.="<img ";
+				if(isset($elm["src"]))
+					$content.="src='".$elm["src"]."' ";
+				$content.="alt='".$elm["content"]."'";
+				$content.=">";
+			}
+			elseif($elm["type"]=="text"&&is_string($elm["content"])){
+				$content.="<span>";
+				$content.=$elm["content"];
+				$content.="</span>";
+			}
+			elseif($elm["type"]=="text"){
+				$content.="<p>";
+				$content.=self::flat($elm["content"]);
+				$content.="</p>";	
+			}
+			elseif($elm["type"]=="link"){
+				$content.="<a ";
+				if(isset($elm["href"]))
+					$content.="href='".$elm["href"]."'";
+				$content.=">";
+				if($issetChild)
+					$content.=self::flat($elm["content"]);
+				else $content.="link";
+				$content.="</a>";
+			}
+			elseif($elm["type"]=="photo"){
+				$content.="<a ";
+				if(isset($elm["href"]))
+					$content.="href='".$elm["href"]."'";
+				$content.=">";
+				$content.="photo";
+				$content.="</a>";
+			}
+			elseif($elm["type"]=="hashtag"){
+				$content.="<a ";
+				if(isset($elm["href"]))
+					$content.="href='".$elm["href"]."'";
+				$content.=">";
+				if($issetChild)
+					$content.=self::flat($elm["content"]);
+				$content.="</a>";
+			}
+			elseif($elm["type"]=="profile"){
+				$content.="<a ";
+				$content.="href='".$elm["id"]."'";
+				$content.=">";
+				if($issetChild)
+					$content.=self::flat($elm["content"]);
+				$content.="</a>";
+			}
+			elseif($elm["type"]=="image"){
+				$content.="<img ";
+				$content.="src='".$elm["src"]."'";
+				$content.=">";
+			}
+			elseif($elm["type"]=="video"){
+				$content.="<a ";
+				if(isset($elm["href"]))
+					$content.="href='".$elm["href"]."'";
+				$content.=">";
+				$content.="video";
+				$content.="</a>";
+			}
 		}
-		return $content;	
+		return $content;
 	}
 }
+
 
 
 ?>
