@@ -1,17 +1,31 @@
 <?php 
 namespace Facebook\Group;
 use Facebook\Utils\Html;
+use Facebook\Utils\Util;
 
 trait actions{
 	//Group action
-	public function join($questions=[]){
+	public function getJoinQuestions(){
+		$this->fetch();
+		if($this->admin==0){
+			$this->join([],1);
+			$questions=[];
+			if(Util::instr($this->html,"/groups/membership_criteria_answer/")){
+				$form_questions=Html::findDom($this->dom("<form"),"<textarea");
+				$questions=Html::dom($form_questions,"<span");
+			}
+			$this->leave(1);
+			return $questions;
+		}
+	}
+	public function join($questions=[],$dontSubmitQuestions=0){
 		$this->fetch();
 		if($this->admin==0){
 			if($this->actions){
 				$form=$this->actions;
 				$this->submit_form($form[0],$form[1]["action"]);
 				$form_questions=Html::findDom($this->dom("<form",1),"<textarea");
-				if($form_questions){
+				if($form_questions&&!$dontSubmitQuestions){
 					$this->submit_form($form_questions[0],$form_questions[1]["action"],$questions);
 				}
 				$this->admin=2;
@@ -19,8 +33,8 @@ trait actions{
 			}
 		}
 	}
-	public function leave(){
-		$this->fetch();
+	public function leave($force=0){
+		$this->fetch($force);
 		if($this->admin==1){
 			$this->http("/group/leave/?group_id=".$this->id);
 			//it may return form to confirm request
