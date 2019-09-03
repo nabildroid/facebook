@@ -32,7 +32,11 @@ trait splithtml{
 		$source=Html::dom(array_shift($content),"<a",1);
 
 		$text=join($content,"");
-
+		if(!isset($html[1])){
+			var_dump("_______ERROR______issue#14");
+			var_dump($this->html);
+			exit;
+		}
 		$actions=Html::findDom(Html::dom($html[1],"<div"),"Full Story");
 		if(!$actions)return;
 		$actions=Html::dom($actions,"<a",1);
