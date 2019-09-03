@@ -60,4 +60,13 @@ class Page extends \Facebook\Common{
 		if($this->admin!==$access)
 			throw new \Exception("you haven't permission", 1);
 	}
+
+	static function IdFromUrl($url){
+		if(intval($url))return $url;
+		preg_match_all("/^\/[\w+\d+.]+?(?=\/\?)/",$url,$id);
+		if(isset($id[0][0])){
+			$id=substr($id[0][0],1);
+		}else $id="";
+		return $id;
+	}
 }

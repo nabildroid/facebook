@@ -62,10 +62,12 @@ class Group extends \Facebook\Common{
 	}
 	static function IdFromUrl($url){
 		if(intval($url))return $url;
-		preg_match_all("/\/\d+/",$url,$id);
-		if(isset($id[0][0]))$id=intval(substr($id[0][0],1));
-		else $id="";
-		return $id;
+		preg_match_all("/^\/groups\/\d+?(?=\?)/",$url,$id);
+		if(isset($id[0][0])){
+			preg_match_all("/\d+/",$id[0][0],$id);
+			$id=isset($id[0][0])?$id[0][0]:"";
+		}else $id="";
+		return intval($id);
 	}
 
 }

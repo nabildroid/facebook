@@ -1,6 +1,8 @@
 <?php 
 namespace Facebook\Utils;
 use Facebook\Profile\Profile;
+use Facebook\Page\Page;
+use Facebook\Group\Group;
 class Content{
 	//those functions all part of parseContent 
 	static function ignoreSameComposition($arr){
@@ -109,26 +111,41 @@ class Content{
 				if($emoji){
 					$temp=["type"=>"emoji","src"=>$emoji];	
 				}else $temp=["type"=>"text"];
-			}elseif($type==4){
+			}
+			elseif($type==4){
 				$temp=["type"=>"text"];
-			}elseif($type==3&&Util::FindInTree($content,"<strong")){
+			}
+			elseif($type==3&&Util::FindInTree($content,"<strong")){
 				$temp=["type"=>"post"];
 				$content=array_splice($arr,$i+1);
-			}elseif ($type==3) {
+			}
+			elseif ($type==3) {
 				$temp=["type"=>"block"];
-			}elseif ($type==1&&isset($attr["href"])&&Util::instr($attr["href"],"hashtag")) {
+			}
+			elseif ($type==1&&isset($attr["href"])&&Util::instr($attr["href"],"hashtag")) {
 				$temp=["type"=>"hashtag","href"=>urldecode($attr["href"])];
-			}elseif ($type==1&&isset($attr["href"])&&Util::instr($attr["href"],"video_redirect")) {
+			}
+			elseif ($type==1&&isset($attr["href"])&&Util::instr($attr["href"],"video_redirect")) {
 				$temp=["type"=>"video","href"=>urldecode($attr["href"])];
 				$content="";
-			}elseif ($type==1&&$content&&$content[0]["type"]==2) {
+			}
+			elseif ($type==1&&$content&&$content[0]["type"]==2) {
 				$temp=["type"=>"photo","href"=>urldecode($attr["href"])];
 				$content="";
-			}elseif($type==1&&$attr["href"]&&Profile::idFromUrl($attr["href"])){
+			}
+			elseif($type==1&&$attr["href"]&&Profile::idFromUrl($attr["href"])){
 				$temp=["type"=>"profile","id"=>Profile::idFromUrl($attr["href"])];
-			}elseif($type==1&&$attr["href"]){
+			}
+			elseif($type==1&&$attr["href"]&&Group::idFromUrl($attr["href"])){
+				$temp=["type"=>"group","id"=>Group::idFromUrl($attr["href"])];
+			}
+			elseif($type==1&&$attr["href"]&&Page::idFromUrl($attr["href"])){
+				$temp=["type"=>"page","id"=>Page::idFromUrl($attr["href"])];
+			}
+			elseif($type==1&&$attr["href"]){
 				$temp=["type"=>"link","href"=>urldecode($attr["href"])];
-			}elseif($type==2&&isset($content["src"])&&$content["src"]){
+			}
+			elseif($type==2&&isset($content["src"])&&$content["src"]){
 				$temp=["type"=>"image","src"=>urldecode($content["src"])];
 			}
 			else $temp=["type"=>$type];
@@ -156,6 +173,8 @@ class Content{
 		$tags=["<p","<div","<a","<img","<span"];
 		if(is_array($html))$html=implode("", $html);
 		$html=self::deleteTables($html);
+		//delete any <wbr>
+		$html=str_replace("<wbr />","",$html);
 		$html=Html::dom($html,$tags,1,1);
 		$html1=self::branchApplay($html,$tags);
 		$content=self::cleanHtml($html1);
@@ -186,10 +205,8 @@ class Content{
 				$content.="alt='".$elm["content"]."'";
 				$content.=">";
 			}
-			elseif($elm["type"]=="text"&&is_string($elm["content"])){
-				$content.="<span>";
+			elseif($elm["type"]=="text"&&is_string($elm["content"])){				
 				$content.=$elm["content"];
-				$content.="</span>";
 			}
 			elseif($elm["type"]=="text"){
 				$content.="<p>";
@@ -223,7 +240,7 @@ class Content{
 					$content.=self::flat($elm["content"]);
 				$content.="</a>";
 			}
-			elseif($elm["type"]=="profile"){
+			elseif($elm["type"]=="profile"||$elm["type"]=="page"||$elm["type"]=="group"){
 				$content.="<a ";
 				$content.="href='".$elm["id"]."'";
 				$content.=">";
