@@ -89,7 +89,7 @@ class Notification extends common{
 		//approved post
 		if(Util::instr($title,"approved your post")||
 			 Util::instr($title,"approved your photo"))
-		return 4;
+		return 5;
 		//aproved join request
 		if(Util::instr($title,"has been approved"))
 		return 6;
