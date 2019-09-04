@@ -29,6 +29,10 @@ trait parse{
 		//Note::html contain the content 
 
 		$reaction=Html::dom($tools[0][0],"<a",1);
+		
+		//check if this comment is mine or not
+		$isAdmin=Util::FindInTree($reaction,[0=>"Edit"]);
+
 		//get like action and likes_number		
 		$likes=array_shift($reaction);
 		$likes_users_link="";//like that hold all users who likes this comments
@@ -72,11 +76,13 @@ trait parse{
 
 		$this->content=Content::parse($content);
 		$this->user=new Profile($this,Profile::idFromUrl($user));
+		$this->admin=$isAdmin;
 		$this->likes["length"]=$likes;
 		$this->likes["url"]=$likes_users_link;
 		$this->likes["like"]=$like_link;
 		$this->childs["length"]=$reply_number;
 		$this->childs["next_page"]=$reply_link;
+
 		//note: parse doesn't provide add form (html) to reply (add)
 	}
 

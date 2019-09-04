@@ -14,7 +14,7 @@ class Comment extends \Facebook\Common{
 	public $id;     //id of comment 
 	public $user;   //the auther of this comment [Profile]
 	public $content;
-
+	public $admin=0;  //if this comment is mine or not (the author)
 	//likes information including link to make a like 
 	public $likes=[
 		"length"=>0,  //number of likes
@@ -103,6 +103,7 @@ class Comment extends \Facebook\Common{
 	private function copyFrom(Comment $comment){
 		$this->parent=$comment->parent;
 		$this->id=$comment->getId();
+		$this->admin=$comment->getAdmin();
 		$this->user=$comment->getUser();
 		$this->content=$comment->getContent();
 		$this->likes=$comment->getLikes();
