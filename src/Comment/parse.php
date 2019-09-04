@@ -49,8 +49,8 @@ trait parse{
 		})[0];
 		if(isset($likes[0][0])){
 			$likes_users_link=$likes[0][1]["href"];
-			preg_match_all("/\d+$/",$likes[0][0],$likes);
-			if(isset($likes[0][0]))$likes=intval($likes[0][0]);
+			$likes=substr($likes[0][0],strpos($likes[0][0],"</span>")+7);
+			if($likes)$likes=Post::LikesStringToInt($likes);
 			else $likes=0;
 		}else $likes=0;
 		//get reply link

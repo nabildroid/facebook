@@ -42,21 +42,22 @@ trait splithtml{
 		$actions=Html::dom($actions,"<a",1);
 
 		//get link of like action
-		$like_link=Util::filter($actions,function($action){
-			return strpos($action[0],"Like")!==false;
-		});
-		if(isset($like_link[0][0][1]["href"]))
-			$like_link=$like_link[0][0][1]["href"];
+		$like_link=Html::findDom($actions,[0=>"Like"]);
+		if(isset($like_link[1]["href"]))
+			$like_link=$like_link[1]["href"];
 		else $like_link="";
 		
-		$alreadyliked=isset(Util::filter($actions,function($action){
-			return strpos($action[0],"<b>Like</b>")!==false;
-		})[0][0]);
+		$alreadyliked=isset(Html::findDom($actions,"<b>Like</b>")[0]);
 
-		$likes=array_shift($actions);
-		if(strlen($likes[0])>4)
-			$likes=intval(substr($likes[0],strpos($likes[0],"</span>")+7));
-		else $likes=0;
+		$likes=Util::filter($actions,function($ra){
+			return Util::instr($ra[0],"<img");
+		})[0];
+		if(isset($likes[0][0])){
+			$likes=substr($likes[0][0],strpos($likes[0][0],"</span>")+7);
+			if($likes)$likes=self::LikesStringToInt($likes);
+			else $likes=0;
+		}else $likes=0;
+
 		/**
 		 * @todo get the number of total comments
 		 */
@@ -89,28 +90,24 @@ trait splithtml{
 		//reaction
 		$reaction=Util::filter(Html::doms($reaction,["<div","<div","<div"]))[0];
 
-		
+
 
 		//get link of like action
-		$like_link=Util::filter($actions,function($action){
-			return strpos($action[0],"Like")!=false;
-		});
-		if(isset($like_link[0][0][1]["href"]))
-			$like_link=$like_link[0][0][1]["href"];
+		$like_link=Html::findDom($actions,"Like");
+		if(isset($like_link[1]["href"]))
+			$like_link=$like_link[1]["href"];
 		else $like_link="";
 
-		$alreadyliked=isset(Util::filter($actions,function($action){
-			return strpos($action[0],"presentation")!==false;
-		})[0][0]);
-
+		$alreadyliked=isset(Html::findDom($actions,"presentation")[0]);
 		$likes=Html::doms(array_shift($reaction),["<div","<div"]);
 		/*
 			some times the html of likes show the name of who like not one
 		  and if the likes number is 1K my code will read it as 1 
 		  so you show also add function that deal with likes number
 		*/
-		$likes=array_pop($likes);
-		$likes=!intval($likes)&&$likes?1:intval($likes);
+		if(isset($likes[0]))
+			$likes=Post::LikesStringToInt($likes[0]);
+		else $likes=0;
 
 		//get id of such image from his like_link
 		$id="";
@@ -148,18 +145,14 @@ trait splithtml{
 		$reaction=Util::filter(Html::doms($reaction,["<div","<div"]))[0];
 		$actions=html::dom(array_shift($reaction),"<a",1);//##### like action
 		//get link of like action
-		$like_link=Util::filter($actions,function($action){
-			return strpos($action[0],"Like")!=false;
-		});
-		if(isset($like_link[0][0][1]["href"]))
-			$like_link=$like_link[0][0][1]["href"];
+		$like_link=Html::findDom($actions,"Like");
+		if(isset($like_link[1]["href"]))
+			$like_link=$like_link[1]["href"];
 		else $like_link="";
 		/**
 		 * @todo presentation criteria is not efficient way because it attribute and exist in picture (not tested in all situation)
 		 */
-		$alreadyliked=isset(Util::filter($actions,function($action){
-			return strpos($action[0],"presentation")!==false;
-		})[0][0]);
+		$alreadyliked=isset(Html::findDom($actions,"presentation")[0]);
 
 		//get number of likes
 		$likes=Html::doms(array_shift($reaction),["<div","<div"]);
@@ -168,8 +161,9 @@ trait splithtml{
 		  and if the likes number is 1K my code will read it as 1 
 		  so you show also add function that deal with likes number
 		*/
-		$likes=array_pop($likes);
-		$likes=!intval($likes)&&$likes?1:intval($likes);
+		if(isset($likes[0]))
+			$likes=Post::LikesStringToInt($likes[0]);
+		else $likes=0;
 
 		return [
 			"source"=>["html"=>$source,"attribute"=>$attributes],

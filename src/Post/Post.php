@@ -118,7 +118,31 @@ class Post extends \Facebook\Common{
 			return $this->admin=true;
 	  else return $this->admin=false;
 	}
+	/**
+	 * convert likes number from string to int for example 1k => 1000 1,500 => 1500
+	 * @param $str likes_number_str string 
+	 * @return intiger
+	 */
+	static function LikesStringToInt($str){
+		preg_match_all("/[\d,\.]*(?:\w)/",$str,$str);
+		$str=str_replace(",","",$str[0][0]);
+		preg_match_all("/\w$/",$str,$suffix);
+		$suffix=isset($suffix[0][0])?$suffix[0][0]:"";
 
+		preg_match_all("/[\d.]*/",$str,$flt);
+		$flt=isset($flt[0][0])?floatval($flt[0][0]):0;
+
+		switch (strtolower($suffix)) {
+			case 'k':
+				$flt*=1000;
+				break;
+			case 'm':
+				$flt*=1000000;
+				break;
+		}
+		if($str&&!$flt)$flt=1;
+		return $flt;
+	}
 
 }
 
