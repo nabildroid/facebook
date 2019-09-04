@@ -19,6 +19,7 @@ class Comment extends \Facebook\Common{
 	public $likes=[
 		"length"=>0,  //number of likes
 		"users"=>[],  //users who likes this comment [array of profile]
+		"mine"=>0,    //if this account has been liked this comment
 		"url"=>"",    //url of page contain all users who likes
 		"like"=>""    //url for make a new like to such comment
 	];

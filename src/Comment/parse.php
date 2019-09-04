@@ -33,32 +33,30 @@ trait parse{
 		//check if this comment is mine or not
 		$isAdmin=Util::FindInTree($reaction,[0=>"Edit"]);
 
-		//get link action and likes_number		
-		$likes=array_shift($reaction);
+
+		//get like_link action and check if account has been liked this comment
+		$like_link=Html::findDom($reaction,[0=>"Like"]);
+		$alreadyliked=0;
+		if(isset($like_link[1]["href"])){
+			$like_link=$like_link[1]["href"];
+			$alreadyliked=Util::instr($like_link,"reactions/picker");
+		}else $like_link="";
+
+		//get likes number and link of users_likes
 		$likes_users_link="";//link that hold all users who likes this comments
-		if($likes[0]=="Like"){
-			$like_link=$likes[1]["href"];
-			$likes=0;
-		}
-		else{
-			$likes_users_link=$likes[1]["href"];
-			$likes=$likes[0];
-			$likes=intval(substr($likes,strpos($likes,"</span>")+7));
-		}
-		//if the first <a is for likes_number
-		if(!isset($like_link)){
-			$like_link=Util::filter($reaction,function($tool){
-				return $tool[0]=="Like";
-			});
-			if(isset($like_link[0][0][1]["href"]))
-				$like_link=$like_link[0][0][1]["href"];
-			else $like_link="";
-		}
-		//get reply link
-		$reply_link=Util::filter($reaction,function($tool){
-			return $tool[0]=="Reply";
+		$likes=Util::filter($reaction,function($r){
+			return Util::instr($r[0],"<img");
 		})[0];
-		if(isset($reply_link[0][1]["href"]))$reply_link=$reply_link[0][1]["href"];
+		if(isset($likes[0][0])){
+			$likes_users_link=$likes[0][1]["href"];
+			preg_match_all("/\d+$/",$likes[0][0],$likes);
+			if(isset($likes[0][0]))$likes=intval($likes[0][0]);
+			else $likes=0;
+		}else $likes=0;
+		//get reply link
+		$reply_link=Html::findDom($reaction,[0=>"Reply"]);
+		if(isset($reply_link[1]["href"]))
+			$reply_link=$reply_link[1]["href"];
 		else $reply_link="";
 
 		//get reply_number
@@ -80,6 +78,7 @@ trait parse{
 		$this->likes["length"]=$likes;
 		$this->likes["url"]=$likes_users_link;
 		$this->likes["like"]=$like_link;
+		$this->likes["mine"]=$alreadyliked;
 		$this->childs["length"]=$reply_number;
 		$this->childs["next_page"]=$reply_link;
 
