@@ -101,11 +101,12 @@ so it parse **string** `$url` and returns either **integer** or **string**
 # general classes that depend on component classes
 
 ## common
+
 it **abstract class** contain base functions like `http` and getting functions
 and common variable between all components 
 
 ### common variables
-
+----
 #### parent
 ```php
 public $parent=null;
@@ -143,26 +144,162 @@ protected $fetched=0;
 ```
 boolean varibale for prevent more then one fetch
 
+### common functions
+------------------
+#### http
+```php
+public function http($url="",$data="",$headers=[],$responseHeader=0)	
+```
+the core of our project ;)
+it's allow each component to make http request and the corespond response
+will be in `$html` common varaible
+##### arguments
+- **url** the url of such http request 
+- **data** is **associative array** that hold all **HTTP POST REQUEST** name/value pair
+- **headers** is **associative array** that hold all Headers of such request
+- **responseHeader** boolean allows to get beside the HTTP response content an **Http response headers** 
+if it's true `$html` will be array of pattren 
+	`{content:"html string",headers:"array of name/values pair"}`
+
+#### fixHttpResponse
+```php
+	public function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0)
+```
+prefixe the desire response that expected from `http`
+say for example **we already have the html** of `Post` why we would make **new http**
+that will return **same Html** as we had
+so `fixHttpResponse` freeze `http` and make it **return desired response**
+##### arguments
+- **response** desired response that we need `http` to return
+
+other arguments it's same as arguments of `html` and **must be the same** to make `html`
+returns desired response
+
+#### submit_form
+```php
+protected function submit_form($html,$url,$values=[],$target_submit="",$forceInput="")
+```
+it allow any component to submit any kind of forms `multipart/form-data` or `application/x-www-form-urlencoded` and so on
+
+##### arguments
+
+- **html** content of form that has all input 
+- **url** the action of form
+- **values** array of values that each input will take **in order**
+- **target_submit** the name of submit input that will trigger the submit action of such form
+- **forceInput** associative array ,it's extra key/value pair will added to values 
+
+>in case of submit `multipart/form-data` **images is only type accept** and 
+the **his value must be url**, means when trying to submit form contain images
+the action will be `submit_form($html,$url,['url of image1','url of img2','some text value'])`
+
+#### getters
+`public function getParent()`
+`public function getId($int=0)`
+`public function getUser()`
+
+only for `Post` `Comment`
+`public function getContent()`
+
+`public function getLikes($prop="")`
+`public function getChilds($prop="")`
+
+only for `Post`
+`public function getSource($prop="")`
+
+only for **image** `Post` or `Profile` 
+`public function getPicture($prop="")`
+
+only for `Profile`
+`public function getBio()`
+
+
+`public function getAdmin()`
+`public function getName($force=0)`
+
+
 
 ## account 
 hold all account functionality like profile messages and wall ....
 #### initail the account
-for that accout must be login to facebook using only real account **cookie(string)**
+for that accout must be logined to facebook using only real account **cookie(string)**
 
 ```php
 $user=new Account;
 $user->login("cookie");
 ```
+## notifications
+setting function that will trigger when new notification/message arrives
+
+### message 
+set trigger
+```php
+$user->notification->setMessageTrigger($fnc);
+```
+
+### notifications
+set trigger
+```php
+$user->notification->setNotificationTrigger($fnc);
+```
+the argument must be valid function that takes one argument
+
+the trigger will invoke whenever new notification arrive
+and will pass a array as paramater to trigger
+such array contain `type`, `url`, `snippet`
+
+- **type** is integer tells which type is this noti
+- **url** when the new notification lead to 
+- **snippet** what the notification tell (caption) **Html**
+
+possible `type`
+1. some user **publish** new post or photo
+2. some user **like/react** to such account post
+3. some user **comment** on such account post or has been replied
+4. some user **like/react** to such account **comment**
+5. acount published **post** has been **approved**
+6. request to **join group** has been **approved**
+
+
+
+
 ## wall
-it's facebook home page (profile wall) 
+it's facebook home page (profile wall)
+accissing wall with
+```php
+$user->wall;
+```
 
 #### get suggestion posts from wall
 ```php
-$posts=$user->posts();
+$posts=$user->wall->posts();
 ```
 return array of `Post` but each Post must force fetched for getting full capabelity
 ```php
 $posts[0]->fetch(1);
 ```
-by default when getting any propreity if it exist Post will return it or will force himself to fetch entiry 
-Post information **Post Page** *when click to see full Post*
+by default when getting any propreity if it exist Post will return it or will force himself to fetch entiry `Post` information **Post Page** *when click to see full Post*
+
+#### publish new post 
+publish new post in account wall
+```php
+$user->wall->publish($param);
+```
+`$param` it's associative array could takes muti arguments or only one
+
+all parameter acceptable
+```
+"text"=>"",
+"images"=>[],
+"privacy"=>"",
+"tags"=>[]
+```
+
+- **text** the content of new post **text only**
+- **images** array of **max 3 url** of picture
+- **privacy** the scope of audiece that such post target 
+- **tags** array of profiles that will tagged to such post
+
+>`privacy` could only be **public** or **only me** or **friends**
+
+after publishing new post will returns 
