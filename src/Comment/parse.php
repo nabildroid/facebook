@@ -33,9 +33,9 @@ trait parse{
 		//check if this comment is mine or not
 		$isAdmin=Util::FindInTree($reaction,[0=>"Edit"]);
 
-		//get like action and likes_number		
+		//get link action and likes_number		
 		$likes=array_shift($reaction);
-		$likes_users_link="";//like that hold all users who likes this comments
+		$likes_users_link="";//link that hold all users who likes this comments
 		if($likes[0]=="Like"){
 			$like_link=$likes[1]["href"];
 			$likes=0;
@@ -54,7 +54,7 @@ trait parse{
 				$like_link=$like_link[0][0][1]["href"];
 			else $like_link="";
 		}
-		//get reply like
+		//get reply link
 		$reply_link=Util::filter($reaction,function($tool){
 			return $tool[0]=="Reply";
 		})[0];

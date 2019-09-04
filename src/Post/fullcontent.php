@@ -7,7 +7,7 @@ trait fullcontent{
 		$this->fetch();
 		if($this->content){
 			//note: bad criteria
-			if(Util::findInTree($this->content,["content"=>"More"])){
+			if(Util::FindInTree($this->content,["content"=>"More"])){
 				$this->fetch(1);
 			} 
 			return $this->content;
