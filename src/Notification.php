@@ -1,7 +1,8 @@
 <?php 
 namespace Facebook;
-use Facebook\Utils\Html as Html;
-use Facebook\Utils\Util as Util;
+use Facebook\Utils\Html;
+use Facebook\Utils\Util;
+use Facebook\Utils\Content;
 
 class Notification extends common{
 	public $triggers=[
@@ -18,9 +19,18 @@ class Notification extends common{
 		$message=Html::findDom($a,"Message");
 		$notification=Html::findDom($a,"Notification");
 		//message
-		if(isset($message[0])&&strpos($message[0],"(")!==false){
-			if(is_callable($this->triggers["message"]))
-				$this->triggers["message"]($message);
+		if(isset($message[0])&&strpos($message[0],"(")!==false&&isset($message[1]["href"])){
+			//get sender id from href from message url
+			$msg_url=$message[1]["href"];
+			preg_match_all("/(\d+){4}/",$msg_url,$id);
+			if(count($id[0])){
+				if($id[0][0]==$this->root->profile->getId())
+					$id=$id[0][1];
+				else $id=$id[0][0];
+			}else $id=0;
+			
+			if($id&&is_callable($this->triggers["message"]))
+				$this->triggers["message"]($id);
 		}
 		if(isset($notification[0])&&strpos($notification[0],"<")!==false){
 			if(is_callable($this->triggers["notification"]))
@@ -46,13 +56,13 @@ class Notification extends common{
 		$html=Html::doms($this->html,['id="notifications_list"',"<div","<div"]);
 		$list=[];
 		foreach ($html as $div)
-			$list=array_merge($list,dom($div,"<div",1));
-		$list=Utils::filter($list,function($l){
+			$list=array_merge($list,Html::dom($div,"<div",1));
+		$list=Util::filter($list,function($l){
 			return Util::instr($l[1]["class"],"bw")&&Util::instr($l[1]["class"],"bx");
 		})[0];
 		foreach ($list as $a) {
-			$a=dom($a[0],"<tr")[0];
-			$a=dom($a,"<a",1)[0];
+			$a=Html::dom($a[0],"<tr")[0];
+			$a=Html::dom($a,"<a",1)[0];
 			$url=urldecode($a[1]["href"]);
 			$url=substr($url,strpos($url,"redir=")+6);
 
