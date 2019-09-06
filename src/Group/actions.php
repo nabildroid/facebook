@@ -14,7 +14,7 @@ trait actions{
 				$form_questions=Html::findDom($this->dom("<form"),"<textarea");
 				$questions=Html::dom($form_questions,"<span");
 			}
-			$this->leave(1);
+			$this->leave(count($questions));
 			return $questions;
 		}
 	}
@@ -25,9 +25,16 @@ trait actions{
 				$form=$this->actions;
 				$this->submit_form($form[0],$form[1]["action"]);
 				$form_questions=Html::findDom($this->dom("<form",1),"<textarea");
+	
 				if($form_questions&&!$dontSubmitQuestions){
 					$this->submit_form($form_questions[0],$form_questions[1]["action"],$questions);
 				}
+				//whenever submit and the content doesn't have textarea is like new fetch happend so there we could get fresh info about group
+				if(!Util::instr($this->html,"<textarea")){
+					$this->fixHttpResponse($this->html,$this->id);
+					$this->fetch(1);
+				}	
+				
 				$this->admin=2;
 				sleep(1);
 			}
