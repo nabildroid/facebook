@@ -570,3 +570,62 @@ $post->comment($txt);
 return such new `Comment`
 
 `$txt` must be **plain text**
+
+
+
+
+#### comment
+take all comment functionality like get subcomment(reply) and like ...
+
+there's two type of `Comment` 
+	comment with `Post` parent
+	reply which is comment with `Comment` parent 
+
+generally comment will created by `Post` or by parent `Comment` but
+in some cases create **stead alone** make more sence like when dealing with `Notification`
+
+```php
+$comment=new Comment($parent,$comment_id);
+```
+
+- `$parent` must be either `Post` or `Comment`
+- `$comment_id` must be **integer**
+
+#### getters
+most getters of `Post` applied to `Comment` as well
+like
+
+- `getContent()`
+- `getUser()`
+- `getAdmin()`
+- `getLikes("mine")`
+- `wholikes()`
+
+##### subcomments
+works like `$post->comment($page)` on `Post`
+```php
+$comment->subcomment($page);
+```
+return array of `Comment` **replys**
+
+#### actions
+##### like
+like `Comment` or reply
+```php
+$comment->like();
+```
+##### reply
+reply or add subcomment to parent `Comment`
+```php
+$comment->reply($txt);
+```
+
+`$txt` is **plain text**
+
+>**Note**: doesn't work on **reply**
+
+
+
+
+
+
