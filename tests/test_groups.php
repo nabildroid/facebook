@@ -1,9 +1,11 @@
 <?php 
-include "../index.php";
-exit;
+use Facebook\Group\Group;
+use Facebook\Profile\Profile;
+use Facebook\Utils\Content;
+
 #my groups
 // $my=$user->groups->myGroups();
-
+// var_dump("number of groups: ".count($my));
 // var_dump("---------------RANDOM POST COMMNETS");
 // $posts=$my[0]->posts();
 // foreach ($posts as $post) {
@@ -12,11 +14,11 @@ exit;
 // // 	var_dump(flatContent($post->getContent()));
 // // 	var_dump("------------------");
 // }
-// exit;
 
 ## actions
 ##leave existing group member
-// array_pop($my)->leave());
+// $last=array_pop($my);
+// $last->leave();
 ##publish 
 
 
@@ -42,7 +44,7 @@ exit;
 $group=new Group($user,2255008081177585);
 ##action 
 ###join
-// $group->join(["one","two","three"]);
+$group->join(["one","two","three"]);
 ###leave
 $group->leave(); 
 

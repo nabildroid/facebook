@@ -236,6 +236,13 @@ set trigger
 ```php
 $user->notification->setMessageTrigger($fnc);
 ```
+the argument must be valid function that takes one argument
+
+the trigger will invoked whenever new message arrive
+and will pass a **the id of sender** to trigger
+
+>**Note**: messages stay arrive until the content of message readed then will desippear
+
 
 ### notifications
 set trigger
@@ -261,6 +268,7 @@ possible `type`
 6. request to **join group** has been **approved**
 
 
+>**Note**: notification disappear once it readed by the trigger
 
 
 ## wall
@@ -302,4 +310,124 @@ all parameter acceptable
 
 >`privacy` could only be **public** or **only me** or **friends**
 
-after publishing new post will returns 
+
+> `publish`  returns such new `Post` object 
+
+
+## profile
+profile it handle all profile actions like setting/getting  and response to request
+get posts and so on
+
+there's two type of profile 
+	1. account profile is unique and always related with `root`
+	2. user profile initial with user id
+
+account profile
+```php
+$user->profile
+```
+
+user profile
+```php
+$someone=$new Profile($parent,$user_id)
+```
+
+`$user_id` must be either **integer** or **string** which lead to user profile
+
+in some cases the id must be integer for that in order to convert string
+id to integer, we should force fetching the `Profile` so that garanti 
+that the id is integer
+```php
+$someone->fetch(1);
+```
+
+### common functionality between account profile and user profile
+
+#### posts
+get posts 
+```php
+$profile->posts($page)
+```
+return array of `Post`
+
+
+#### profile picture\cover
+```php
+$profile->getPicture("profile");
+$profile->getPicture("cover");
+```
+return `Post`
+
+
+#### profile bio *descrition*
+```php
+$profile->getBio();
+```
+return **array of parsed html**
+
+
+#### friends
+get all friends to such profile
+```php
+$profile->friends();
+```
+return array of `Profile`
+
+
+### account profile unique functionality
+
+#### set profile picture
+to set profile picture using **url of image**
+```php
+$user->profile->setProfilePicture($url);
+```
+
+#### set profile cover picture
+to set profile cover picture using **url of image**
+```php
+$user->profile->setCoverPicture($url);
+```
+
+### set bio
+set profile bio must be **plain text**
+```php
+$user->profile->setBio($txt);
+```
+
+### pending friend requests
+get array of `Profile` who send friend request to account
+```php
+$user->profile->pendingRequests()
+```
+return array of `Profile`
+
+### users profile functionality
+
+>to send/react with friend request to profile we need to do so from his profile
+
+#### send friend request
+```php
+$someone->sendFriendRequest();
+```
+returns boolean
+
+#### accept the friend request
+if `$someone` sent request to `Account` we can accept it
+```php
+$someone->confirmUserRequest()
+```
+returns boolean
+
+
+#### reject friend request
+if `$someone` sent request to `Account` we can reject it
+```php
+$someone->rejectUserRequest()
+```
+returns boolean
+
+
+
+
+
+

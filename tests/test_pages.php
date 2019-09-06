@@ -1,7 +1,9 @@
 <?php 
-include "../index.php";
+use Facebook\Group\Page;
+
 #my pages
 // $myPages=$user->pages->myPages();
+// var_dump(count($myPages));
 // $page=$myPages[0];
 ##posts
 // var_dump("---------------RANDOM POST COMMNETS");
@@ -11,7 +13,7 @@ include "../index.php";
 // 	foreach ($posts as $post) {
 // 		var_dump("####POST_ID: ".$post->getId());
 // 		var_dump("------------------");
-// 		var_dump(flatContent($post->getContent()));
+// 		var_dump(($post->getContent()));
 // 		var_dump("------------------");
 // 	}
 // }
@@ -23,27 +25,26 @@ include "../index.php";
 // var_dump($post->getSource("page")->getId());
 
 #invitedPages
-// $pages=$user->pages->invitedPages();
-// $page=$pages[0];
-
+$pages=$user->pages->invitedPages();
+$page=$pages[0];
 ##info
-// var_dump("Page ID: ".$page->getId());
+var_dump("Page ID: ".$page->getId());
 
 ##action
 // $page->like();
 
 ##posts
-// var_dump("---------------RANDOM POST COMMNETS");
-// for ($i=0; $i <2 ; $i++) { 
-// 	$posts=$page->posts($i);
-// 	var_dump("|[page:".$i." ]|");
-// 	foreach ($posts as $post) {
-// 		var_dump("####POST_ID: ".$post->getId());
-// 		var_dump("------------------");
-// 		var_dump(flatContent($post->getContent()));
-// 		var_dump("------------------");
-// 	}
-// }
+var_dump("---------------RANDOM POST COMMNETS");
+for ($i=0; $i <2 ; $i++) { 
+	$posts=$page->posts($i);
+	var_dump("|[page:".$i." ]|");
+	foreach ($posts as $post) {
+		var_dump("####POST_ID: ".$post->getId());
+		var_dump("------------------");
+		var_dump(flatContent($post->getContent()));
+		var_dump("------------------");
+	}
+}
 
 #suggestionPages
 // $pages=$user->pages->suggestionPages();
