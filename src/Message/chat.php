@@ -17,7 +17,7 @@ trait chat{
 			if(!$next)break;
 			$this->http($next);
 			//get friend name note: it's not test in all scenarios
-			if(!$this->friend->getName()){
+			if(!$this->friend->name)){
 				$friendName=$this->dom("<span")[0];
 				if(isset($friendName[0])&&trim($friendName[0]))
 					$this->friend->name=trim($friendName[0]);
@@ -73,7 +73,7 @@ trait chat{
 		$sender=Html::dom($sections[0],"<strong")[0];
 		//get content 
 		$content=Content::parse($sections[1]);
-		$friendName=$this->friend->getName(1);
+		$friendName=$this->friend->getName();
 
 		return [
 			"sender"=>$sender==$friendName?1:0,
