@@ -215,7 +215,7 @@ only for `Profile`
 
 
 `public function getAdmin()`
-`public function getName($force=0)`
+`public function getName()`
 
 
 
@@ -343,13 +343,11 @@ $someone->fetch(1);
 
 #### common functionality between account profile and user profile
 
-##### posts
-get posts 
+##### profile name
 ```php
-$profile->posts($page)
+$profile->getName();
 ```
-return array of `Post`
-
+return **string**
 
 ##### profile picture\cover
 ```php
@@ -364,6 +362,13 @@ return `Post`
 $profile->getBio();
 ```
 return **array of parsed html**
+
+##### posts
+get posts 
+```php
+$profile->posts($page)
+```
+return array of `Post`
 
 
 ##### friends
