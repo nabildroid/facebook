@@ -427,7 +427,136 @@ $someone->rejectUserRequest()
 returns boolean
 
 
+### post
+hold all post functionality such as like and get content and publish comment
 
+there's two type of posts image `Post` and normal `Post` each has same functionality exept for getPicture function in image `Post`
 
+`Post` could be full fetched which means no need to fetched any more, or half fetched
+so it have only the first part of content when content is large, no information about childrens including add new child
 
+>**Note** all functions that return array of posts actuely half fetched posted
+and if full fetched needed,for that force fetched required 
 
+#### getters
+
+##### user
+the post author
+```php
+$post->getUser();
+```
+return either `Profile` or null when such `Post` has been published by `Page`
+
+##### admin
+check if post has been writen by `Account` or by other `Profile`
+```php
+$post->getAdmin();
+```
+return boolean
+
+##### content
+get content of `Post` as **parsed html type**
+```php
+$post->getContent();
+```
+return array of parsed html
+
+>**Note**: if post is half fetched the content will messing half part and some time the most parts so it better when full content needed to use force fetching the `Post` or use use `fullcontent` which automatcally force fetching the `Post` if that required
+
+##### get fullcontent
+get full content by request single `Post` by it `id` whenever content is large
+to it check if content contain `More` keyword which indicate that `Post` contain
+only first part of full content
+```php
+$post->fullcontent();
+```
+return array of parsed html
+
+>**Note**: fullcontent will check the existence of `More` keyword before trying to 
+force fetching the entire `Post` by it `id`
+
+##### picture
+works only with image `Post` type
+```php
+$post->getPicture();
+```
+return either null or link to `View full size` of image 
+
+##### source
+each post has caples of source **origin-post**, **page**, **group**
+
+###### origin-post
+if post share other post so the last will be the **origin-post**
+```php
+$post->getSource("origin");
+```
+return either null or `Post`
+
+>**Note**: the content of **origin-post** exist in parsed html content of **parent** `Post` and it type is `'post'`
+
+###### page
+if `Post` was published by `Page` or shared from `Page`
+```php
+$post->getSource("page");
+```
+return either null or `Page`
+
+>**Note**: if `Post` was not shared from `Page` to `Profile` or to `Group` that means
+there's no author,so `$post->getUser()` return null
+
+###### group
+if `Post` published in group
+```php
+$post->getSource("group");
+```
+return either null or `Group`
+
+##### comments
+get comments of `Post`
+comments section of `Post` works by pagination so in order to get all comments
+that required to get to each page of comments section
+```php
+$post->comments($page);
+```
+return array of `Comment`
+
+`$page` argument is **integer** and indicate which page of comments will extract comments from it 
+
+>**Note**: the default value of `$page` is `0` which means the first page
+
+##### uses who likes post
+```php
+$post->wholikes();
+```
+return array of **all** `Profile` who likes such `Post`
+
+>**Note**: dont used when the post has thousen of likes
+
+##### check if `Account` have been like the post
+```php
+$post->getLikes("mine"); 
+```
+return boolean indicate whether the post has been laked by `Account` or note
+
+#### actions
+
+##### like
+in order to like unliked post
+```php
+$post->like();
+```
+return boolean
+
+##### unlike 
+```php
+$post->unlike();
+```
+
+##### comment
+to publish new `Comment` to such `Post`
+```php
+$post->comment($txt);
+```
+return such new `Comment`
+
+`$txt` must be **plain text**
