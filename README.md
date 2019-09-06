@@ -219,7 +219,7 @@ only for `Profile`
 
 
 
-## account 
+### account 
 hold all account functionality like profile messages and wall ....
 #### initail the account
 for that accout must be logined to facebook using only real account **cookie(string)**
@@ -228,10 +228,10 @@ for that accout must be logined to facebook using only real account **cookie(str
 $user=new Account;
 $user->login("cookie");
 ```
-## notifications
+### notifications
 setting function that will trigger when new notification/message arrives
 
-### message 
+#### message 
 set trigger
 ```php
 $user->notification->setMessageTrigger($fnc);
@@ -244,7 +244,7 @@ and will pass a **the id of sender** to trigger
 >**Note**: messages stay arrive until the content of message readed then will desippear
 
 
-### notifications
+#### notifications
 set trigger
 ```php
 $user->notification->setNotificationTrigger($fnc);
@@ -271,7 +271,7 @@ possible `type`
 >**Note**: notification disappear once it readed by the trigger
 
 
-## wall
+### wall
 it's facebook home page (profile wall)
 accissing wall with
 ```php
@@ -314,7 +314,7 @@ all parameter acceptable
 > `publish`  returns such new `Post` object 
 
 
-## profile
+### profile
 profile it handle all profile actions like setting/getting  and response to request
 get posts and so on
 
@@ -341,9 +341,9 @@ that the id is integer
 $someone->fetch(1);
 ```
 
-### common functionality between account profile and user profile
+#### common functionality between account profile and user profile
 
-#### posts
+##### posts
 get posts 
 ```php
 $profile->posts($page)
@@ -351,7 +351,7 @@ $profile->posts($page)
 return array of `Post`
 
 
-#### profile picture\cover
+##### profile picture\cover
 ```php
 $profile->getPicture("profile");
 $profile->getPicture("cover");
@@ -359,14 +359,14 @@ $profile->getPicture("cover");
 return `Post`
 
 
-#### profile bio *descrition*
+##### profile bio *descrition*
 ```php
 $profile->getBio();
 ```
 return **array of parsed html**
 
 
-#### friends
+##### friends
 get all friends to such profile
 ```php
 $profile->friends();
@@ -374,44 +374,44 @@ $profile->friends();
 return array of `Profile`
 
 
-### account profile unique functionality
+#### account profile unique functionality
 
-#### set profile picture
+##### set profile picture
 to set profile picture using **url of image**
 ```php
 $user->profile->setProfilePicture($url);
 ```
 
-#### set profile cover picture
+##### set profile cover picture
 to set profile cover picture using **url of image**
 ```php
 $user->profile->setCoverPicture($url);
 ```
 
-### set bio
+##### set bio
 set profile bio must be **plain text**
 ```php
 $user->profile->setBio($txt);
 ```
 
-### pending friend requests
+##### pending friend requests
 get array of `Profile` who send friend request to account
 ```php
 $user->profile->pendingRequests()
 ```
 return array of `Profile`
 
-### users profile functionality
+##### users profile functionality
 
 >to send/react with friend request to profile we need to do so from his profile
 
-#### send friend request
+##### send friend request
 ```php
 $someone->sendFriendRequest();
 ```
 returns boolean
 
-#### accept the friend request
+##### accept the friend request
 if `$someone` sent request to `Account` we can accept it
 ```php
 $someone->confirmUserRequest()
@@ -419,7 +419,7 @@ $someone->confirmUserRequest()
 returns boolean
 
 
-#### reject friend request
+##### reject friend request
 if `$someone` sent request to `Account` we can reject it
 ```php
 $someone->rejectUserRequest()
@@ -437,6 +437,16 @@ so it have only the first part of content when content is large, no information 
 
 >**Note** all functions that return array of posts actuely half fetched posted
 and if full fetched needed,for that force fetched required 
+
+#### create stead alone post
+```php
+$post=new Post($user,$post_id);
+```
+arguments
+	**$user**    the parent
+	**$post_id** the id of the post **integer**
+
+>**Note**: `new Post` create full fetched post
 
 #### getters
 
