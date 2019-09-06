@@ -30,6 +30,10 @@ trait actions{
 			$this->fetch(1);
 		$add=Html::dom($this->childs["add"],"<form",1)[0];
 		$this->submit_form($add[0],$add[1]["action"],[$txt]);
+		//return this new Comment$
+		$this->fixHttpResponse($this->html,$this->getId());
+		$this->fetch(1);
+		return $this->comments()[0];
 	}
 }
 
