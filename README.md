@@ -629,6 +629,39 @@ $comment->reply($txt);
 
 >**Note**: doesn't work on **reply**
 
+### groups
+for get array of `Group` by section: **myGroups** or **suggestionGroups**
+
+#### myGroups
+```php
+$user->groups->myGroups();
+```
+return array of `Group` that `Account` is member with them
+
+#### suggestionGroups
+```php
+$user->groups->suggestionGroups();
+```
+return array of `Group` that facebook suggetion them to `Account`
+
+### group
+take all functionality of group like send join request get posts
+
+there two way for creating a `Group` first by using getting in `Groups`
+or by create new `Group`
+```php
+$group=new Group($parent,$group_id);
+```
+
+- `$group_id` the id of group
+
+
+#### getters
+
+#### name
+get name of `Group`
+```php
+$group->getName();
 
 
 
