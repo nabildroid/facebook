@@ -195,26 +195,38 @@ the action will be `submit_form($html,$url,['url of image1','url of img2','some 
 
 ##### getters
 `public function getParent()`
+
 `public function getId($int=0)`
+
 `public function getUser()`
 
+
 only for `Post` `Comment`
+
 `public function getContent()`
 
 `public function getLikes($prop="")`
+
 `public function getChilds($prop="")`
 
+
 only for `Post`
+
 `public function getSource($prop="")`
 
+
 only for **image** `Post` or `Profile` 
+
 `public function getPicture($prop="")`
 
+
 only for `Profile`
+
 `public function getBio()`
 
 
 `public function getAdmin()`
+
 `public function getName()`
 
 

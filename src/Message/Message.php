@@ -49,6 +49,8 @@ class Message extends \Facebook\Common{
 	}
 
 	private function messageUrl(){
+		if(!is_integer($this->friend->getId()))
+			$this->friend->getId(1);
 		return "/messages/read/?fbid=".$this->friend->getId();
 	}
 

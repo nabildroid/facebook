@@ -17,7 +17,7 @@ trait chat{
 			if(!$next)break;
 			$this->http($next);
 			//get friend name note: it's not test in all scenarios
-			if(!$this->friend->name)){
+			if(!$this->friend->name){
 				$friendName=$this->dom("<span")[0];
 				if(isset($friendName[0])&&trim($friendName[0]))
 					$this->friend->name=trim($friendName[0]);
