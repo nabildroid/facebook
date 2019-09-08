@@ -1,10 +1,10 @@
-### Facebook Api through WebScarping Technologie
-## works only in mbasic.facebook.com
-## works only in english version of facebook
-----------
+**Facebook Api through WebScarping Technologie**
+**works only in mbasic.facebook.com**
+**works only in english version of facebook**
 ----------
 
-# common classes functionality
+
+## common classes functionality
 ### variables
 
 #### id
@@ -98,23 +98,23 @@ so it parse **string** `$url` and returns either **integer** or **string**
 
 
 
-# general classes that depend on component classes
+## general classes that depend on component classes
 
-## common
+### common
 
 it **abstract class** contain base functions like `http` and getting functions
 and common variable between all components 
 
-### common variables
+#### common variables
 ----
-#### parent
+##### parent
 ```php
 public $parent=null;
 ```
 is the parent that generate such componet it's necissary argument in all compoents
 when inisiatie them because it lead to `root`
 
-#### root
+##### root
 ```php
 public $root=null;
 ```
@@ -122,13 +122,13 @@ it's always `Account` **class**
 this vraible takes his value when `Common` `construct` invoked
 from the **parent class**
 
-#### html
+##### html
 ```php
 public $html="";
 ```
 contain the response of `http` function
 
-#### lastHttpRequest
+##### lastHttpRequest
 ```php
 public $lastHttpRequest=null;
 ```
@@ -138,22 +138,22 @@ so when `http` invoke it assign like that
 $this->lastHttpRequest=[$url,$data,$headers,$responseHeader]
 ```
 
-#### fetched
+##### fetched
 ```php
 protected $fetched=0;
 ```
 boolean varibale for prevent more then one fetch
 
-### common functions
+#### common functions
 ------------------
-#### http
+##### http
 ```php
 public function http($url="",$data="",$headers=[],$responseHeader=0)	
 ```
 the core of our project ;)
 it's allow each component to make http request and the corespond response
 will be in `$html` common varaible
-##### arguments
+###### arguments
 - **url** the url of such http request 
 - **data** is **associative array** that hold all **HTTP POST REQUEST** name/value pair
 - **headers** is **associative array** that hold all Headers of such request
@@ -161,7 +161,7 @@ will be in `$html` common varaible
 if it's true `$html` will be array of pattren 
 	`{content:"html string",headers:"array of name/values pair"}`
 
-#### fixHttpResponse
+##### fixHttpResponse
 ```php
 	public function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0)
 ```
@@ -169,19 +169,19 @@ prefixe the desire response that expected from `http`
 say for example **we already have the html** of `Post` why we would make **new http**
 that will return **same Html** as we had
 so `fixHttpResponse` freeze `http` and make it **return desired response**
-##### arguments
+###### arguments
 - **response** desired response that we need `http` to return
 
 other arguments it's same as arguments of `html` and **must be the same** to make `html`
 returns desired response
 
-#### submit_form
+##### submit_form
 ```php
 protected function submit_form($html,$url,$values=[],$target_submit="",$forceInput="")
 ```
 it allow any component to submit any kind of forms `multipart/form-data` or `application/x-www-form-urlencoded` and so on
 
-##### arguments
+###### arguments
 
 - **html** content of form that has all input 
 - **url** the action of form
@@ -193,7 +193,7 @@ it allow any component to submit any kind of forms `multipart/form-data` or `app
 the **his value must be url**, means when trying to submit form contain images
 the action will be `submit_form($html,$url,['url of image1','url of img2','some text value'])`
 
-#### getters
+##### getters
 `public function getParent()`
 `public function getId($int=0)`
 `public function getUser()`
