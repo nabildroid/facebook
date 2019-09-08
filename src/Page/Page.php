@@ -45,7 +45,7 @@ class Page extends \Facebook\Common{
 
 		$tool=Html::findDom(Html::dom($this->html,"<table"),"More");//contain the like/dislike button and messaging and follow
 		$tool=Html::dom($tool,"<a",1);
-		//like_like whether it like or dislike like
+		//like_like whether it like or dislike link
 		$like_link=Html::findDom($tool,"Like");
 		if(isset($like_link[1]["href"]))
 			$this->likes["like"]=$like_link[1]["href"];
@@ -54,6 +54,8 @@ class Page extends \Facebook\Common{
 			if(isset($like_link[1]["href"]))
 				$this->likes["like"]=$like_link[1]["href"];
 		}
+		//check if this page owned by Account
+		$this->admin=Html::findDom($tool,"Follow")!=true;
 
 		if($this->admin){
 			$form=Html::findDom($this->dom("<form",1),"<textarea");
@@ -64,7 +66,7 @@ class Page extends \Facebook\Common{
 	}
 
 	private function permission($access){
-		if($this->admin!==$access)
+		if($this->admin!=$access)
 			throw new \Exception("you haven't permission", 1);
 	}
 

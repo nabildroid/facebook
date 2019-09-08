@@ -8,8 +8,8 @@ trait publish{
 	 * @param $param, is array(key/pair) it takes text(string),images(array)
 	 */
 	public function publish($param){
-		$this->permission(1);
 		$this->fetch();
+		$this->permission(1);
 
 		//prepare paramater
 		$param=Util::mergeAssociativeArray([
