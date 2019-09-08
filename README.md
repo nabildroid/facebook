@@ -658,10 +658,67 @@ $group=new Group($parent,$group_id);
 
 #### getters
 
-#### name
+##### name
 get name of `Group`
 ```php
 $group->getName();
+```
+retur  **string**
+
+##### membership status
+the situation of `Account` to `Group` could be either **visitor** or **member** or **pending request**
+```php
+$group->getAdmin();
+```
+return **integer** 
+- **0**: visitor
+- **1**: member
+- **2**: pending memebership 
+
+##### posts
+works only on **open groups** or membership groups
+works exactly like posts in `Profile`
+```php
+$group->posts($page);
+```
+return array of `Post`
+
+##### get join questions
+some groups **require answering some questions** to verify the user 
+and sometimes **letting those questions empty lead to rejected request** 
+for that this function returns those question
+
+```php
+$group->getJoinQuestions();
+```
+return either null or array of **string** eacch represent one question
+
+>**Note**: this action makes a join request and then cancel it by using `join` then `leave` and **sometimes the request doesn't cancel**
+
+#### action
+
+##### join
+to join in `Group`
+```php
+$group->join($answers=[]);
+```
+>**Note**: works only on admin value **2**
+`$answers` is array of answer of required join question, and the default value empty array which means letting questions empty 
+
+##### leave 
+to leave a membership group or cancel join request
+```php
+$group->leave();
+```
+>**Note**: works only on admin values **0** and **1**
+
+
+##### publish 
+publish new post to `Group`
+works exactly like publish on `wall` except on `Group` there's not `privacy` parameter
+```php
+$group->publish([]);
+```
 
 
 
