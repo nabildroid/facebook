@@ -31,7 +31,10 @@ class  System{
 		
 			if($this->FREE_FACEBOOK)
 				array_shift($html);
-			
+
+			//check cookie
+			$this->detectCorrectCookie($html);
+
 			if(!isset($html[0]))return $http;
 			$menu=array_shift($html);
 			$content=array_shift($html);
@@ -40,7 +43,10 @@ class  System{
 			return $content;
 		}else return $http;
 	}
-
+	private function detectCorrectCookie($html){
+		if(Util::instr(join($html),"Join Facebook or log in to continue."))
+			throw new \Exception("Cookies not valid", 1);
+	}
 }
 
 
