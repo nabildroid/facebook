@@ -296,11 +296,13 @@ $user->wall->publish($param);
 `$param` it's associative array could takes muti arguments or only one
 
 all parameter acceptable
-```
-"text"=>"",
-"images"=>[],
-"privacy"=>"",
-"tags"=>[]
+```json
+{
+	"text":"",
+	"images":[],
+	"privacy":"",
+	"tags":[]
+}
 ```
 
 - **text** the content of new post **text only**
@@ -806,7 +808,85 @@ $page->publish([]);
 >**Note**: works only with owner pages **admin:1**
 
 
+### messages
+get array of `Message` of sections: **recent** or **request** or **unread** or **other**
 
+#### recent
+last received messages
+```php
+$user->messages->recent();
+```
+
+#### request
+messages that sent by **foreign user** (not friend of `Account`)
+```php
+$user->messages->request();
+```
+
+#### unread
+all unread messages 
+```php
+$user->messages->unread();
+```
+
+#### other
+other messages like spam ...
+```php
+$user->messages->other();
+```
+
+### message
+take all message (message channel) between user and `Account` functionality such as send message get latest message received
+
+>**Note**: message means channel of continue send/recieve between one user and `Account`
+
+#### create message
+there's two way to create message channel, by getting it from `messages` or directly create one
+
+```php
+$message=new Message($parent,$user);
+```
+arguments
+- `$parent` the parent of such message **must lead to `Account`**
+- `$user` the next part of such conversation and **must be `Profile` type**
+
+
+#### getters
+##### chat
+get all conversation messages that happend with other part
+it works with pagination and **always first page contian the latest messages**
+ 
+```php
+$message->chat($page=0);
+```
+return array of **associative array**
+```json
+{
+	"content":[],
+	"sender":null
+}
+```
+
+- `content` **array**,the content of message as **parsed html**
+- `sender` **integer**, either **1** means received or **0** sent
+
+#### actions
+##### send
+send message to user it could be image or text or both
+
+```php
+$message->send($param);
+```
+
+`$param` contain the content of message
+```json
+{
+	"text":"",
+	"images":[]
+}
+```
+- `text` **plain text** of message
+- `images` **array** of images **Maxa 3 images**
 
 
 
