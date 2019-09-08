@@ -445,10 +445,10 @@ and if full fetched needed,for that force fetched required
 
 #### create stead alone post
 ```php
-$post=new Post($user,$post_id);
+$post=new Post($parent,$post_id);
 ```
 arguments
-	**$user**    the parent
+	**$parent**    the parent
 	**$post_id** the id of the post **integer**
 
 >**Note**: `new Post` create full fetched post
@@ -648,6 +648,9 @@ return array of `Group` that facebook suggetion them to `Account`
 take all functionality of group like send join request get posts
 
 there two way for creating a `Group` first by using getting in `Groups`
+
+
+#### create group
 or by create new `Group`
 ```php
 $group=new Group($parent,$group_id);
@@ -719,6 +722,92 @@ works exactly like publish on `wall` except on `Group` there's not `privacy` par
 ```php
 $group->publish([]);
 ```
+
+
+### pages
+for getting array of `Page` of sections: **my pages** or **suggestion pages** or **invited pages**
+
+#### myPages
+get all pages that `Account` own them
+```php
+$user->pages->myPages();
+```
+return array of `Page`
+
+
+#### invited pages
+get any pages that `Account` friend send invitation to like thier page
+```php
+$user->pages->invitedPages();
+```
+return array of `Page`
+
+#### suggestion pages
+to get pages that facebook suggest it to `Account`
+```php
+$user->pages->suggestionPages();
+```
+return array of `Page`
+
+### page
+take all page functionality such as like or publish ..
+there's two type of pages one that `Account` own it and other `Account` is jsu visitor
+
+#### create page
+there's two ways to create page either it  will be returned by `pages`
+or create one directly
+```php
+$page=new Page($parent,$page_id);
+```
+
+- `$page_id` either *recommended* **integer** or **string**
+
+#### getters
+
+##### name
+the page name
+```php
+$page->getName();
+```
+return **string**
+
+##### admin
+if `Account` is the owner **1** or just visitor **0**
+```php
+$page->getAdmin();
+```
+return **integer**
+
+##### posts
+works exactly like `wall`
+return array of `Post`
+
+
+#### actions
+
+##### like
+make `Account` like such `Page`
+```php
+$page->like();
+```
+
+##### unlike 
+remove `Account` like form `Page`*
+```php
+$page->unlike();
+```
+
+##### publish 
+works exactly like `wall` publish except there's neither `privacy` not `tags`
+```php
+$page->publish([]);
+```
+
+>**Note**: works only with owner pages **admin:1**
+
+
+
+
 
 
 
