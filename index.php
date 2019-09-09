@@ -8,6 +8,6 @@ $user->login("datr=AZFIXQTAaRVWnVEXWdFAmepU; sb=AZFIXQzp0jJDVApP-vpXwKow; m_pixe
 
 $test="wall";
 
-include "tests/test".$test.".php";
+include "tests/test_".$test.".php";
 
 ?>
