@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Facebook\Wall;
 use Facebook\Utils\Html;
 use Facebook\Utils\Util;
@@ -19,20 +19,18 @@ trait publish{
 
 		//main function
 		$this->http();
-		$form=Html::findDom($this->dom("<form",1),"<textarea");	
+		$form=Html::findDom($this->dom("<form",1),"<textarea");
+        $this->handle_undefined_array_index($form,0,"public doesn't have textarea to write on it");
 
 		//handle logic error taging friends in private post or tags is note type of profiles array
 		if($param["tags"]){
-			$error_type=0;
-			foreach ($param["tags"] as $user) 
-				if(!is_a($user,"Profile")){
-					$error_type=1;
-					break;
-				}
-			if($error_type)
-				throw new \Exception("taged users must be array of Profiles", 1);
+            $error="";
+            if(!Util::is_arrayOf($param["tags"],"Profile"))
+				$error="taged users must be array of Profiles";
 			elseif(($this->currentPrivacy($form[0])==="only me"&&!$param["privacy"])||$param["privacy"]==="only me")
-			throw new \Exception("trying to tag friend in private post ", 1);
+                $error="trying to tag friend in private post";
+
+            if($error)$this->error($error);
 		}
 
 		$forceInput=[];
@@ -53,12 +51,20 @@ trait publish{
 			//fecth upload page
 			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_photo");
 			//upload images
-			$form=Html::dom($this->html,"<form",1)[0];
-			$this->submit_form($form[0],$form[1]["action"],$param["images"],"add_photo_done");
-			$form=Html::dom($this->html,"<form",1)[0];
+			$form=Html::dom($this->html,"<form",1);
+            $this->handle_undefined_array_index($form,[0,0],"couldn't get from for upload images");
+
+			$this->submit_form($form[0][0],$form[0][1]["action"],$param["images"],"add_photo_done");
+			$form=Html::dom($this->html,"<form",1);
+            if($this->handle_undefined_array_index($form,[0,0],"error in uploading images"))
+                $form=$form[0];
+
 			//add privacy if exist to $forceInpute
-			$privacy=$this->changePrivacy($form,$param["privacy"]);
-			if($privacy)$forceInput["privacyx"]=$privacy;
+			if($privacy){
+                $privacy=$this->changePrivacy($form,$param["privacy"]);
+                $forceInput["privacyx"]=$privacy;
+            }
+
 			//publish post
 			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_post",$forceInput);
 		}
