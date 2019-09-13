@@ -20,7 +20,7 @@ trait publish{
 		//main function
 		$this->http();
 		$form=Html::findDom($this->dom("<form",1),"<textarea");
-        $this->handle_undefined_array_index($form,0,"public doesn't have textarea to write on it");
+        $this->undefined_array_index($form,0,"wall doesn't have textarea to write on it");
 
 		//handle logic error taging friends in private post or tags is note type of profiles array
 		if($param["tags"]){
@@ -52,11 +52,11 @@ trait publish{
 			$this->submit_form($form[0],$form[1]["action"],[$param["text"]],"view_photo");
 			//upload images
 			$form=Html::dom($this->html,"<form",1);
-            $this->handle_undefined_array_index($form,[0,0],"couldn't get from for upload images");
+            $this->undefined_array_index($form,[0,0],"couldn't get from for upload images");
 
 			$this->submit_form($form[0][0],$form[0][1]["action"],$param["images"],"add_photo_done");
 			$form=Html::dom($this->html,"<form",1);
-            if($this->handle_undefined_array_index($form,[0,0],"error in uploading images"))
+            if($this->undefined_array_index($form,[0,0],"error in uploading images"))
                 $form=$form[0];
 
 			//add privacy if exist to $forceInpute

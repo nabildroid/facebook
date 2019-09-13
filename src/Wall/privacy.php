@@ -7,10 +7,8 @@ use Facebook\Post\Post;
 trait privacy{
 	private function currentPrivacy($formHtml){
 		$current_privacy=Html::dom($formHtml,'name="view_privacy"',1);
+        $this->undefined_array_index($current_privacy,[0,1,"value"],"unable to get current privacy of the post");
 
-        $this->handle_undefined_array_index($current_privacy,[0,1,"value"],"unable to get current privacy of the post");
-        var_dump($current_privacy);
-        exit;
 		return strtolower(trim($current_privacy[0][1]["value"]));
 	}
 	private function changePrivacy($form,$privacy){

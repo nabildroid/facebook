@@ -3,10 +3,11 @@ namespace Facebook;
 class Errors{
 
     /**check if index exist in array or report it */
-    protected function handle_undefined_array_index(array $arr,$index,string $log=""){
+    protected function undefined_array_index(array $arr,$index,string $log=""){
         if(is_array($index)){
-            while(isset($arr[$index[0]]))
-                array_shift($index);
+            while(isset($index[0])&&isset($arr[$index[0]]))
+	            $arr=$arr[array_shift($index)];
+
             if(count($index))
                 $this->error($log);
         }
