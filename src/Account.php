@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Facebook;
 use Facebook\Profile\Profile as Profile;
 use Facebook\Wall\Wall as Wall;
@@ -20,7 +20,7 @@ class Account extends System{
 		$this->messages=new Messages($this);
 		$this->notification=new Notification($this);
 	}
-	public function login($cookie){
+	public function login(string $cookie){
 		$this->cookie=$cookie;
 		preg_match_all("/c_user=.(\d).*?(?=;)/",$cookie,$id);
 		if(isset($id[0][0]))$id=substr($id[0][0],7);

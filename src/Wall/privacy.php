@@ -25,7 +25,9 @@ trait privacy{
 				}else $csid=$csid[0][1]["value"];
 
 				$this->http("/composer/mbasic/?csid=".$csid."&errcode=0&cwevent=composer_entry&filter_type=0&priv_expand=see_all&view_privacy");
-				$html=$this->dom("<table")[0];
+				$html=$this->dom("<table");
+                if($this->undefined_array_index($html,0,"privacy table doesn't exsit"))
+                    $html=$html[0];
 				$html=Html::doms($html,["<td","<tr"]);
 
 				foreach ($html as $tr) {
@@ -33,10 +35,10 @@ trait privacy{
 					if(isset(Html::dom($name,"<strong")[0]))$name=Html::dom($name,"<strong")[0];
 					if(strtolower($name)==$privacy){
 						$privacy=Html::dom($tr,"<a",1);
-            $privacy=array_pop($privacy)[1]["href"];
-            preg_match_all("/privacyx=.+?(?=&)/",$privacy,$privacy);
-            $privacy=substr($privacy[0][0],9);
-            return $privacy;
+                        $privacy=array_pop($privacy)[1]["href"];
+                        preg_match_all("/privacyx=.+?(?=&)/",$privacy,$privacy);
+                        $privacy=substr($privacy[0][0],9);
+                        return $privacy;
 					}
 				}
 			}

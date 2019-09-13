@@ -100,6 +100,9 @@ abstract class Common extends Errors{
 				*/
 			 	elseif(isset($input["type"])&&$input["type"]=="file"){
 					$file_path="./temp_images/".uniqid().".jpg";
+                    if(!is_dir("./temp_images"))
+                        mkdir("temp_images");
+
 					$img=array_shift($values);
 					if($img){
 						file_put_contents($file_path,file_get_contents($img));

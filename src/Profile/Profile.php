@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Facebook\Profile;
 use Facebook\Utils\Html;
 use Facebook\Utils\Util;
@@ -26,7 +26,7 @@ class Profile extends \Facebook\Common {
 		"next_page"=>""
 	];
 	public $actions; // array of possible actions like send friend request
-	
+
 
 	function  __construct($parent,$id,$admin=0){
 		$this->parent=$parent;
@@ -39,12 +39,18 @@ class Profile extends \Facebook\Common {
 		if(!$force&&$this->fetched)return;
 		/**
 		 * facebook return about page when fetching profile with only user id
-		 * so ?v=timeline is important for getting also the posts of user 
+		 * so ?v=timeline is important for getting also the posts of user
 		 */
 		$this->http($this->id."?v=timeline");
-		$html=Html::doms($this->html,['id="root"',"<div","<div"])[0];
+		$html=Html::doms($this->html,['id="root"',"<div","<div"]);
+        if($this->undefined_array_index($html,0,"unable to fetch body of profile"))
+            $html=$html[0];
+
 		//get cover picture
 		$section=Html::dom($html,"<div");
+        if(!count($section))
+            $this->error("profile doesn't contain any information section");
+
 		$cover=Html::dom($section[0],"<a",1);
 		if(isset($cover[0])){
 			preg_match_all("/fbid=.(\d)*/",$cover[0][1]["href"],$cover);
@@ -78,12 +84,14 @@ class Profile extends \Facebook\Common {
 				$this->bio=Content::parse($section1[1]);
 		}
 		//action buttons
-		$section2=Html::dom($section[2],"<a",1);
-		$this->actions=$section2;
+		if(isset($section[2])){
+            $section2=Html::dom($section[2],"<a",1);
+            $this->actions=$section2;
+        }
 
 		//get user id(integer) from actions in more button
-		if(!$this->admin){
-			$id=Html::findDom($section2,"owner_id");
+		if(!$this->admin&&$this->actions){
+			$id=Html::findDom($this->actions,"owner_id");
 			if(isset($id[1]["href"])){
 				preg_match_all("/owner_id=\d+/",$id[1]["href"],$id);
 				$id=intval(substr($id[0][0],9));
@@ -105,7 +113,10 @@ class Profile extends \Facebook\Common {
 		return isset(Html::findDom($this->actions,"Confirm Friend")[1]["href"]);
 	}
 
-
+    private function refetchFromOldHtml(){
+        $this->fixHttpResponse($this->html,$this->id);
+        $this->fetch(1);
+    }
 
 	/**
 	 * @param $url string like /bla.bla.00?refid=18&__tn__=R
