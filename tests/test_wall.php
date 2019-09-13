@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use Facebook\Comment\Comment;
 use Facebook\Wall\Wall;
@@ -14,7 +14,7 @@ $wall=$user->wall;
 // 	var_dump("####POST_ID: ".$post->getId());
 // 	print_r($post->getContent());
 // 	echo "\n\n\n";
-// 	// for ($i=0; $i <1 ; $i++) { 
+// 	// for ($i=0; $i <1 ; $i++) {
 // 	// 	var_dump("-------page".$i);
 // 	// 	$cmts=$post->comments($i);
 // 	// 	foreach ($cmts as $cmt) {
@@ -61,13 +61,12 @@ quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
 consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
 cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
 proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-	"images"=>["https://scontent-mrs2-1.xx.fbcdn.net/v/t1.0-9/fr/cp0/e15/q65/69283767_549920142211885_4254410095917531136_n.jpg?_nc_cat=108&efg=eyJpIjoiYiJ9&_nc_oc=AQlpOh5dvD0aCwnS1ugrqYdg1Fq7S4-6qaadAdAZuxJUW5fbfaFKHtUEYaNsx4EhGSk&_nc_ht=scontent-mrs2-1.xx&oh=ca16a08389d24908bc1112dbbaacd92d&oe=5DCEDE59","https://scontent-mrs2-1.xx.fbcdn.net/v/t1.0-9/fr/cp0/e15/q65/69584199_370439857184399_5708920372938670080_n.jpg?_nc_cat=109&efg=eyJpIjoiYiJ9&_nc_eui2=AeGxaIWOMqDzgc2VVkB5H_Udk7j4KbesAzV8OtYYnKvDDNLMeA6XnUU8ke147fYp32MVZdwnum8rTsmdiQymcUPxsVr83xRFf2QKgDSS8igbAw&_nc_oc=AQk6XQzWTCa7BpE-0r0RG2xOdYKr2l4UZ-yusGnDxQfIF0pXjSexHjtIJbUBGjDk3YQ&_nc_ht=scontent-mrs2-1.xx&oh=10500937c0484d734b5c946114860aef&oe=5DCE7910"],
-	"privacy"=>"public"
+"privacy"=>"friends",
 ]);
 var_dump($myPost->getId());
 
 
 
 
- ?>	
+ ?>
 </pre>

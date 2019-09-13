@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Facebook\Wall;
 use Facebook\Utils\Html;
 
@@ -6,10 +6,10 @@ use Facebook\Post\Post;
 
 trait privacy{
 	private function currentPrivacy($formHtml){
-		$current_privacy=Html::dom($formHtml,'name="view_privacy"',1)[0];
-		if(isset($current_privacy[1]["value"]))
-			return strtolower(trim($current_privacy[1]["value"]));
-		else return false;
+		$current_privacy=Html::dom($formHtml,'name="view_privacy"',1);
+        $this->undefined_array_index($current_privacy,[0,1,"value"],"unable to get current privacy of the post");
+
+		return strtolower(trim($current_privacy[0][1]["value"]));
 	}
 	private function changePrivacy($form,$privacy){
 		if($privacy){

@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Facebook\Utils;
 class Util{
 	static function jsondecode($txt){
@@ -12,7 +12,7 @@ class Util{
 		* @param $callback is the indicator if element is accepted or nor
 		* @return array(array of accepted , array of the rest)
 	**/
-	static function filter($arr,$callback=false){
+	static function filter(array $arr,$callback=false){
 		$new=[];
 		$not=[];
 		foreach ($arr as $a) {
@@ -25,7 +25,7 @@ class Util{
 	/**
 		* recursive function for  search on  depth of any array it's good for select one element in doms array
 		* @param $tree, array that contain all elements including our $target
-		* @param $target, what we looking for, i doesn't metter if it array or part of full string 
+		* @param $target, what we looking for, i doesn't metter if it array or part of full string
 		* @return boolean
 	**/
 	static function FindInTree($tree,$target){
@@ -53,14 +53,22 @@ class Util{
 		}elseif(!is_array($target)&&strpos($tree,$target)!==false)
 			return true;
 	}
-	
+	static function is_arrayOf(array $arr, string $type){
+        $check=1;
+        foreach($arr as $ar)
+            if(!is_a($ar,$type)){
+                $check=0;break;
+            }
+        return $check;
+    }
+
 	/**
 	 * @param $origin the template of the array
 	 * @param $new where the template take thier values
 	 * @param (boolean) $takeEmptyChild override template value even if the @param $new has empty value
 	 * @return template with new value
 	 */
-	static function mergeAssociativeArray($origin,$new,$takeEmptyChild=0){
+	static function mergeAssociativeArray(array $origin,array $new,$takeEmptyChild=0){
 		foreach ($origin as $key => $value) {
 			if(isset($new[$key])&&($new[$key]||!$new["$key"]&&$takeEmptyChild)){
 				$origin[$key]=$new[$key];
@@ -69,12 +77,12 @@ class Util{
 		return $origin;
 	}
 	/**
-	 * search in string 
+	 * search in string
 	 * @param $str  string that the search will apply to
-	 * @param $s target could be string or array 
+	 * @param $s target could be string or array
 	 * @return boolean if @param $s is string or if it array return will be string that match
 	 */
-	static function instr($str,$s){
+	static function instr(string $str,$s){
 		if(is_array($s)){
 				foreach ($s as $key) {
 					if(strpos($str,$key)!==false)
@@ -87,7 +95,7 @@ class Util{
 	static function strcut($str,$s,$e,$split=""){
 		$target="";
 		$remain="";
-		for ($i=0; $i <strlen($str) ; $i++) { 
+		for ($i=0; $i <strlen($str) ; $i++) {
 			if($i>=$s-1&&$i<$e+1){
 				$target.=$str[$i];
 				if($i+1==$e||$i>strlen($str)-2){

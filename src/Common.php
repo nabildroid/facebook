@@ -1,9 +1,9 @@
-<?php 
+<?php
 namespace Facebook;
 use Facebook\Utils\Html;
 use Facebook\Utils\Util;
 
-abstract class Common{
+abstract class Common extends Errors{
 	public $root=null;
 	public $parent=null;
 	public $html="";
@@ -20,11 +20,11 @@ abstract class Common{
 		}
 	}
 	/**
-		* @todo BAD BAD BAD ... it's provide a way to access full account :( :( 
+		* @todo BAD BAD BAD ... it's provide a way to access full account :( :(
 		* it public now because of some satic function need to call http in post of exemple
 	*/
-	public  function http($url="",$data="",$headers=[],$responseHeader=0){		
-		//check if previous request is equivalent to current one 
+	public  function http($url="",$data="",$headers=[],$responseHeader=0){
+		//check if previous request is equivalent to current one
 		if($this->lastHttpRequest==[$url,$data,$headers,$responseHeader])
 			return $this->html;
 		else $this->lastHttpRequest=[$url,$data,$headers,$responseHeader];
@@ -34,22 +34,22 @@ abstract class Common{
 
 	/**
 		* to prevent uncessary request that it's response aready exist
-		* @param $response the response that request suppose to return 
+		* @param $response the response that request suppose to return
 		* @param $url,$data,$headers,responseHeader are responsable of such response
 		* @return null
 	  */
 	public function fixHttpResponse($response,$url="",$data="",$headers=[],$responseHeader=0){
 		$this->html=$response;
-		$this->lastHttpRequest=[$url,$data,$headers,$responseHeader];		
+		$this->lastHttpRequest=[$url,$data,$headers,$responseHeader];
 	}
 	protected function dom($search,$getAttribute=0,$grabText=0){
 		return Html::dom($this->html,$search,$getAttribute,$grabText);
 	}
 
 	/**
-	 *submit any form 
+	 *submit any form
 	 * @param $html is the content(HTML) of form that hold any inputs
-	 * @param $url where the form action happen 
+	 * @param $url where the form action happen
 	 * @param $values array of all values that will submitted by order, can be a text or **url** for files
 	 * @param $target_submit if one submit must trigger in this form
 	 * @param forceInput is key/value pair for forcing any input to take static value
@@ -61,8 +61,8 @@ abstract class Common{
 		foreach ($inputs as $input) {
 			if(isset($input[1]))$input=$input[1];
 
-				//when uploading multi images some hidden input takes multi values 
-				//and such input his name always end with [] to indicate array 
+				//when uploading multi images some hidden input takes multi values
+				//and such input his name always end with [] to indicate array
 				if(isset($input["name"]))
 					$input["name"]=str_replace("[]", "",$input["name"]);
 
@@ -70,7 +70,7 @@ abstract class Common{
 				if($input["find_tag"]=="<textarea"||$input["type"]=="text"){
 					$value=array_shift($values);
 
-					//check if $input["name"] is referent to array or note  
+					//check if $input["name"] is referent to array or note
 					if(isset($data[$input["name"]])&&$value){//referent to array
 						if(!is_array($data[$input["name"]]))
 							$data[$input["name"]]=[$data[$input["name"]],$value];
@@ -81,7 +81,7 @@ abstract class Common{
 				elseif($input["type"]=="hidden"&&isset($input["name"])){
 					$value=isset($input["value"])?$input["value"]:"";
 
-					//check if $input["name"] is referent to array or note  
+					//check if $input["name"] is referent to array or note
 					if(isset($data[$input["name"]])&&$value){//referent to array
 						if(!is_array($data[$input["name"]]))
 							$data[$input["name"]]=[$data[$input["name"]],$value];
@@ -94,7 +94,7 @@ abstract class Common{
 						$data[$input["name"]]=isset($input["value"])?$input["value"]:"";
 				}
 				/*
-					files input 
+					files input
 					download the pictures from URL then upload it then delete it
 					all URLS of pictures are in @param $input
 				*/
@@ -104,7 +104,7 @@ abstract class Common{
 					if($img){
 						file_put_contents($file_path,file_get_contents($img));
 						$files[]=$file_path;
-						$file = new \CURLFile($file_path,mime_content_type($file_path),$input["name"]);	
+						$file = new \CURLFile($file_path,mime_content_type($file_path),$input["name"]);
 						$data[$input["name"]]=$file;
 					}
 				}
@@ -136,7 +136,7 @@ abstract class Common{
 	}
 
 	/**
-	 *@param $int get integer 
+	 *@param $int get integer
 	 *@return such class id if it exist
 	 */
 	public function getId($int=0){
