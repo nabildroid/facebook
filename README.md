@@ -4,7 +4,10 @@
 
 **works only in english version of facebook**
 
-[use case example]: ./master/tests/code.png
+![use case example][logo]
+
+[logo]: tests/code.png "use case example"
+
 
 ----------
 
