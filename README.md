@@ -1,7 +1,15 @@
 **Facebook Api through WebScarping Technologie**
+
 **works only in mbasic.facebook.com**
+
 **works only in english version of facebook**
+
+[use case example]: ./master/tests/code.png
+
 ----------
+
+
+
 
 
 ## common classes functionality
